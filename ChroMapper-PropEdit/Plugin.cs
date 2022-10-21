@@ -21,6 +21,8 @@ public class Plugin {
 			// Map Edit
 			var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();
 			ui.AddWindow(mapEditorUI);
+			
+			SelectionController.SelectionChangedEvent += ui.UpdateSelection;
 		}
 	}
 	

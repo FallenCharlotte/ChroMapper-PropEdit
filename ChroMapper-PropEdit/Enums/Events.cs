@@ -1,6 +1,6 @@
 namespace ChroMapper_PropEdit.Enums {
 
-enum EventValues : ushort {
+enum LightValues : ushort {
 	Off = 0,
 	RightOn,
 	RightFlash,
@@ -14,6 +14,11 @@ enum EventValues : ushort {
 	WhiteFlash,
 	WhiteFade,
 	WhiteTrans
+}
+
+enum LaserDirection : ushort {
+	RightCW = 0,
+	LeftCW,
 }
 
 }

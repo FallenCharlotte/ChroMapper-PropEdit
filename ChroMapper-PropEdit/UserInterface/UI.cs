@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using SimpleJSON;
 
 using ChroMapper_PropEdit.Component;
 using ChroMapper_PropEdit.Enums;
@@ -19,6 +20,7 @@ public class UI {
 	public GameObject panel;
 	//public UIDropdown test;
 	public List<GameObject> elements = new List<GameObject>();
+	public HashSet<BeatmapObject> editing;
 	
 	public UI() {
 		main_button = ExtensionButtons.AddButton(
@@ -120,24 +122,33 @@ public class UI {
 		}
 		elements.Clear();
 		
+		editing = SelectionController.SelectedObjects;
+		
 		if (SelectionController.HasSelectedObjects()) {
 			title.GetComponent<TextMeshProUGUI>().text = SelectionController.SelectedObjects.Count + " Items selected";
 			
-			var type = SelectionController.SelectedObjects.First().BeatmapType;
-			
-			foreach (var o in SelectionController.SelectedObjects) {
-				if (o.BeatmapType != type) {
-					elements.Add(AddLabel(panel.transform, "Unsupported", "Multi-Type Unsupported!", new Vector2(0, 0)));
-					return;
-				}
+			if (editing.GroupBy(o => o.BeatmapType).Count() > 1) {
+				elements.Add(AddLabel(panel.transform, "Unsupported", "Multi-Type Unsupported!", new Vector2(0, 0)));
+				return;
 			}
+			
+			var type = editing.First().BeatmapType;
 			
 			switch (type) {
 				case BeatmapObject.ObjectType.Note:
-					AddDropdown(panel.transform, "Type",  "Type", typeof(NoteTypes));
+					AddDropdown("Type", typeof(NoteTypes), BaseGetSet<int>(typeof(BeatmapNote), "Type"));
 					break;
 				case BeatmapObject.ObjectType.Event:
-					AddDropdown(panel.transform, "Value",  "Value", typeof(EventValues));
+					var events = editing.Select(o => (MapEvent)o);
+					// Light
+					if (events.Where(e => !e.IsUtilityEvent).Count() == editing.Count()) {
+						AddDropdown("Value", typeof(LightValues), BaseGetSet<int>(typeof(MapEvent), "Value"));
+					}
+					// Laser Speeds
+					if (events.Where(e => e.IsLaserSpeedEvent).Count() == editing.Count()) {
+						AddCheckbox("Lock Rotation", "_lockPosition");
+						AddDropdown("Direction", typeof(LaserDirection), CustomGetSetInt("_direction"));
+					}
 					break;
 			}
 		}
@@ -146,46 +157,19 @@ public class UI {
 		}
 	}
 	
-	private void UpdateDropdown(string field_name, System.Type type, string strval) {
-		var val = System.Enum.GetNames(type).ToList().IndexOf(strval);
-		
-		var beatmapActions = new List<BeatmapObjectModifiedAction>();
-		
-		foreach (var o in SelectionController.SelectedObjects) {
-			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
-			
-			var field = clone.GetType().GetField(field_name);
-			field.SetValue(clone, val);
-			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
-		}
-		
-		BeatmapActionContainer.AddAction(
-			new ActionCollectionAction(beatmapActions, true, true,
-				$"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."), true);
-		
-		// Prevent selecting "--"
-		UpdateSelection();
-	}
+	// Form Fields
 	
-	private GameObject AddChild(GameObject parent, string name, params System.Type[] components) {
-		var obj = new GameObject(name, components);
-		obj.transform.SetParent(parent.transform);
-		return obj;
-	}
-	
-	
-	private UIDropdown AddDropdown(Transform parent, string title, string field_name, System.Type type) {
+	private GameObject AddField(string title) {
 		var container = new GameObject(title + " Container");
-		container.transform.SetParent(parent);
+		container.transform.SetParent(panel.transform);
 		AttachTransform(container, new Vector2(0, 20), new Vector2(0, 0));
 		
 		elements.Add(container);
 		
-		var entryLabel = AddChild(container, title + " Label", typeof(TextMeshProUGUI));
-		AttachTransform(entryLabel, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
-		var textComponent = entryLabel.GetComponent<TextMeshProUGUI>();
-
+		var label = AddChild(container, title + " Label", typeof(TextMeshProUGUI));
+		AttachTransform(label, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
+		
+		var textComponent = label.GetComponent<TextMeshProUGUI>();
 		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
 		textComponent.alignment = TextAlignmentOptions.Left;
 		textComponent.enableAutoSizing = true;
@@ -193,17 +177,65 @@ public class UI {
 		textComponent.fontSizeMax = 16;
 		textComponent.text = title;
 		
-		// Get values from selected items
-		int last = -1;
-		var options = new List<string>();
-		foreach (var o in SelectionController.SelectedObjects) {
-			var field = o.GetType().GetField(field_name);
-			int val = (int)field.GetValue(o);
-			
-			if (last == -1 || last == val) {
-				last = val;
+		return container;
+	}
+	
+	private Toggle AddCheckbox(string title, string custom_field) {
+		var container = AddField(title);
+		
+		// Get value from selected items, false unless all true
+		bool val = true;
+		foreach (var o in editing) {
+			if (!(o.CustomData[custom_field] ?? false)) {
+				val = false;
+				break;
 			}
-			else {
+		}
+		
+		var original = GameObject.Find("Strobe Generator").GetComponentInChildren<Toggle>(true);
+		var toggleObject = UnityEngine.Object.Instantiate(original, container.transform);
+		var toggleComponent = toggleObject.GetComponent<Toggle>();
+		var colorBlock = toggleComponent.colors;
+		colorBlock.normalColor = Color.white;
+		toggleComponent.colors = colorBlock;
+		toggleComponent.isOn = val;
+		toggleComponent.onValueChanged.AddListener((value) => {
+			UpdateCustomBool(custom_field, value);
+		});
+		return toggleComponent;
+	}
+	private void UpdateCustomBool(string custom_field, bool val) {
+		var beatmapActions = new List<BeatmapObjectModifiedAction>();
+		
+		foreach (var o in editing) {
+			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
+			
+			clone.CustomData[custom_field] = val;
+			
+			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
+		}
+		
+		BeatmapActionContainer.AddAction(
+			new ActionCollectionAction(beatmapActions, true, true,
+				$"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."), false);
+		
+		// Prevent selecting "--"
+		UpdateSelection();
+	}
+	
+	private UIDropdown AddDropdown(string title, System.Type type, System.ValueTuple<System.Func<BeatmapObject, int>, System.Action<BeatmapObject, int>> get_set) {
+		var container = AddField(title);
+		
+		(var getter, var setter) = get_set;
+		
+		// Get values from selected items
+		var options = new List<string>();
+		int last = getter(editing.First());
+		foreach (var o in editing) {
+			
+			int val = getter(o);
+			
+			if (last != val) {
 				options.Add("--");
 				last = 0;
 				break;
@@ -216,10 +248,52 @@ public class UI {
 		dropdown.SetOptions(options);
 		dropdown.Dropdown.value = last;
 		dropdown.Dropdown.onValueChanged.AddListener((val) => {
-			UpdateDropdown(field_name, type, options[val]);
+			UpdateDropdown(setter, type, options[val]);
 		});
 		
 		return dropdown;
+	}
+	private void UpdateDropdown(System.Action<BeatmapObject, int> setter, System.Type type, string strval) {
+		ushort val = (ushort)System.Enum.GetValues(type).GetValue(System.Enum.GetNames(type).ToList().IndexOf(strval));
+		
+		var beatmapActions = new List<BeatmapObjectModifiedAction>();
+		foreach (var o in editing) {
+			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
+			
+			setter(clone, val);
+			
+			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
+		}
+		
+		BeatmapActionContainer.AddAction(
+			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."),
+			true);
+		
+		// Prevent selecting "--"
+		UpdateSelection();
+	}
+	
+	// Form Data Helpers
+	
+	private (System.Func<BeatmapObject, T>, System.Action<BeatmapObject, T>) BaseGetSet<T>(System.Type type, string field_name) {
+		var field = type.GetField(field_name);
+		System.Func<BeatmapObject, T> getter = (o) => (T)field.GetValue(o);
+		System.Action<BeatmapObject, T> setter = (o, v) => field.SetValue(o, v);
+		return (getter, setter);
+	}
+	
+	private (System.Func<BeatmapObject, int>, System.Action<BeatmapObject, int>) CustomGetSetInt(string field_name) {
+		System.Func<BeatmapObject, int> getter = (o) => (int)o.CustomData[field_name];
+		System.Action<BeatmapObject, int> setter = (o, v) => o.CustomData[field_name] = v;
+		return (getter, setter);
+	}
+	
+	// General UI Helpers
+	
+	private GameObject AddChild(GameObject parent, string name, params System.Type[] components) {
+		var obj = new GameObject(name, components);
+		obj.transform.SetParent(parent.transform);
+		return obj;
 	}
 	
 	private GameObject AddLabel(Transform parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center) {

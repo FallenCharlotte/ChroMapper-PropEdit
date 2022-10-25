@@ -28,6 +28,9 @@
     <Reference Include="Main">
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\Main.dll</HintPath>
     </Reference>
+    <Reference Include="Plugins">
+      <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\Plugins.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
@@ -63,6 +66,8 @@
   <ItemGroup>
     <Compile Include="Plugin.cs" />
     <Compile Include="Components\DragWindowController.cs" />
+    <Compile Include="Enums\EventValues.cs" />
+    <Compile Include="Enums\NoteTypes.cs" />
     <Compile Include="UserInterface\UI.cs" />
   </ItemGroup>
   <ItemGroup>

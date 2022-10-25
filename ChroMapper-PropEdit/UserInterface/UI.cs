@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
@@ -6,14 +8,17 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 
 using ChroMapper_PropEdit.Component;
+using ChroMapper_PropEdit.Enums;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
 public class UI {
 	public ExtensionButton main_button;
 	public GameObject window;
-	public GameObject none_status;
 	public GameObject title;
+	public GameObject panel;
+	//public UIDropdown test;
+	public List<GameObject> elements = new List<GameObject>();
 	
 	public UI() {
 		main_button = ExtensionButtons.AddButton(
@@ -61,7 +66,7 @@ public class UI {
 		srect.horizontal = false;
 		srect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
 		
-		var panel = AddChild(scroll_area, "Prop Panel");
+		panel = AddChild(scroll_area, "Prop Panel");
 		srect.content = AttachTransform(panel, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1));
 		{
 			var layout = panel.AddComponent<VerticalLayoutGroup>();
@@ -110,18 +115,111 @@ public class UI {
 	}
 	
 	public void UpdateSelection() {
+		foreach (var e in elements) {
+			Object.Destroy(e);
+		}
+		elements.Clear();
+		
 		if (SelectionController.HasSelectedObjects()) {
-			//none_status.SetActive(false);
+			title.GetComponent<TextMeshProUGUI>().text = SelectionController.SelectedObjects.Count + " Items selected";
+			
+			var type = SelectionController.SelectedObjects.First().BeatmapType;
+			
+			foreach (var o in SelectionController.SelectedObjects) {
+				if (o.BeatmapType != type) {
+					elements.Add(AddLabel(panel.transform, "Unsupported", "Multi-Type Unsupported!", new Vector2(0, 0)));
+					return;
+				}
+			}
+			
+			switch (type) {
+				case BeatmapObject.ObjectType.Note:
+					AddDropdown(panel.transform, "Type",  "Type", typeof(NoteTypes));
+					break;
+				case BeatmapObject.ObjectType.Event:
+					AddDropdown(panel.transform, "Value",  "Value", typeof(EventValues));
+					break;
+			}
 		}
 		else {
-			//none_status.SetActive(true);
+			title.GetComponent<TextMeshProUGUI>().text = "No items selected";
 		}
+	}
+	
+	private void UpdateDropdown(string field_name, System.Type type, string strval) {
+		var val = System.Enum.GetNames(type).ToList().IndexOf(strval);
+		
+		var beatmapActions = new List<BeatmapObjectModifiedAction>();
+		
+		foreach (var o in SelectionController.SelectedObjects) {
+			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
+			
+			var field = clone.GetType().GetField(field_name);
+			field.SetValue(clone, val);
+			
+			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
+		}
+		
+		BeatmapActionContainer.AddAction(
+			new ActionCollectionAction(beatmapActions, true, true,
+				$"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."), true);
+		
+		// Prevent selecting "--"
+		UpdateSelection();
 	}
 	
 	private GameObject AddChild(GameObject parent, string name, params System.Type[] components) {
 		var obj = new GameObject(name, components);
 		obj.transform.SetParent(parent.transform);
 		return obj;
+	}
+	
+	
+	private UIDropdown AddDropdown(Transform parent, string title, string field_name, System.Type type) {
+		var container = new GameObject(title + " Container");
+		container.transform.SetParent(parent);
+		AttachTransform(container, new Vector2(0, 20), new Vector2(0, 0));
+		
+		elements.Add(container);
+		
+		var entryLabel = AddChild(container, title + " Label", typeof(TextMeshProUGUI));
+		AttachTransform(entryLabel, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
+		var textComponent = entryLabel.GetComponent<TextMeshProUGUI>();
+
+		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
+		textComponent.alignment = TextAlignmentOptions.Left;
+		textComponent.enableAutoSizing = true;
+		textComponent.fontSizeMin = 8;
+		textComponent.fontSizeMax = 16;
+		textComponent.text = title;
+		
+		// Get values from selected items
+		int last = -1;
+		var options = new List<string>();
+		foreach (var o in SelectionController.SelectedObjects) {
+			var field = o.GetType().GetField(field_name);
+			int val = (int)field.GetValue(o);
+			
+			if (last == -1 || last == val) {
+				last = val;
+			}
+			else {
+				options.Add("--");
+				last = 0;
+				break;
+			}
+		}
+		options.AddRange(System.Enum.GetNames(type).ToList());
+		
+		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, container.transform);
+		MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		dropdown.SetOptions(options);
+		dropdown.Dropdown.value = last;
+		dropdown.Dropdown.onValueChanged.AddListener((val) => {
+			UpdateDropdown(field_name, type, options[val]);
+		});
+		
+		return dropdown;
 	}
 	
 	private GameObject AddLabel(Transform parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center) {

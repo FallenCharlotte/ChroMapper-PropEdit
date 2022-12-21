@@ -8,6 +8,10 @@ using UnityEngine.Events;
 using UnityEngine.UI;
 using SimpleJSON;
 
+using Convert = System.Convert;
+
+using System.Linq.Expressions;
+
 using ChroMapper_PropEdit.Component;
 using ChroMapper_PropEdit.Enums;
 
@@ -76,6 +80,7 @@ public class UI {
 			layout.spacing = 0;
 			layout.childControlHeight = false;
 			layout.childForceExpandWidth = true;
+			layout.childAlignment = TextAnchor.UpperCenter;
 		}
 		{
 			var fitter = panel.AddComponent<ContentSizeFitter>();
@@ -147,7 +152,9 @@ public class UI {
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserSpeedEvent).Count() == editing.Count()) {
 						AddCheckbox("Lock Rotation", "_lockPosition");
-						AddDropdown("Direction", typeof(LaserDirection), CustomGetSetInt("_direction"));
+						AddTextbox("Speed", BaseGetSet<int>(typeof(MapEvent), "Value"));
+						AddDropdown("Direction", typeof(LaserDirection), CustomGetSet<int>("_direction"));
+						AddTextbox("Chroma Speed", CustomGetSet<float>("_speed"));
 					}
 					break;
 			}
@@ -186,7 +193,7 @@ public class UI {
 		// Get value from selected items, false unless all true
 		bool val = true;
 		foreach (var o in editing) {
-			if (!(o.CustomData[custom_field] ?? false)) {
+			if (!(o.GetOrCreateCustomData()[custom_field] ?? false)) {
 				val = false;
 				break;
 			}
@@ -208,9 +215,11 @@ public class UI {
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
 		
 		foreach (var o in editing) {
+			// WTF THIS SHOULDN'T BE REQUIRED WHYYYYYYYYYYYYYY
+			o.GetOrCreateCustomData();
 			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
 			
-			clone.CustomData[custom_field] = val;
+			clone.GetOrCreateCustomData()[custom_field] = val;
 			
 			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
 		}
@@ -273,6 +282,75 @@ public class UI {
 		UpdateSelection();
 	}
 	
+	private UITextInput AddTextbox<T>(string title, System.ValueTuple<System.Func<BeatmapObject, T>, System.Action<BeatmapObject, T>> get_set) {
+		var container = AddField(title);
+		
+		(var getter, var setter) = get_set;
+		
+		// Get values from selected items
+		var it = editing.GetEnumerator();
+		it.MoveNext();
+		T val = getter(it.Current);
+		bool same = true;
+		while (it.MoveNext()) {
+			if (!EqualityComparer<T>.Default.Equals(getter(it.Current), val)) {
+				same = false;
+				break;
+			}
+		}
+		
+		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
+		MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		input.InputField.text = same ? (string)Convert.ChangeType(val, typeof(string)) : "";
+		input.InputField.onEndEdit.AddListener(delegate {
+			//Plugin.rhythmMarkerController.InputEnable();
+		});
+		input.InputField.onSelect.AddListener(delegate {
+			//Plugin.rhythmMarkerController.InputDisable();
+		});
+		input.InputField.onValueChanged.AddListener((v) => {
+			UpdateTextbox(setter, v);
+		});
+		
+		return input;
+	}
+	private void UpdateTextbox<T>(System.Action<BeatmapObject, T> setter, string strval) {
+		var methods = typeof(T).GetMethods();
+		System.Reflection.MethodInfo parse = null;
+		foreach (var method in methods) {
+			if (method.Name == "TryParse") {
+				parse = method;
+				break;
+			}
+		}
+		T val;
+		object[] parameters = new object[]{strval, null};
+		bool res = (bool)parse.Invoke(null, parameters);
+		
+		if (!res) {
+			UpdateSelection();
+			return;
+		}
+		
+		val = (T)parameters[1];
+		
+		var beatmapActions = new List<BeatmapObjectModifiedAction>();
+		foreach (var o in editing) {
+			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
+			
+			setter(clone, val);
+			
+			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
+		}
+		
+		BeatmapActionContainer.AddAction(
+			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."),
+			true);
+		
+		// Prevent selecting "--"
+		UpdateSelection();
+	}
+	
 	// Form Data Helpers
 	
 	private (System.Func<BeatmapObject, T>, System.Action<BeatmapObject, T>) BaseGetSet<T>(System.Type type, string field_name) {
@@ -282,10 +360,20 @@ public class UI {
 		return (getter, setter);
 	}
 	
-	private (System.Func<BeatmapObject, int>, System.Action<BeatmapObject, int>) CustomGetSetInt(string field_name) {
-		System.Func<BeatmapObject, int> getter = (o) => (int)o.CustomData[field_name];
-		System.Action<BeatmapObject, int> setter = (o, v) => o.CustomData[field_name] = v;
+	private (System.Func<BeatmapObject, T>, System.Action<BeatmapObject, T>) CustomGetSet<T>(string field_name) {
+		System.Func<BeatmapObject, T> getter = (o) => CreateConvertFunc<SimpleJSON.JSONNode, T>()(o.GetOrCreateCustomData()[field_name]);
+		System.Action<BeatmapObject, T> setter = (o, v) => o.GetOrCreateCustomData()[field_name] = CreateConvertFunc<T, SimpleJSON.JSONNode>()(v);
 		return (getter, setter);
+	}
+	
+	// https://stackoverflow.com/a/32037899
+	static System.Func<TInput, TOutput> CreateConvertFunc<TInput, TOutput>()
+	{
+		var source = Expression.Parameter(typeof(TInput), "source");
+		// the next will throw if no conversion exists
+		var convert = Expression.Convert(source, typeof(TOutput));
+		var method = convert.Method;
+		return Expression.Lambda<System.Func<TInput, TOutput>>(convert, source).Compile();
 	}
 	
 	// General UI Helpers
@@ -313,8 +401,7 @@ public class UI {
 		return entryLabel;
 	}
 	
-	private RectTransform AttachTransform(GameObject obj,    Vector2 size, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, Vector2? pivot = null)
-	{
+	private RectTransform AttachTransform(GameObject obj,    Vector2 size, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, Vector2? pivot = null) {
 		var rectTransform = obj.GetComponent<RectTransform>();
 		if (rectTransform == null) {
 			rectTransform = obj.AddComponent<RectTransform>();
@@ -322,8 +409,7 @@ public class UI {
 		return MoveTransform(rectTransform, size, pos, anchor_min, anchor_max, pivot);
 	}
 	
-	private RectTransform MoveTransform(RectTransform trans, Vector2 size, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, Vector2? pivot = null)
-	{
+	private RectTransform MoveTransform(RectTransform trans, Vector2 size, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, Vector2? pivot = null) {
 		trans.localScale = new Vector3(1, 1, 1);
 		trans.sizeDelta = size;
 		trans.pivot = pivot ?? new Vector2(0.5f, 0.5f);

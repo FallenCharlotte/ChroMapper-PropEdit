@@ -17,8 +17,8 @@ enum LightValues : ushort {
 }
 
 enum LaserDirection : ushort {
-	RightCW = 0,
-	LeftCW,
+	Outward = 0,
+	Inward,
 }
 
 }

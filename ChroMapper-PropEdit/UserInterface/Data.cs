@@ -35,6 +35,27 @@ public class Data {
 		return (getter, setter);
 	}
 	
+	// I hate C#
+	public static (System.Func<BeatmapObject, string>, System.Action<BeatmapObject, string>) CustomGetSetString(string field_name) {
+		System.Func<BeatmapObject, string> getter = (o) => {
+			if (o.CustomData?.HasKey(field_name) ?? false) {
+				return ((JSONString)o.CustomData[field_name]).Value;
+			}
+			else {
+				return null;
+			}
+		};
+		System.Action<BeatmapObject, string> setter = (o, v) => {
+			if (string.IsNullOrEmpty(v)) {
+				o.CustomData?.Remove(field_name);
+			}
+			else {
+				o.GetOrCreateCustomData()[field_name] = v;
+			}
+		};
+		return (getter, setter);
+	}
+	
 	// https://stackoverflow.com/a/32037899
 	public static System.Func<TInput, TOutput> CreateConvertFunc<TInput, TOutput>()
 	{

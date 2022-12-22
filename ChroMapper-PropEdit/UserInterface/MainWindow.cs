@@ -140,19 +140,60 @@ public class MainWindow {
 			switch (type) {
 				case BeatmapObject.ObjectType.Note:
 					AddDropdown("Type", Data.BaseGetSet<int>(typeof(BeatmapNote), "Type"), typeof(NoteTypes));
+					AddDropdown("Direction", Data.BaseGetSet<int>(typeof(BeatmapNote), "CutDirection"), typeof(CutDirections));
+					AddField("");
+					AddField("Chroma");
+					// TODO: color
+					AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("_disableSpawnEffect"));
+					
+					AddField("");
+					AddField("Noodle Extensions");
+					// TODO: position, rotation
+					AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"));
+					AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"));
+					AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"));
+					AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"));
+					
+					AddParsed("Direction", Data.CustomGetSet<float>("_cutDirection"));
+					// TODO: flip
+					AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("_disableNoteGravity"));
+					AddCheckbox("Disable Look", Data.CustomGetSet<bool>("_disableNoteLook"));
+					break;
+				case BeatmapObject.ObjectType.Obstacle:
+					
 					break;
 				case BeatmapObject.ObjectType.Event:
 					var events = editing.Select(o => (MapEvent)o);
 					// Light
 					if (events.Where(e => !e.IsUtilityEvent).Count() == editing.Count()) {
 						AddDropdown("Value", Data.BaseGetSet<int>(typeof(MapEvent), "Value"), typeof(LightValues));
+						// TODO: lightID, color
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserSpeedEvent).Count() == editing.Count()) {
-						AddTextbox( "Speed",         Data.BaseGetSet<int>(typeof(MapEvent), "Value"));
+						AddField("Laser Speed Event");
+						AddParsed("Speed", Data.BaseGetSet<int>(typeof(MapEvent), "Value"));
+						AddField("");
+						AddField("Chroma");
 						AddCheckbox("Lock Rotation", Data.CustomGetSet<bool>("_lockPosition"));
-						AddDropdown("Direction",     Data.CustomGetSet<int>("_direction"), typeof(LaserDirection), true);
-						AddTextbox( "Precise Speed", Data.CustomGetSet<float>("_speed"));
+						AddDropdown("Direction", Data.CustomGetSet<int>("_direction"), typeof(LaserDirection), true);
+						AddParsed("Precise Speed", Data.CustomGetSet<float>("_speed"));
+					}
+					if (events.Where(e => e.Type == MapEvent.EventTypeRingsRotate).Count() == editing.Count()) {
+						AddField("Chroma");
+						AddTextbox("Filter", Data.CustomGetSetString("_nameFilter"));
+						AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"));
+						AddParsed("Rotation", Data.CustomGetSet<float>("_rotation"));
+						AddParsed("Step", Data.CustomGetSet<float>("_step"));
+						AddParsed("Propagation", Data.CustomGetSet<float>("_prop"));
+						AddParsed("Speed", Data.CustomGetSet<float>("_speed"));
+						AddDropdown("Direction", Data.CustomGetSet<int>("_direction"), typeof(RingDirection), true);
+						AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"));
+					}
+					if (events.Where(e => e.Type == MapEvent.EventTypeRingsZoom).Count() == editing.Count()) {
+						AddField("Chroma");
+						AddParsed("Step", Data.CustomGetSet<float>("_step"));
+						AddParsed("Speed", Data.CustomGetSet<float>("_speed"));
 					}
 					break;
 			}
@@ -237,7 +278,7 @@ public class MainWindow {
 		return dropdown;
 	}
 	
-	private UITextInput AddTextbox<T>(string title, System.ValueTuple<System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>> get_set) where T : struct {
+	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>> get_set) where T : struct {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -277,7 +318,56 @@ public class MainWindow {
 		return input;
 	}
 	
+	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BeatmapObject, string>, System.Action<BeatmapObject, string>> get_set) {
+		var container = AddField(title);
+		
+		(var getter, var setter) = get_set;
+		
+		var value = GetAllOrNothingString(getter);
+		
+		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
+		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		input.InputField.text = value ?? "";
+		input.InputField.onEndEdit.AddListener(delegate {
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
+		});
+		input.InputField.onSelect.AddListener(delegate {
+			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
+			}
+		});
+		input.InputField.onValueChanged.AddListener((s) => {
+			if (s == "") {
+				s = null;
+			}
+			UpdateObjectsString(setter, s);
+		});
+		
+		return input;
+	}
+	
 	private void UpdateObjects<T>(System.Action<BeatmapObject, T?> setter, T? value) where T : struct {
+		var beatmapActions = new List<BeatmapObjectModifiedAction>();
+		foreach (var o in editing) {
+			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
+			
+			setter(clone, value);
+			
+			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
+		}
+		
+		BeatmapActionContainer.AddAction(
+			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."),
+			true);
+		
+		// Prevent selecting "--"
+		UpdateSelection();
+	}
+	
+	// I hate c#
+	private void UpdateObjectsString(System.Action<BeatmapObject, string> setter, string value) {
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
 		foreach (var o in editing) {
 			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
@@ -308,6 +398,21 @@ public class MainWindow {
 						break;
 					}
 				}
+			}
+		}
+		
+		return last;
+	}
+	
+	// I hate C#
+	private string GetAllOrNothingString(System.Func<BeatmapObject, string> getter) {
+		var it = editing.GetEnumerator();
+		it.MoveNext();
+		var last = getter(it.Current);
+		while (last != null && it.MoveNext()) {
+			if (last != getter(it.Current)) {
+				last = null;
+				break;
 			}
 		}
 		

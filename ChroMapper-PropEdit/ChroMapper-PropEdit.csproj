@@ -7,6 +7,9 @@
     <OutputType>Library</OutputType>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>9.0</LangVersion>
+  </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -27,6 +30,9 @@
   <ItemGroup>
     <Reference Include="Main">
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\Main.dll</HintPath>
+    </Reference>
+    <Reference Include="Input">
+      <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\Input.dll</HintPath>
     </Reference>
     <Reference Include="Plugins">
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\Plugins.dll</HintPath>
@@ -59,6 +65,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />

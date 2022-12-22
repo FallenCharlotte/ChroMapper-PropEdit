@@ -229,37 +229,41 @@ public class MainWindow {
 		UpdateSelection();
 	}
 	
-	private UIDropdown AddDropdown(string title, System.Type type, System.ValueTuple<System.Func<BeatmapObject, int>, System.Action<BeatmapObject, int>> get_set) {
+	private UIDropdown AddDropdown(string title, System.Type type, System.ValueTuple<System.Func<BeatmapObject, int?>, System.Action<BeatmapObject, int?>> get_set) {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
 		
 		// Get values from selected items
 		var options = new List<string>();
-		int last = getter(editing.First());
-		foreach (var o in editing) {
+		var it = editing.GetEnumerator();
+		it.MoveNext();
+		var last = getter(it.Current);
+		while (last.HasValue && it.MoveNext()) {
 			
-			int val = getter(o);
+			var val = getter(it.Current);
 			
-			if (last != val) {
-				options.Add("--");
-				last = 0;
+			if (!val.HasValue || last != val) {
+				last = null;
 				break;
 			}
+		}
+		if (!last.HasValue) {
+			options.Add("--");
 		}
 		options.AddRange(System.Enum.GetNames(type).ToList());
 		
 		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, container.transform);
 		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		dropdown.SetOptions(options);
-		dropdown.Dropdown.value = last;
+		dropdown.Dropdown.value = last ?? 0;
 		dropdown.Dropdown.onValueChanged.AddListener((val) => {
 			UpdateDropdown(setter, type, options[val]);
 		});
 		
 		return dropdown;
 	}
-	private void UpdateDropdown(System.Action<BeatmapObject, int> setter, System.Type type, string strval) {
+	private void UpdateDropdown(System.Action<BeatmapObject, int?> setter, System.Type type, string strval) {
 		ushort val = (ushort)System.Enum.GetValues(type).GetValue(System.Enum.GetNames(type).ToList().IndexOf(strval));
 		
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
@@ -279,7 +283,7 @@ public class MainWindow {
 		UpdateSelection();
 	}
 	
-	private UITextInput AddTextbox<T>(string title, System.ValueTuple<System.Func<BeatmapObject, T>, System.Action<BeatmapObject, T>> get_set) {
+	private UITextInput AddTextbox<T>(string title, System.ValueTuple<System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>> get_set) where T : struct {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -287,23 +291,36 @@ public class MainWindow {
 		// Get values from selected items
 		var it = editing.GetEnumerator();
 		it.MoveNext();
-		T val = getter(it.Current);
-		bool same = true;
-		while (it.MoveNext()) {
-			if (!EqualityComparer<T>.Default.Equals(getter(it.Current), val)) {
-				same = false;
-				break;
+		var last = getter(it.Current);
+		bool same = false;
+		// baby C# though null checks
+		if (last is T l) {
+			same = true;
+			while (it.MoveNext()) {
+				if (getter(it.Current) is T v) {
+					if (!EqualityComparer<T>.Default.Equals(v, l)) {
+						same = false;
+						last = null;
+						break;
+					}
+				}
 			}
 		}
 		
+		Debug.Log("Same: " + (same ? "true" : "false"));
+		
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		input.InputField.text = same ? (string)Convert.ChangeType(val, typeof(string)) : "";
+		input.InputField.text = same ? (string)Convert.ChangeType(last, typeof(string)) : "";
 		input.InputField.onEndEdit.AddListener(delegate {
-			//Plugin.rhythmMarkerController.InputEnable();
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
 		});
 		input.InputField.onSelect.AddListener(delegate {
-			//Plugin.rhythmMarkerController.InputDisable();
+			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
+			}
 		});
 		input.InputField.onValueChanged.AddListener((v) => {
 			UpdateTextbox(setter, v);
@@ -311,7 +328,7 @@ public class MainWindow {
 		
 		return input;
 	}
-	private void UpdateTextbox<T>(System.Action<BeatmapObject, T> setter, string strval) {
+	private void UpdateTextbox<T>(System.Action<BeatmapObject, T?> setter, string strval) where T : struct {
 		var methods = typeof(T).GetMethods();
 		System.Reflection.MethodInfo parse = null;
 		foreach (var method in methods) {
@@ -320,16 +337,11 @@ public class MainWindow {
 				break;
 			}
 		}
-		T val;
+		T? val;
 		object[] parameters = new object[]{strval, null};
 		bool res = (bool)parse.Invoke(null, parameters);
 		
-		if (!res) {
-			UpdateSelection();
-			return;
-		}
-		
-		val = (T)parameters[1];
+		val = (res) ? (T)parameters[1] : null;
 		
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
 		foreach (var o in editing) {
@@ -348,9 +360,15 @@ public class MainWindow {
 		UpdateSelection();
 	}
 	
-	// Form Data Helpers
+	// Stop textbox input from triggering actions, copied from the node editor
 	
+	private readonly System.Type[] actionMapsEnabledWhenNodeEditing = {
+		typeof(CMInput.ICameraActions), typeof(CMInput.IBeatmapObjectsActions), typeof(CMInput.INodeEditorActions),
+		typeof(CMInput.ISavingActions), typeof(CMInput.ITimelineActions)
+	};
 	
+	private System.Type[] ActionMapsDisabled => typeof(CMInput).GetNestedTypes()
+		.Where(x => x.IsInterface && !actionMapsEnabledWhenNodeEditing.Contains(x)).ToArray();
 }
 
 }

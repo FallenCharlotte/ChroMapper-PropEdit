@@ -3,20 +3,35 @@ using System.Reflection;
 using System.Linq.Expressions;
 using TMPro;
 using UnityEngine;
+using SimpleJSON;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
 public class Forms {
-	public static (System.Func<BeatmapObject, T>, System.Action<BeatmapObject, T>) BaseGetSet<T>(System.Type type, string field_name) {
+	public static (System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>) BaseGetSet<T>(System.Type type, string field_name) where T : struct {
 		var field = type.GetField(field_name);
-		System.Func<BeatmapObject, T> getter = (o) => (T)field.GetValue(o);
-		System.Action<BeatmapObject, T> setter = (o, v) => field.SetValue(o, v);
+		System.Func<BeatmapObject, T?> getter = (o) => (T)field.GetValue(o);
+		System.Action<BeatmapObject, T?> setter = (o, v) => field.SetValue(o, v);
 		return (getter, setter);
 	}
 	
-	public static (System.Func<BeatmapObject, T>, System.Action<BeatmapObject, T>) CustomGetSet<T>(string field_name) {
-		System.Func<BeatmapObject, T> getter = (o) => CreateConvertFunc<SimpleJSON.JSONNode, T>()(o.GetOrCreateCustomData()[field_name]);
-		System.Action<BeatmapObject, T> setter = (o, v) => o.GetOrCreateCustomData()[field_name] = CreateConvertFunc<T, SimpleJSON.JSONNode>()(v);
+	public static (System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>) CustomGetSet<T>(string field_name) where T : struct {
+		System.Func<BeatmapObject, T?> getter = (o) => {
+			if (o.CustomData?.HasKey(field_name) ?? false) {
+				return CreateConvertFunc<JSONNode, T>()(o.CustomData[field_name]);
+			}
+			else {
+				return null;
+			}
+		};
+		System.Action<BeatmapObject, T?> setter = (o, v) => {
+			if (v is T val) {
+				o.GetOrCreateCustomData()[field_name] = CreateConvertFunc<T, SimpleJSON.JSONNode>()(val);
+			}
+			else {
+				o.CustomData?.Remove(field_name);
+			}
+		};
 		return (getter, setter);
 	}
 	

@@ -10,5 +10,6 @@ A GUI node editor for quick and easy Chroma/NE!
 - [ ] NE rotation
 - [ ] NE note flip
 - [ ] NE obstacle scale
+- [ ] Organizational dropdowns?
 
 Everything else *should* work

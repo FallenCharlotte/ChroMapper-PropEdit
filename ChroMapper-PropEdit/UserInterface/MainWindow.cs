@@ -20,6 +20,7 @@ public class MainWindow {
 	public GameObject window;
 	public GameObject title;
 	public GameObject panel;
+	public Scrollbar scrollbar;
 	public ScrollToTop scroll_to_top;
 	public List<GameObject> elements = new List<GameObject>();
 	public HashSet<BeatmapObject> editing;
@@ -92,9 +93,10 @@ public class MainWindow {
 		
 		var scroller = UI.AddChild(container, "Scroll Bar", typeof(Scrollbar));
 		UI.AttachTransform(scroller, new Vector2(10, 0), new Vector2(-5.5f, 0), new Vector2(1, 0), new Vector2(1, 1));
-		var scrollbar = scroller.GetComponent<Scrollbar>();
+		scrollbar = scroller.GetComponent<Scrollbar>();
 		scrollbar.transition = Selectable.Transition.ColorTint;
 		scrollbar.direction = Scrollbar.Direction.BottomToTop;
+		scrollbar.value = 1f;
 		srect.verticalScrollbar = scrollbar;
 		scroll_to_top = window.AddComponent<ScrollToTop>();
 		scroll_to_top.scrollbar = scrollbar;
@@ -173,7 +175,7 @@ public class MainWindow {
 					AddDropdown("Height", Data.BaseGetSet<int>(typeof(BeatmapObstacle), "Type"), typeof(WallHeights));
 					AddParsed("Width", Data.BaseGetSet<int>(typeof(BeatmapObstacle), "Width"));
 					
-					// TODO: Chroma color, size
+					// TODO: Chroma color
 					
 					AddField("");
 					AddField("Noodle Extensions");

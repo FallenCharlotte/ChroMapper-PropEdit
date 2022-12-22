@@ -80,6 +80,7 @@
     <Compile Include="Enums\Events.cs" />
     <Compile Include="Enums\Notes.cs" />
     <Compile Include="Enums\Obstacles.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UserInterface\Data.cs" />
     <Compile Include="UserInterface\MainWindow.cs" />
     <Compile Include="UserInterface\UI.cs" />

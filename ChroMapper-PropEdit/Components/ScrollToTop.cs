@@ -7,8 +7,14 @@ namespace ChroMapper_PropEdit.Components {
 public class ScrollToTop : MonoBehaviour {
 	public Scrollbar scrollbar;
 	
+	public void OnEnable() {
+		Trigger();
+	}
+	
 	public void Trigger() {
-		StartCoroutine(Scroll());
+		if (isActiveAndEnabled) {
+			StartCoroutine(Scroll());
+		}
 	}
 	
 	private IEnumerator Scroll() {

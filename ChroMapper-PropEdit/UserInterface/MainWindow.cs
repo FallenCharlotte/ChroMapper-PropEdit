@@ -49,7 +49,7 @@ public class MainWindow {
 			image.color = new Color(0.24f, 0.24f, 0.24f, 1);
 		}
 		
-		//window.SetActive(false);
+		window.SetActive(false);
 		
 		title = UI.AddLabel(window.transform, "Title", "Prop Editor", new Vector2(10, -20), size: new Vector2(-10, 30), font_size: 28, anchor_min: new Vector2(0, 1), anchor_max: new Vector2(1, 1), align: TextAlignmentOptions.Left);
 		
@@ -74,11 +74,15 @@ public class MainWindow {
 		srect.content = UI.AttachTransform(panel, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1));
 		{
 			var layout = panel.AddComponent<VerticalLayoutGroup>();
-			layout.padding = new RectOffset(5, 5, 0, 0);
+			layout.padding = new RectOffset(5, 15, 0, 0);
 			layout.spacing = 0;
 			layout.childControlHeight = false;
 			layout.childForceExpandWidth = true;
 			layout.childAlignment = TextAnchor.UpperCenter;
+		}
+		{
+			var layout = panel.AddComponent<LayoutElement>();
+			layout.minHeight = 256 - 40 - 15;
 		}
 		{
 			var fitter = panel.AddComponent<ContentSizeFitter>();
@@ -137,6 +141,8 @@ public class MainWindow {
 			
 			var type = editing.First().BeatmapType;
 			
+			AddParsed("Beat", Data.BaseGetSet<float>(typeof(BeatmapObject), "Time"));
+			
 			switch (type) {
 				case BeatmapObject.ObjectType.Note:
 					AddDropdown("Type", Data.BaseGetSet<int>(typeof(BeatmapNote), "Type"), typeof(NoteTypes));
@@ -144,23 +150,36 @@ public class MainWindow {
 					AddField("");
 					AddField("Chroma");
 					// TODO: color
-					AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("_disableSpawnEffect"));
+					AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("_disableSpawnEffect"), false);
 					
 					AddField("");
 					AddField("Noodle Extensions");
 					// TODO: position, rotation
-					AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"));
-					AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"));
-					AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"));
-					AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"));
+					AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
+					AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
+					AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
+					AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
 					
-					AddParsed("Direction", Data.CustomGetSet<float>("_cutDirection"));
+					AddParsed("Direction", Data.CustomGetSet<float>("_cutDirection"), true);
 					// TODO: flip
-					AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("_disableNoteGravity"));
-					AddCheckbox("Disable Look", Data.CustomGetSet<bool>("_disableNoteLook"));
+					AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("_disableNoteGravity"), false);
+					AddCheckbox("Disable Look", Data.CustomGetSet<bool>("_disableNoteLook"), false);
 					break;
 				case BeatmapObject.ObjectType.Obstacle:
+					AddParsed("Duration", Data.BaseGetSet<float>(typeof(BeatmapObstacle), "Duration"));
+					AddDropdown("Height", Data.BaseGetSet<int>(typeof(BeatmapObstacle), "Type"), typeof(WallHeights));
+					AddParsed("Width", Data.BaseGetSet<int>(typeof(BeatmapObstacle), "Width"));
 					
+					// TODO: Chroma color, size
+					
+					AddField("");
+					AddField("Noodle Extensions");
+					// TODO: position, rotation
+					AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
+					AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
+					AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
+					AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+					// TODO: scale
 					break;
 				case BeatmapObject.ObjectType.Event:
 					var events = editing.Select(o => (MapEvent)o);
@@ -171,29 +190,28 @@ public class MainWindow {
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserSpeedEvent).Count() == editing.Count()) {
-						AddField("Laser Speed Event");
-						AddParsed("Speed", Data.BaseGetSet<int>(typeof(MapEvent), "Value"));
+						AddParsed("Speed", Data.BaseGetSet<int>(typeof(MapEvent), "Value"), true);
 						AddField("");
 						AddField("Chroma");
-						AddCheckbox("Lock Rotation", Data.CustomGetSet<bool>("_lockPosition"));
+						AddCheckbox("Lock Rotation", Data.CustomGetSet<bool>("_lockPosition"), false);
 						AddDropdown("Direction", Data.CustomGetSet<int>("_direction"), typeof(LaserDirection), true);
-						AddParsed("Precise Speed", Data.CustomGetSet<float>("_speed"));
+						AddParsed("Precise Speed", Data.CustomGetSet<float>("_speed"), true);
 					}
 					if (events.Where(e => e.Type == MapEvent.EventTypeRingsRotate).Count() == editing.Count()) {
 						AddField("Chroma");
 						AddTextbox("Filter", Data.CustomGetSetString("_nameFilter"));
-						AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"));
-						AddParsed("Rotation", Data.CustomGetSet<float>("_rotation"));
-						AddParsed("Step", Data.CustomGetSet<float>("_step"));
-						AddParsed("Propagation", Data.CustomGetSet<float>("_prop"));
-						AddParsed("Speed", Data.CustomGetSet<float>("_speed"));
+						AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
+						AddParsed("Rotation", Data.CustomGetSet<float>("_rotation"), true);
+						AddParsed("Step", Data.CustomGetSet<float>("_step"), true);
+						AddParsed("Propagation", Data.CustomGetSet<float>("_prop"), true);
+						AddParsed("Speed", Data.CustomGetSet<float>("_speed"), true);
 						AddDropdown("Direction", Data.CustomGetSet<int>("_direction"), typeof(RingDirection), true);
-						AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"));
+						AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
 					}
 					if (events.Where(e => e.Type == MapEvent.EventTypeRingsZoom).Count() == editing.Count()) {
 						AddField("Chroma");
-						AddParsed("Step", Data.CustomGetSet<float>("_step"));
-						AddParsed("Speed", Data.CustomGetSet<float>("_speed"));
+						AddParsed("Step", Data.CustomGetSet<float>("_step"), true);
+						AddParsed("Speed", Data.CustomGetSet<float>("_speed"), true);
 					}
 					break;
 			}
@@ -225,13 +243,13 @@ public class MainWindow {
 		return container;
 	}
 	
-	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BeatmapObject, bool?>, System.Action<BeatmapObject, bool?>> get_set) {
+	// CustomData node gets removed when value = default
+	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BeatmapObject, bool?>, System.Action<BeatmapObject, bool?>> get_set, bool _default) {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
 		
-		// Get value from selected items, false unless all true
-		bool value = GetAllOrNothing<bool>(getter) ?? false;
+		bool value = GetAllOrNothing<bool>(getter) ?? _default;
 		
 		var original = GameObject.Find("Strobe Generator").GetComponentInChildren<Toggle>(true);
 		var toggleObject = UnityEngine.Object.Instantiate(original, container.transform);
@@ -241,7 +259,12 @@ public class MainWindow {
 		toggleComponent.colors = colorBlock;
 		toggleComponent.isOn = value;
 		toggleComponent.onValueChanged.AddListener((v) => {
-			UpdateObjects<bool>(setter, v);
+			if (v == _default) {
+				UpdateObjects<bool>(setter, null);
+			}
+			else {
+				UpdateObjects<bool>(setter, v);
+			}
 		});
 		return toggleComponent;
 	}
@@ -278,7 +301,7 @@ public class MainWindow {
 		return dropdown;
 	}
 	
-	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>> get_set) where T : struct {
+	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>> get_set, bool nullable = false) where T : struct {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -310,9 +333,12 @@ public class MainWindow {
 			}
 			object[] parameters = new object[]{s, null};
 			bool res = (bool)parse.Invoke(null, parameters);
-			
-			T? value = (res) ? (T)parameters[1] : null;
-			UpdateObjects<T>(setter, value);
+			if (!res && nullable) {
+				UpdateObjects<T>(setter, null);
+			}
+			else {
+				UpdateObjects<T>(setter, (T)parameters[1]);
+			}
 		});
 		
 		return input;

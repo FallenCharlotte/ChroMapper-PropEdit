@@ -203,6 +203,7 @@ public class MainWindow {
 						AddParsed("Precise Speed", Data.CustomGetSet<float>("_speed"), true);
 					}
 					if (events.Where(e => e.Type == MapEvent.EventTypeRingsRotate).Count() == editing.Count()) {
+						AddField("");
 						AddField("Chroma");
 						AddTextbox("Filter", Data.CustomGetSetString("_nameFilter"));
 						AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
@@ -214,6 +215,7 @@ public class MainWindow {
 						AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
 					}
 					if (events.Where(e => e.Type == MapEvent.EventTypeRingsZoom).Count() == editing.Count()) {
+						AddField("");
 						AddField("Chroma");
 						AddParsed("Step", Data.CustomGetSet<float>("_step"), true);
 						AddParsed("Speed", Data.CustomGetSet<float>("_speed"), true);

@@ -151,7 +151,7 @@ public class MainWindow {
 					if (events.Where(e => e.IsLaserSpeedEvent).Count() == editing.Count()) {
 						AddTextbox( "Speed",         Data.BaseGetSet<int>(typeof(MapEvent), "Value"));
 						AddCheckbox("Lock Rotation", Data.CustomGetSet<bool>("_lockPosition"));
-						AddDropdown("Direction",     Data.CustomGetSet<int>("_direction"), typeof(LaserDirection));
+						AddDropdown("Direction",     Data.CustomGetSet<int>("_direction"), typeof(LaserDirection), true);
 						AddTextbox( "Precise Speed", Data.CustomGetSet<float>("_speed"));
 					}
 					break;
@@ -205,7 +205,7 @@ public class MainWindow {
 		return toggleComponent;
 	}
 	
-	private UIDropdown AddDropdown(string title, System.ValueTuple<System.Func<BeatmapObject, int?>, System.Action<BeatmapObject, int?>> get_set, System.Type type) {
+	private UIDropdown AddDropdown(string title, System.ValueTuple<System.Func<BeatmapObject, int?>, System.Action<BeatmapObject, int?>> get_set, System.Type type, bool nullable = false) {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -216,6 +216,10 @@ public class MainWindow {
 		if (!value.HasValue) {
 			options.Add("--");
 		}
+		else if (nullable) {
+			options.Add("Unset");
+			value += 1;
+		}
 		options.AddRange(System.Enum.GetNames(type).ToList());
 		
 		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, container.transform);
@@ -223,7 +227,10 @@ public class MainWindow {
 		dropdown.SetOptions(options);
 		dropdown.Dropdown.value = value ?? 0;
 		dropdown.Dropdown.onValueChanged.AddListener((i) => {
-			ushort value = (ushort)System.Enum.GetValues(type).GetValue(System.Enum.GetNames(type).ToList().IndexOf(options[i]));
+			int ei = System.Enum.GetNames(type).ToList().IndexOf(options[i]);
+			ushort? value = (ei >= 0)
+				? (ushort)System.Enum.GetValues(type).GetValue(ei)
+				: null;
 			UpdateObjects<int>(setter, value);
 		});
 		

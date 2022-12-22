@@ -10,7 +10,7 @@ using SimpleJSON;
 
 using Convert = System.Convert;
 
-using ChroMapper_PropEdit.Component;
+using ChroMapper_PropEdit.Components;
 using ChroMapper_PropEdit.Enums;
 
 namespace ChroMapper_PropEdit.UserInterface {
@@ -20,7 +20,7 @@ public class MainWindow {
 	public GameObject window;
 	public GameObject title;
 	public GameObject panel;
-	//public UIDropdown test;
+	public ScrollToTop scroll_to_top;
 	public List<GameObject> elements = new List<GameObject>();
 	public HashSet<BeatmapObject> editing;
 	
@@ -74,9 +74,10 @@ public class MainWindow {
 		srect.content = UI.AttachTransform(panel, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1));
 		{
 			var layout = panel.AddComponent<VerticalLayoutGroup>();
-			layout.padding = new RectOffset(5, 15, 0, 0);
+			layout.padding = new RectOffset(10, 15, 0, 0);
 			layout.spacing = 0;
 			layout.childControlHeight = false;
+			layout.childForceExpandHeight = false;
 			layout.childForceExpandWidth = true;
 			layout.childAlignment = TextAnchor.UpperCenter;
 		}
@@ -95,6 +96,8 @@ public class MainWindow {
 		scrollbar.transition = Selectable.Transition.ColorTint;
 		scrollbar.direction = Scrollbar.Direction.BottomToTop;
 		srect.verticalScrollbar = scrollbar;
+		scroll_to_top = window.AddComponent<ScrollToTop>();
+		scroll_to_top.scrollbar = scrollbar;
 		
 		var slide = UI.AddChild(scroller, "Slide");
 		UI.AttachTransform(slide, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
@@ -219,6 +222,7 @@ public class MainWindow {
 		else {
 			title.GetComponent<TextMeshProUGUI>().text = "No items selected";
 		}
+		scroll_to_top.Trigger();
 	}
 	
 	// Form Fields

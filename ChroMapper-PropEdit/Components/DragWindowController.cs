@@ -4,7 +4,7 @@ using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-namespace ChroMapper_PropEdit.Component {
+namespace ChroMapper_PropEdit.Components {
 
 public class DragWindowController : MonoBehaviour, IDragHandler
 {

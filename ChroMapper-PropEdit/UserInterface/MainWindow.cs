@@ -139,20 +139,20 @@ public class MainWindow {
 			
 			switch (type) {
 				case BeatmapObject.ObjectType.Note:
-					AddDropdown("Type", typeof(NoteTypes), Forms.BaseGetSet<int>(typeof(BeatmapNote), "Type"));
+					AddDropdown("Type", Data.BaseGetSet<int>(typeof(BeatmapNote), "Type"), typeof(NoteTypes));
 					break;
 				case BeatmapObject.ObjectType.Event:
 					var events = editing.Select(o => (MapEvent)o);
 					// Light
 					if (events.Where(e => !e.IsUtilityEvent).Count() == editing.Count()) {
-						AddDropdown("Value", typeof(LightValues), Forms.BaseGetSet<int>(typeof(MapEvent), "Value"));
+						AddDropdown("Value", Data.BaseGetSet<int>(typeof(MapEvent), "Value"), typeof(LightValues));
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserSpeedEvent).Count() == editing.Count()) {
-						AddCheckbox("Lock Rotation", "_lockPosition");
-						AddTextbox("Speed", Forms.BaseGetSet<int>(typeof(MapEvent), "Value"));
-						AddDropdown("Direction", typeof(LaserDirection), Forms.CustomGetSet<int>("_direction"));
-						AddTextbox("Precise Speed", Forms.CustomGetSet<float>("_speed"));
+						AddTextbox( "Speed",         Data.BaseGetSet<int>(typeof(MapEvent), "Value"));
+						AddCheckbox("Lock Rotation", Data.CustomGetSet<bool>("_lockPosition"));
+						AddDropdown("Direction",     Data.CustomGetSet<int>("_direction"), typeof(LaserDirection));
+						AddTextbox( "Precise Speed", Data.CustomGetSet<float>("_speed"));
 					}
 					break;
 			}
@@ -184,17 +184,13 @@ public class MainWindow {
 		return container;
 	}
 	
-	private Toggle AddCheckbox(string title, string custom_field) {
+	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BeatmapObject, bool?>, System.Action<BeatmapObject, bool?>> get_set) {
 		var container = AddField(title);
 		
+		(var getter, var setter) = get_set;
+		
 		// Get value from selected items, false unless all true
-		bool val = true;
-		foreach (var o in editing) {
-			if (!(o.GetOrCreateCustomData()[custom_field] ?? false)) {
-				val = false;
-				break;
-			}
-		}
+		bool value = GetAllOrNothing<bool>(getter) ?? false;
 		
 		var original = GameObject.Find("Strobe Generator").GetComponentInChildren<Toggle>(true);
 		var toggleObject = UnityEngine.Object.Instantiate(original, container.transform);
@@ -202,53 +198,22 @@ public class MainWindow {
 		var colorBlock = toggleComponent.colors;
 		colorBlock.normalColor = Color.white;
 		toggleComponent.colors = colorBlock;
-		toggleComponent.isOn = val;
-		toggleComponent.onValueChanged.AddListener((value) => {
-			UpdateCustomBool(custom_field, value);
+		toggleComponent.isOn = value;
+		toggleComponent.onValueChanged.AddListener((v) => {
+			UpdateObjects<bool>(setter, v);
 		});
 		return toggleComponent;
 	}
-	private void UpdateCustomBool(string custom_field, bool val) {
-		var beatmapActions = new List<BeatmapObjectModifiedAction>();
-		
-		foreach (var o in editing) {
-			// WTF THIS SHOULDN'T BE REQUIRED WHYYYYYYYYYYYYYY
-			o.GetOrCreateCustomData();
-			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
-			
-			clone.GetOrCreateCustomData()[custom_field] = val;
-			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
-		}
-		
-		BeatmapActionContainer.AddAction(
-			new ActionCollectionAction(beatmapActions, true, true,
-				$"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."), false);
-		
-		// Prevent selecting "--"
-		UpdateSelection();
-	}
 	
-	private UIDropdown AddDropdown(string title, System.Type type, System.ValueTuple<System.Func<BeatmapObject, int?>, System.Action<BeatmapObject, int?>> get_set) {
+	private UIDropdown AddDropdown(string title, System.ValueTuple<System.Func<BeatmapObject, int?>, System.Action<BeatmapObject, int?>> get_set, System.Type type) {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
 		
 		// Get values from selected items
 		var options = new List<string>();
-		var it = editing.GetEnumerator();
-		it.MoveNext();
-		var last = getter(it.Current);
-		while (last.HasValue && it.MoveNext()) {
-			
-			var val = getter(it.Current);
-			
-			if (!val.HasValue || last != val) {
-				last = null;
-				break;
-			}
-		}
-		if (!last.HasValue) {
+		var value = GetAllOrNothing<int>(getter);
+		if (!value.HasValue) {
 			options.Add("--");
 		}
 		options.AddRange(System.Enum.GetNames(type).ToList());
@@ -256,31 +221,13 @@ public class MainWindow {
 		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, container.transform);
 		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		dropdown.SetOptions(options);
-		dropdown.Dropdown.value = last ?? 0;
-		dropdown.Dropdown.onValueChanged.AddListener((val) => {
-			UpdateDropdown(setter, type, options[val]);
+		dropdown.Dropdown.value = value ?? 0;
+		dropdown.Dropdown.onValueChanged.AddListener((i) => {
+			ushort value = (ushort)System.Enum.GetValues(type).GetValue(System.Enum.GetNames(type).ToList().IndexOf(options[i]));
+			UpdateObjects<int>(setter, value);
 		});
 		
 		return dropdown;
-	}
-	private void UpdateDropdown(System.Action<BeatmapObject, int?> setter, System.Type type, string strval) {
-		ushort val = (ushort)System.Enum.GetValues(type).GetValue(System.Enum.GetNames(type).ToList().IndexOf(strval));
-		
-		var beatmapActions = new List<BeatmapObjectModifiedAction>();
-		foreach (var o in editing) {
-			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
-			
-			setter(clone, val);
-			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
-		}
-		
-		BeatmapActionContainer.AddAction(
-			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."),
-			true);
-		
-		// Prevent selecting "--"
-		UpdateSelection();
 	}
 	
 	private UITextInput AddTextbox<T>(string title, System.ValueTuple<System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>> get_set) where T : struct {
@@ -288,30 +235,11 @@ public class MainWindow {
 		
 		(var getter, var setter) = get_set;
 		
-		// Get values from selected items
-		var it = editing.GetEnumerator();
-		it.MoveNext();
-		var last = getter(it.Current);
-		bool same = false;
-		// baby C# though null checks
-		if (last is T l) {
-			same = true;
-			while (it.MoveNext()) {
-				if (getter(it.Current) is T v) {
-					if (!EqualityComparer<T>.Default.Equals(v, l)) {
-						same = false;
-						last = null;
-						break;
-					}
-				}
-			}
-		}
-		
-		Debug.Log("Same: " + (same ? "true" : "false"));
+		var value = GetAllOrNothing<T>(getter);
 		
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		input.InputField.text = same ? (string)Convert.ChangeType(last, typeof(string)) : "";
+		input.InputField.text = value.HasValue ? (string)Convert.ChangeType(value, typeof(string)) : "";
 		input.InputField.onEndEdit.AddListener(delegate {
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
@@ -322,32 +250,32 @@ public class MainWindow {
 				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
 			}
 		});
-		input.InputField.onValueChanged.AddListener((v) => {
-			UpdateTextbox(setter, v);
+		input.InputField.onValueChanged.AddListener((s) => {
+			// No IParsable in mono ;_;
+			var methods = typeof(T).GetMethods();
+			System.Reflection.MethodInfo parse = null;
+			foreach (var method in methods) {
+				if (method.Name == "TryParse") {
+					parse = method;
+					break;
+				}
+			}
+			object[] parameters = new object[]{s, null};
+			bool res = (bool)parse.Invoke(null, parameters);
+			
+			T? value = (res) ? (T)parameters[1] : null;
+			UpdateObjects<T>(setter, value);
 		});
 		
 		return input;
 	}
-	private void UpdateTextbox<T>(System.Action<BeatmapObject, T?> setter, string strval) where T : struct {
-		var methods = typeof(T).GetMethods();
-		System.Reflection.MethodInfo parse = null;
-		foreach (var method in methods) {
-			if (method.Name == "TryParse") {
-				parse = method;
-				break;
-			}
-		}
-		T? val;
-		object[] parameters = new object[]{strval, null};
-		bool res = (bool)parse.Invoke(null, parameters);
-		
-		val = (res) ? (T)parameters[1] : null;
-		
+	
+	private void UpdateObjects<T>(System.Action<BeatmapObject, T?> setter, T? value) where T : struct {
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
 		foreach (var o in editing) {
 			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
 			
-			setter(clone, val);
+			setter(clone, value);
 			
 			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
 		}
@@ -358,6 +286,25 @@ public class MainWindow {
 		
 		// Prevent selecting "--"
 		UpdateSelection();
+	}
+	
+	private T? GetAllOrNothing<T>(System.Func<BeatmapObject, T?> getter) where T : struct {
+		var it = editing.GetEnumerator();
+		it.MoveNext();
+		var last = getter(it.Current);
+		// baby C# though null checks
+		if (last is T l) {
+			while (it.MoveNext()) {
+				if (getter(it.Current) is T v) {
+					if (!EqualityComparer<T>.Default.Equals(v, l)) {
+						last = null;
+						break;
+					}
+				}
+			}
+		}
+		
+		return last;
 	}
 	
 	// Stop textbox input from triggering actions, copied from the node editor

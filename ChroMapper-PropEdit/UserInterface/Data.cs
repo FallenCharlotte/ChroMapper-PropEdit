@@ -7,7 +7,7 @@ using SimpleJSON;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
-public class Forms {
+public class Data {
 	public static (System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>) BaseGetSet<T>(System.Type type, string field_name) where T : struct {
 		var field = type.GetField(field_name);
 		System.Func<BeatmapObject, T?> getter = (o) => (T)field.GetValue(o);
@@ -25,8 +25,8 @@ public class Forms {
 			}
 		};
 		System.Action<BeatmapObject, T?> setter = (o, v) => {
-			if (v is T val) {
-				o.GetOrCreateCustomData()[field_name] = CreateConvertFunc<T, SimpleJSON.JSONNode>()(val);
+			if (v is T value) {
+				o.GetOrCreateCustomData()[field_name] = CreateConvertFunc<T, SimpleJSON.JSONNode>()(value);
 			}
 			else {
 				o.CustomData?.Remove(field_name);

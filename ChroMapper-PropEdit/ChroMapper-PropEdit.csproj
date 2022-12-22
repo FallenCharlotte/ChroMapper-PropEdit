@@ -78,7 +78,7 @@
     <Compile Include="Components\DragWindowController.cs" />
     <Compile Include="Enums\Events.cs" />
     <Compile Include="Enums\NoteTypes.cs" />
-    <Compile Include="UserInterface\Forms.cs" />
+    <Compile Include="UserInterface\Data.cs" />
     <Compile Include="UserInterface\MainWindow.cs" />
     <Compile Include="UserInterface\UI.cs" />
   </ItemGroup>

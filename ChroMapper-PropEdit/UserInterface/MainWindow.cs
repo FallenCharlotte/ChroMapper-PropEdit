@@ -319,17 +319,7 @@ public class MainWindow {
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		input.InputField.text = value.HasValue ? (string)Convert.ChangeType(value, typeof(string)) : "";
-		input.InputField.onEndEdit.AddListener(delegate {
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
-		});
-		input.InputField.onSelect.AddListener(delegate {
-			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
-			}
-		});
-		input.InputField.onValueChanged.AddListener((s) => {
+		input.InputField.onEndEdit.AddListener((s) => {
 			// No IParsable in mono ;_;
 			var methods = typeof(T).GetMethods();
 			System.Reflection.MethodInfo parse = null;
@@ -347,6 +337,15 @@ public class MainWindow {
 			else {
 				UpdateObjects<T>(setter, (T)parameters[1]);
 			}
+			
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
+		});
+		input.InputField.onSelect.AddListener(delegate {
+			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
+			}
 		});
 		
 		return input;
@@ -362,7 +361,12 @@ public class MainWindow {
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		input.InputField.text = value ?? "";
-		input.InputField.onEndEdit.AddListener(delegate {
+		input.InputField.onEndEdit.AddListener((s) => {
+			if (s == "") {
+				s = null;
+			}
+			UpdateObjectsString(setter, s);
+			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
 		});
@@ -371,12 +375,6 @@ public class MainWindow {
 				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
 				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
 			}
-		});
-		input.InputField.onValueChanged.AddListener((s) => {
-			if (s == "") {
-				s = null;
-			}
-			UpdateObjectsString(setter, s);
 		});
 		
 		return input;

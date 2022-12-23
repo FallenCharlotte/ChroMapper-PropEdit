@@ -121,14 +121,14 @@ public class MainWindow {
 			scrollbar.handleRect = handle.GetComponent<RectTransform>();
 		}
 		
-		UpdateSelection();
+		UpdateSelection(true);
 	}
 	
 	public void ToggleWindow() {
 		window.SetActive(!window.activeSelf);
 	}
 	
-	public void UpdateSelection() {
+	public void UpdateSelection(bool real) {
 		foreach (var e in elements) {
 			Object.Destroy(e);
 		}
@@ -226,7 +226,9 @@ public class MainWindow {
 		else {
 			title.GetComponent<TextMeshProUGUI>().text = "No items selected";
 		}
-		scroll_to_top.Trigger();
+		if (real) {
+			scroll_to_top.Trigger();
+		}
 	}
 	
 	// Form Fields
@@ -395,7 +397,7 @@ public class MainWindow {
 			true);
 		
 		// Prevent selecting "--"
-		UpdateSelection();
+		UpdateSelection(false);
 	}
 	
 	// I hate c#
@@ -414,7 +416,7 @@ public class MainWindow {
 			true);
 		
 		// Prevent selecting "--"
-		UpdateSelection();
+		UpdateSelection(false);
 	}
 	
 	private T? GetAllOrNothing<T>(System.Func<BeatmapObject, T?> getter) where T : struct {

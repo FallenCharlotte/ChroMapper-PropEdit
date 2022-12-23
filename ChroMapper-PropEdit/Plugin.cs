@@ -22,7 +22,7 @@ public class Plugin {
 			var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();
 			main.Init(mapEditorUI);
 			
-			SelectionController.SelectionChangedEvent += main.UpdateSelection;
+			SelectionController.SelectionChangedEvent += () => main.UpdateSelection(true);
 		}
 	}
 	

@@ -121,6 +121,24 @@ public class MainWindow {
 			scrollbar.handleRect = handle.GetComponent<RectTransform>();
 		}
 		
+		// C.U.M. required
+		typeof(BeatmapActionContainer)
+			.GetEvent("ActionUndoEvent")
+			?.AddMethod
+			?.Invoke(null, new object[] { (System.Action<BeatmapAction>) ((_) => {
+				UpdateSelection(false);
+			})});
+		typeof(BeatmapActionContainer)
+			.GetEvent("ActionRedoEvent")
+			?.AddMethod
+			?.Invoke(null, new object[] { (System.Action<BeatmapAction>) ((_) => {
+				UpdateSelection(false);
+			})});
+		
+		if (typeof(BeatmapActionContainer).GetEvent("ActionUndoEvent") == null) {
+			Debug.LogWarning("Warning: Insufficient C.U.M., PropEdit won't update after undo/redo!");
+		}
+		
 		UpdateSelection(true);
 	}
 	

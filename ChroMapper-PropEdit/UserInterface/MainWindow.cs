@@ -479,11 +479,10 @@ public class MainWindow {
 				var settings = JSON.Parse(reader.ReadToEnd()).AsObject;
 				window.GetComponent<RectTransform>().anchoredPosition = new Vector2(settings["x"].AsFloat, settings["y"].AsFloat);
 				window.GetComponent<RectTransform>().sizeDelta = new Vector2(settings["w"].AsInt, settings["h"].AsInt);
-				
-				var layout = panel.GetComponent<LayoutElement>();
-				layout.minHeight = settings["h"].AsInt - 40 - 15;
 			}
 		}
+		var layout = panel.GetComponent<LayoutElement>();
+		layout.minHeight = window.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
 	}
 	
 	private void AnchoredPosSave() {

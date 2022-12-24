@@ -16,6 +16,8 @@ using ChroMapper_PropEdit.Enums;
 namespace ChroMapper_PropEdit.UserInterface {
 
 public class MainWindow {
+	public readonly string SETTINGS_FILE = UnityEngine.Application.persistentDataPath + "/PropEdit.json";
+	
 	public ExtensionButton main_button;
 	public GameObject window;
 	public GameObject title;
@@ -40,8 +42,8 @@ public class MainWindow {
 		// Window Drag
 		window.AddComponent<DragWindowController>();
 		window.GetComponent<DragWindowController>().canvas = parent.GetComponent<Canvas>();
-		//window.GetComponent<DragWindowController>().OnDragWindow += AnchoredPosSave;
-
+		window.GetComponent<DragWindowController>().OnDragWindow += AnchoredPosSave;
+		
 		UI.AttachTransform(window, new Vector2(220, 256), new Vector2(0, 0), new Vector2(0.5f, 0.5f));
 		{
 			var image = window.AddComponent<Image>();
@@ -84,7 +86,6 @@ public class MainWindow {
 		}
 		{
 			var layout = panel.AddComponent<LayoutElement>();
-			layout.minHeight = 256 - 40 - 15;
 		}
 		{
 			var fitter = panel.AddComponent<ContentSizeFitter>();
@@ -143,6 +144,7 @@ public class MainWindow {
 	}
 	
 	public void ToggleWindow() {
+		LoadSettings();
 		window.SetActive(!window.activeSelf);
 	}
 	
@@ -469,6 +471,29 @@ public class MainWindow {
 		}
 		
 		return last;
+	}
+	
+	private void LoadSettings() {
+		if (File.Exists(SETTINGS_FILE)) {
+			using (var reader = new StreamReader(SETTINGS_FILE)) {
+				var settings = JSON.Parse(reader.ReadToEnd()).AsObject;
+				window.GetComponent<RectTransform>().anchoredPosition = new Vector2(settings["x"].AsFloat, settings["y"].AsFloat);
+				window.GetComponent<RectTransform>().sizeDelta = new Vector2(settings["w"].AsInt, settings["h"].AsInt);
+				
+				var layout = panel.GetComponent<LayoutElement>();
+				layout.minHeight = settings["h"].AsInt - 40 - 15;
+			}
+		}
+	}
+	
+	private void AnchoredPosSave() {
+		var pos = window.GetComponent<RectTransform>().anchoredPosition;
+		var settings = new JSONObject();
+		settings.Add("x", pos.x);
+		settings.Add("y", pos.y);
+		settings.Add("w", window.GetComponent<RectTransform>().sizeDelta.x);
+		settings.Add("h", window.GetComponent<RectTransform>().sizeDelta.y);
+		File.WriteAllText(SETTINGS_FILE, settings.ToString(4));
 	}
 	
 	// Stop textbox input from triggering actions, copied from the node editor

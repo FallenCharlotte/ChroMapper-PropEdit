@@ -25,7 +25,7 @@ public class MainWindow {
 	public Scrollbar scrollbar;
 	public ScrollToTop scroll_to_top;
 	public List<GameObject> elements = new List<GameObject>();
-	public HashSet<BeatmapObject> editing;
+	public IEnumerable<BeatmapObject> editing;
 	
 	public MainWindow() {
 		main_button = ExtensionButtons.AddButton(
@@ -146,6 +146,7 @@ public class MainWindow {
 	public void ToggleWindow() {
 		LoadSettings();
 		window.SetActive(!window.activeSelf);
+		UpdateSelection(false);
 	}
 	
 	public void UpdateSelection(bool real) {
@@ -154,7 +155,7 @@ public class MainWindow {
 		}
 		elements.Clear();
 		
-		editing = SelectionController.SelectedObjects;
+		editing = SelectionController.SelectedObjects.Select(it => it);
 		
 		if (SelectionController.HasSelectedObjects()) {
 			title.GetComponent<TextMeshProUGUI>().text = SelectionController.SelectedObjects.Count + " Items selected";
@@ -174,7 +175,7 @@ public class MainWindow {
 					AddDropdown("Direction", Data.BaseGetSet<int>(typeof(BeatmapNote), "CutDirection"), typeof(CutDirections));
 					AddField("");
 					AddField("Chroma");
-					// TODO: color
+					AddTextbox("Color", Data.GetSetColor("_color"));
 					AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("_disableSpawnEffect"), false);
 					
 					AddField("");
@@ -195,7 +196,9 @@ public class MainWindow {
 					AddDropdown("Height", Data.BaseGetSet<int>(typeof(BeatmapObstacle), "Type"), typeof(WallHeights));
 					AddParsed("Width", Data.BaseGetSet<int>(typeof(BeatmapObstacle), "Width"));
 					
-					// TODO: Chroma color
+					AddField("");
+					AddField("Chroma");
+					AddTextbox("Color", Data.GetSetColor("_color"));
 					
 					AddField("");
 					AddField("Noodle Extensions");
@@ -211,7 +214,10 @@ public class MainWindow {
 					// Light
 					if (events.Where(e => !e.IsUtilityEvent).Count() == editing.Count()) {
 						AddDropdown("Value", Data.BaseGetSet<int>(typeof(MapEvent), "Value"), typeof(LightValues));
-						// TODO: lightID, color
+						// TODO: lightID
+						AddField("");
+						AddField("Chroma");
+						AddTextbox("Color", Data.GetSetColor("_color"));
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserSpeedEvent).Count() == editing.Count()) {

@@ -5,6 +5,7 @@ using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using SimpleJSON;
 
@@ -19,6 +20,8 @@ public class MainWindow {
 	public readonly string SETTINGS_FILE = UnityEngine.Application.persistentDataPath + "/PropEdit.json";
 	
 	public ExtensionButton main_button;
+	public InputAction keybind;
+	public InputAction shift;
 	public GameObject window;
 	public GameObject title;
 	public GameObject panel;
@@ -32,6 +35,20 @@ public class MainWindow {
 			UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
 			"Prop Edit",
 			ToggleWindow);
+		keybind = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/n");
+		keybind.performed += (ctx) => {
+			ToggleWindow();
+		};
+		shift = new InputAction(binding: "<Keyboard>/shift");
+		shift.started += (ctx) => {
+			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Disable();
+			keybind.Enable();
+		};
+		shift.canceled += (ctx) => {
+			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Enable();
+			keybind.Disable();
+		};
+		shift.Enable();
 	}
 	
 	public void Init(MapEditorUI mapEditorUI) {

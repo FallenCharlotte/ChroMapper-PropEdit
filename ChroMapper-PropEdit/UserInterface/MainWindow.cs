@@ -9,10 +9,15 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using SimpleJSON;
 
-using Convert = System.Convert;
+using Beatmap.Base;
+using Beatmap.Enums;
+using Beatmap.Helper;
+using Beatmap.V2;
 
 using ChroMapper_PropEdit.Components;
 using ChroMapper_PropEdit.Enums;
+
+using Convert = System.Convert;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
@@ -28,7 +33,7 @@ public class MainWindow {
 	public Scrollbar scrollbar;
 	public ScrollToTop scroll_to_top;
 	public List<GameObject> elements = new List<GameObject>();
-	public IEnumerable<BeatmapObject> editing;
+	public IEnumerable<BaseObject> editing;
 	
 	public MainWindow() {
 		main_button = ExtensionButtons.AddButton(
@@ -177,91 +182,118 @@ public class MainWindow {
 		if (SelectionController.HasSelectedObjects()) {
 			title.GetComponent<TextMeshProUGUI>().text = SelectionController.SelectedObjects.Count + " Items selected";
 			
-			if (editing.GroupBy(o => o.BeatmapType).Count() > 1) {
+			if (editing.GroupBy(o => o.ObjectType).Count() > 1) {
 				elements.Add(UI.AddLabel(panel.transform, "Unsupported", "Multi-Type Unsupported!", new Vector2(0, 0)));
 				return;
 			}
 			
-			var type = editing.First().BeatmapType;
+			var o = editing.First();
+			var type = o.ObjectType;
 			
-			AddParsed("Beat", Data.BaseGetSet<float>(typeof(BeatmapObject), "Time"));
+			AddParsed("Beat", Data.GetSet<float>(typeof(BaseObject), "Time"));
 			
 			switch (type) {
-				case BeatmapObject.ObjectType.Note:
-					AddDropdown("Type", Data.BaseGetSet<int>(typeof(BeatmapNote), "Type"), typeof(NoteTypes));
-					AddDropdown("Direction", Data.BaseGetSet<int>(typeof(BeatmapNote), "CutDirection"), typeof(CutDirections));
+				case ObjectType.Note:
+					AddDropdown("Type", Data.GetSet<int>(typeof(BaseNote), "Type"), typeof(NoteTypes));
+					AddDropdown("Direction", Data.GetSet<int>(typeof(BaseNote), "CutDirection"), typeof(CutDirections));
 					AddField("");
 					AddField("Chroma");
-					AddTextbox("Color", Data.GetSetColor("_color"));
-					AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("_disableSpawnEffect"), false);
+					AddTextbox("Color", Data.GetSetColor(o.CustomKeyColor));
+					if (o is V2Note) {
+						AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("_disableSpawnEffect"), false);
+					}
+					else {
+						AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("spawnEffect"), true);
+					}
 					
 					AddField("");
 					AddField("Noodle Extensions");
+					AddParsed("Direction", Data.GetSet<int>(typeof(BaseNote), "CustomDirection"), true);
 					// TODO: position, rotation
-					AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
-					AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
-					AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
-					AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+					if (o is V2Note) {
+						AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
+						AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
+						AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+					}
+					else {
+						AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"), true);
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"), true);
+						AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
+						AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
+						AddCheckbox("Disable Look", Data.CustomGetSet<bool>("disableNoteLook"), false);
+					}
 					
-					AddParsed("Direction", Data.CustomGetSet<float>("_cutDirection"), true);
 					// TODO: flip
-					AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("_disableNoteGravity"), false);
-					AddCheckbox("Disable Look", Data.CustomGetSet<bool>("_disableNoteLook"), false);
+					
 					break;
-				case BeatmapObject.ObjectType.Obstacle:
-					AddParsed("Duration", Data.BaseGetSet<float>(typeof(BeatmapObstacle), "Duration"));
-					AddDropdown("Height", Data.BaseGetSet<int>(typeof(BeatmapObstacle), "Type"), typeof(WallHeights));
-					AddParsed("Width", Data.BaseGetSet<int>(typeof(BeatmapObstacle), "Width"));
+				case ObjectType.Obstacle:
+					AddParsed("Duration", Data.GetSet<float>(typeof(BaseObstacle), "Duration"));
+					AddDropdown("Height", Data.GetSet<int>(typeof(BaseObstacle), "Type"), typeof(WallHeights));
+					AddParsed("Width", Data.GetSet<int>(typeof(BaseObstacle), "Width"));
 					
 					AddField("");
 					AddField("Chroma");
-					AddTextbox("Color", Data.GetSetColor("_color"));
+					AddTextbox("Color", Data.GetSetColor(o.CustomKeyColor));
 					
 					AddField("");
 					AddField("Noodle Extensions");
 					// TODO: position, rotation
-					AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
-					AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
-					AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
-					AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+					if (o is V2Obstacle) {
+						AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
+						AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
+						AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+					}
+					else {
+						AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"), true);
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"), true);
+						AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
+					}
+					
 					// TODO: scale
 					break;
-				case BeatmapObject.ObjectType.Event:
-					var events = editing.Select(o => (MapEvent)o);
+				case ObjectType.Event:
+					var env = BeatSaberSongContainer.Instance.Song.EnvironmentName;
+					var events = editing.Select(o => (BaseEvent)o);
 					// Light
-					if (events.Where(e => !e.IsUtilityEvent).Count() == editing.Count()) {
-						AddDropdown("Value", Data.BaseGetSet<int>(typeof(MapEvent), "Value"), typeof(LightValues));
+					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
+						AddDropdown("Value", Data.GetSet<int>(typeof(BaseEvent), "Value"), typeof(LightValues));
 						// TODO: lightID
 						AddField("");
 						AddField("Chroma");
-						AddTextbox("Color", Data.GetSetColor("_color"));
+						AddTextbox("Color", Data.GetSetColor(o.CustomKeyColor));
 					}
 					// Laser Speeds
-					if (events.Where(e => e.IsLaserSpeedEvent).Count() == editing.Count()) {
-						AddParsed("Speed", Data.BaseGetSet<int>(typeof(MapEvent), "Value"), true);
+					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
+						AddParsed("Speed", Data.GetSet<int>(typeof(BaseEvent), "Value"), true);
 						AddField("");
 						AddField("Chroma");
-						AddCheckbox("Lock Rotation", Data.CustomGetSet<bool>("_lockPosition"), false);
-						AddDropdown("Direction", Data.CustomGetSet<int>("_direction"), typeof(LaserDirection), true);
-						AddParsed("Precise Speed", Data.CustomGetSet<float>("_speed"), true);
+						AddCheckbox("Lock Rotation", Data.GetSet<bool> (typeof(BaseEvent), "CustomLockRotation"), false);
+						AddDropdown("Direction",     Data.GetSet<int>  (typeof(BaseEvent), "CustomDirection"), typeof(LaserDirection), true);
+						AddParsed("Precise Speed",   Data.GetSet<float>(typeof(BaseEvent), "CustomPreciseSpeed"), true);
 					}
-					if (events.Where(e => e.Type == MapEvent.EventTypeRingsRotate).Count() == editing.Count()) {
+					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
 						AddField("");
 						AddField("Chroma");
-						AddTextbox("Filter", Data.CustomGetSetString("_nameFilter"));
-						AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
-						AddParsed("Rotation", Data.CustomGetSet<float>("_rotation"), true);
-						AddParsed("Step", Data.CustomGetSet<float>("_step"), true);
-						AddParsed("Propagation", Data.CustomGetSet<float>("_prop"), true);
-						AddParsed("Speed", Data.CustomGetSet<float>("_speed"), true);
-						AddDropdown("Direction", Data.CustomGetSet<int>("_direction"), typeof(RingDirection), true);
-						AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
+						AddTextbox("Filter",     Data.GetSetString(typeof(BaseEvent), "CustomNameFilter"));
+						if (o is V2Event) {
+							AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
+						}
+						//AddParsed("Rotation",    Data.GetSet<float>(typeof(BaseEvent), "CustomLaneRotation"), true);
+						AddParsed("Step",        Data.GetSet<float>(typeof(BaseEvent), "CustomStep"), true);
+						AddParsed("Propagation", Data.GetSet<float>(typeof(BaseEvent), "CustomProp"), true);
+						AddParsed("Speed",       Data.GetSet<float>(typeof(BaseEvent), "CustomSpeed"), true);
+						AddDropdown("Direction", Data.GetSet<int>  (typeof(BaseEvent), "CustomDirection"), typeof(RingDirection), true);
+						if (o is V2Event) {
+							AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
+						}
 					}
-					if (events.Where(e => e.Type == MapEvent.EventTypeRingsZoom).Count() == editing.Count()) {
+					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
 						AddField("");
 						AddField("Chroma");
-						AddParsed("Step", Data.CustomGetSet<float>("_step"), true);
-						AddParsed("Speed", Data.CustomGetSet<float>("_speed"), true);
+						AddParsed("Step",  Data.GetSet<float>(typeof(BaseEvent), "CustomStep"), true);
+						AddParsed("Speed", Data.GetSet<float>(typeof(BaseEvent), "CustomSpeed"), true);
 					}
 					break;
 			}
@@ -297,7 +329,7 @@ public class MainWindow {
 	}
 	
 	// CustomData node gets removed when value = default
-	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BeatmapObject, bool?>, System.Action<BeatmapObject, bool?>> get_set, bool _default) {
+	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool _default) {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -322,7 +354,7 @@ public class MainWindow {
 		return toggleComponent;
 	}
 	
-	private UIDropdown AddDropdown(string title, System.ValueTuple<System.Func<BeatmapObject, int?>, System.Action<BeatmapObject, int?>> get_set, System.Type type, bool nullable = false) {
+	private UIDropdown AddDropdown(string title, System.ValueTuple<System.Func<BaseObject, int?>, System.Action<BaseObject, int?>> get_set, System.Type type, bool nullable = false) {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -354,7 +386,7 @@ public class MainWindow {
 		return dropdown;
 	}
 	
-	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BeatmapObject, T?>, System.Action<BeatmapObject, T?>> get_set, bool nullable = false) where T : struct {
+	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, bool nullable = false) where T : struct {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -396,7 +428,7 @@ public class MainWindow {
 		return input;
 	}
 	
-	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BeatmapObject, string>, System.Action<BeatmapObject, string>> get_set) {
+	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string>, System.Action<BaseObject, string>> get_set) {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -425,14 +457,22 @@ public class MainWindow {
 		return input;
 	}
 	
-	private void UpdateObjects<T>(System.Action<BeatmapObject, T?> setter, T? value) where T : struct {
+	private void UpdateObjects<T>(System.Action<BaseObject, T?> setter, T? value) where T : struct {
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
 		foreach (var o in editing) {
-			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
+			var clone = BeatmapFactory.Clone(o);
 			
-			setter(clone, value);
+			setter(o, value);
 			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
+			// Events have custom data saved in properties, and the only way to update both them is to nuke CustomData and re-clone.
+			// Don't do it to anything else, they don't have the properties and will loose everything if they're nuked!
+			if (o is BaseEvent) {
+				o.CustomData = null;
+			}
+			
+			var n = BeatmapFactory.Clone(o);
+			
+			beatmapActions.Add(new BeatmapObjectModifiedAction(n, o, clone, $"Edited a {o.ObjectType} with Prop Edit.", true));
 		}
 		
 		BeatmapActionContainer.AddAction(
@@ -444,14 +484,15 @@ public class MainWindow {
 	}
 	
 	// I hate c#
-	private void UpdateObjectsString(System.Action<BeatmapObject, string> setter, string value) {
+	private void UpdateObjectsString(System.Action<BaseObject, string> setter, string value) {
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
 		foreach (var o in editing) {
-			var clone = System.Activator.CreateInstance(o.GetType(), new object[] { o.ConvertToJson() }) as BeatmapObject;
+			var clone = BeatmapFactory.Clone(o);
 			
-			setter(clone, value);
+			setter(o, value);
+			o.RefreshCustom();
 			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(clone, o, o, $"Edited a {o.BeatmapType} with Prop Edit.", true));
+			beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, clone, $"Edited a {o.ObjectType} with Prop Edit.", true));
 		}
 		
 		BeatmapActionContainer.AddAction(
@@ -462,7 +503,7 @@ public class MainWindow {
 		UpdateSelection(false);
 	}
 	
-	private T? GetAllOrNothing<T>(System.Func<BeatmapObject, T?> getter) where T : struct {
+	private T? GetAllOrNothing<T>(System.Func<BaseObject, T?> getter) where T : struct {
 		var it = editing.GetEnumerator();
 		it.MoveNext();
 		var last = getter(it.Current);
@@ -482,7 +523,7 @@ public class MainWindow {
 	}
 	
 	// I hate C#
-	private string GetAllOrNothingString(System.Func<BeatmapObject, string> getter) {
+	private string GetAllOrNothingString(System.Func<BaseObject, string> getter) {
 		var it = editing.GetEnumerator();
 		it.MoveNext();
 		var last = getter(it.Current);

@@ -256,6 +256,7 @@ public class MainWindow {
 				case ObjectType.Event:
 					var env = BeatSaberSongContainer.Instance.Song.EnvironmentName;
 					var events = editing.Select(o => (BaseEvent)o);
+					var f = events.First();
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
 						AddDropdown("Value", Data.GetSet<int>(typeof(BaseEvent), "Value"), typeof(LightValues));
@@ -269,31 +270,31 @@ public class MainWindow {
 						AddParsed("Speed", Data.GetSet<int>(typeof(BaseEvent), "Value"), true);
 						AddField("");
 						AddField("Chroma");
-						AddCheckbox("Lock Rotation", Data.GetSet<bool> (typeof(BaseEvent), "CustomLockRotation"), false);
-						AddDropdown("Direction",     Data.GetSet<int>  (typeof(BaseEvent), "CustomDirection"), typeof(LaserDirection), true);
-						AddParsed("Precise Speed",   Data.GetSet<float>(typeof(BaseEvent), "CustomPreciseSpeed"), true);
+						AddCheckbox("Lock Rotation", Data.CustomGetSet<bool> (f.CustomKeyLockRotation), false);
+						AddDropdown("Direction",     Data.CustomGetSet<int>  (f.CustomKeyDirection), typeof(LaserDirection), true);
+						AddParsed("Precise Speed",   Data.CustomGetSet<float>(f.CustomKeyPreciseSpeed), true);
 					}
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
 						AddField("");
 						AddField("Chroma");
 						AddTextbox("Filter",     Data.GetSetString(typeof(BaseEvent), "CustomNameFilter"));
-						/*if (o is V2Event) {
+						if (o is V2Event) {
 							AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
-						}*/
-						AddParsed("Rotation",    Data.GetSet<int>(typeof(BaseEvent), "CustomLaneRotation"), true);
-						AddParsed("Step",        Data.GetSet<float>(typeof(BaseEvent), "CustomStep"), true);
-						AddParsed("Propagation", Data.GetSet<float>(typeof(BaseEvent), "CustomProp"), true);
-						AddParsed("Speed",       Data.GetSet<float>(typeof(BaseEvent), "CustomSpeed"), true);
-						AddDropdown("Direction", Data.GetSet<int>  (typeof(BaseEvent), "CustomDirection"), typeof(RingDirection), true);
-						/*if (o is V2Event) {
+						}
+						AddParsed("Rotation",    Data.CustomGetSet<int>  (f.CustomKeyLaneRotation), true);
+						AddParsed("Step",        Data.CustomGetSet<float>(f.CustomKeyStep), true);
+						AddParsed("Propagation", Data.CustomGetSet<float>(f.CustomKeyProp), true);
+						AddParsed("Speed",       Data.CustomGetSet<float>(f.CustomKeySpeed), true);
+						AddDropdown("Direction", Data.CustomGetSet<int>  (f.CustomKeyDirection), typeof(RingDirection), true);
+						if (o is V2Event) {
 							AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
-						}*/
+						}
 					}
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
 						AddField("");
 						AddField("Chroma");
-						AddParsed("Step",  Data.GetSet<float>(typeof(BaseEvent), "CustomStep"), true);
-						AddParsed("Speed", Data.GetSet<float>(typeof(BaseEvent), "CustomSpeed"), true);
+						AddParsed("Step",  Data.CustomGetSet<float>(f.CustomKeyStep), true);
+						AddParsed("Speed", Data.CustomGetSet<float>(f.CustomKeySpeed), true);
 					}
 					break;
 			}
@@ -464,15 +465,7 @@ public class MainWindow {
 			
 			setter(o, value);
 			
-			// Events have custom data saved in properties, and the only way to update both them is to nuke CustomData and re-clone.
-			// Don't do it to anything else, they don't have the properties and will loose everything if they're nuked!
-			if (o is BaseEvent) {
-				o.CustomData = null;
-			}
-			
-			var n = BeatmapFactory.Clone(o);
-			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(n, o, clone, $"Edited a {o.ObjectType} with Prop Edit.", true));
+			beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, clone, $"Edited a {o.ObjectType} with Prop Edit.", true));
 		}
 		
 		BeatmapActionContainer.AddAction(

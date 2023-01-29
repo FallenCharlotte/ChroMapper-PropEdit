@@ -1,6 +1,6 @@
 #!/bin/bash
 
-PROJECT="ChroMapper-PropEdit"
+PROJECT="$(basename "$(pwd)")"
 ver=$1
 short=$1
 

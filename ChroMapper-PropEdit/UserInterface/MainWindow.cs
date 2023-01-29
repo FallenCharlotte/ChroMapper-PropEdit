@@ -40,20 +40,6 @@ public class MainWindow {
 			UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
 			"Prop Edit",
 			ToggleWindow);
-		keybind = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/n");
-		keybind.performed += (ctx) => {
-			ToggleWindow();
-		};
-		shift = new InputAction(binding: "<Keyboard>/shift");
-		shift.started += (ctx) => {
-			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Disable();
-			keybind.Enable();
-		};
-		shift.canceled += (ctx) => {
-			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Enable();
-			keybind.Disable();
-		};
-		shift.Enable();
 	}
 	
 	public void Init(MapEditorUI mapEditorUI) {
@@ -163,12 +149,32 @@ public class MainWindow {
 		}
 		
 		UpdateSelection(true);
+		
+		keybind = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/n");
+		keybind.performed += (ctx) => {
+			ToggleWindow();
+		};
+		shift = new InputAction(binding: "<Keyboard>/shift");
+		shift.started += (ctx) => {
+			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Disable();
+			keybind.Enable();
+		};
+		shift.canceled += (ctx) => {
+			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Enable();
+			keybind.Disable();
+		};
+		shift.Enable();
 	}
 	
 	public void ToggleWindow() {
 		LoadSettings();
 		window.SetActive(!window.activeSelf);
 		UpdateSelection(false);
+	}
+	
+	public void Denit() {
+		shift?.Disable();
+		keybind?.Disable();
 	}
 	
 	public void UpdateSelection(bool real) {

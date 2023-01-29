@@ -56,13 +56,8 @@ public class Data {
 	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) GetSetColor(string field_name) {
 		System.Func<BaseObject, string> getter = (o) => {
 			if (o.CustomData?.HasKey(field_name) ?? false) {
-				var color = o.CustomData[field_name].AsArray;
-				if (color.Count == 4) {
-					return string.Format("#{0:X2}{1:X2}{2:X2}{3:X2}", cftoi(color[0]), cftoi(color[1]), cftoi(color[2]), cftoi(color[3]));
-				}
-				else {
-					return string.Format("#{0:X2}{1:X2}{2:X2}", cftoi(color[0]), cftoi(color[1]), cftoi(color[2]));
-				}
+				var color = o.CustomData[field_name].ReadColor();
+				return string.Format("#{0:X2}{1:X2}{2:X2}{3:X2}", cftoi(color.r), cftoi(color.g), cftoi(color.b), cftoi(color.a));
 			}
 			else {
 				return null;

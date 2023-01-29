@@ -277,17 +277,17 @@ public class MainWindow {
 						AddField("");
 						AddField("Chroma");
 						AddTextbox("Filter",     Data.GetSetString(typeof(BaseEvent), "CustomNameFilter"));
-						if (o is V2Event) {
+						/*if (o is V2Event) {
 							AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
-						}
-						//AddParsed("Rotation",    Data.GetSet<float>(typeof(BaseEvent), "CustomLaneRotation"), true);
+						}*/
+						AddParsed("Rotation",    Data.GetSet<int>(typeof(BaseEvent), "CustomLaneRotation"), true);
 						AddParsed("Step",        Data.GetSet<float>(typeof(BaseEvent), "CustomStep"), true);
 						AddParsed("Propagation", Data.GetSet<float>(typeof(BaseEvent), "CustomProp"), true);
 						AddParsed("Speed",       Data.GetSet<float>(typeof(BaseEvent), "CustomSpeed"), true);
 						AddDropdown("Direction", Data.GetSet<int>  (typeof(BaseEvent), "CustomDirection"), typeof(RingDirection), true);
-						if (o is V2Event) {
+						/*if (o is V2Event) {
 							AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
-						}
+						}*/
 					}
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
 						AddField("");

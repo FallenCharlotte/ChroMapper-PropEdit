@@ -1,3 +1,5 @@
+// Static UI helper functions
+
 using System.IO;
 using System.Reflection;
 using TMPro;

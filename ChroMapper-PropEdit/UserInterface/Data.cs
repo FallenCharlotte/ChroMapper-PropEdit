@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Linq.Expressions;
@@ -10,6 +11,9 @@ using Beatmap.Base;
 namespace ChroMapper_PropEdit.UserInterface {
 
 public class Data {
+	
+#region Getter/setter factories
+	
 	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) GetSet<T>(System.Type type, string field_name) where T : struct {
 		var field = type.GetProperty(field_name);
 		System.Func<BaseObject, T?> getter = (o) => (T?)field.GetMethod.Invoke(o, null) ?? null;
@@ -46,6 +50,42 @@ public class Data {
 			field.SetMethod.Invoke(o, new object[] {v});
 		};
 		return (getter, setter);
+	}
+	
+#endregion
+	
+	public static T? GetAllOrNothing<T>(IEnumerable<BaseObject> editing, System.Func<BaseObject, T?> getter) where T : struct {
+		var it = editing.GetEnumerator();
+		it.MoveNext();
+		var last = getter(it.Current);
+		// baby C# though null checks
+		if (last is T l) {
+			while (it.MoveNext()) {
+				if (getter(it.Current) is T v) {
+					if (!EqualityComparer<T>.Default.Equals(v, l)) {
+						last = null;
+						break;
+					}
+				}
+			}
+		}
+		
+		return last;
+	}
+	
+	// I hate C#
+	public static string GetAllOrNothingString(IEnumerable<BaseObject> editing, System.Func<BaseObject, string> getter) {
+		var it = editing.GetEnumerator();
+		it.MoveNext();
+		var last = getter(it.Current);
+		while (last != null && it.MoveNext()) {
+			if (last != getter(it.Current)) {
+				last = null;
+				break;
+			}
+		}
+		
+		return last;
 	}
 	
 	// Color float to color int 0-255

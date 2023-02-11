@@ -1,12 +1,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Linq;
 using System.Linq.Expressions;
 using TMPro;
 using UnityEngine;
 using SimpleJSON;
 
 using Beatmap.Base;
+using Beatmap.Enums;
 using Beatmap.Shared;
 
 namespace ChroMapper_PropEdit.UserInterface {
@@ -74,10 +76,18 @@ public class Data {
 				e.CustomLightGradient = null;
 			}
 			else if (e.CustomLightGradient == null) {
-				// TODO: fix this
-				ColorUtility.TryParseHtmlString("#FFFFFF", out var begin);
-				ColorUtility.TryParseHtmlString("#000000", out var end);
-				e.CustomLightGradient = new ChromaLightGradient(begin, end);
+				var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.Event);
+				
+				var next = (BaseEvent) collection.LoadedObjects
+					.Where(n => (((BaseEvent)n).Type == e.Type) && (n.Time > e.Time))
+					.FirstOrDefault();
+				
+				Color begin = GetColor(e);
+				Color end = (next != null) ? GetColor(next) : begin;
+				
+				float duration = (next != null) ? (next.Time - e.Time) : 1;
+				
+				e.CustomLightGradient = new ChromaLightGradient(begin, end, duration);
 			}
 		}};
 		return (getter, setter);
@@ -171,6 +181,16 @@ public class Data {
 			root = root[path[i]];
 		}
 		root?.Remove(path[path.Length - 1]);
+	}
+	
+	public static Color GetColor(BaseEvent e) {
+		return (e.CustomColor ?? (e.Value switch {
+			0 => Color.clear,
+			(>= 1) and (<= 4) => BeatSaberSongContainer.Instance.DifficultyData.EnvColorRight ?? BeatSaberSong.DefaultRightColor,
+			(>= 5) and (<= 8) => BeatSaberSongContainer.Instance.DifficultyData.EnvColorLeft ?? BeatSaberSong.DefaultLeftColor,
+			(>= 9) => Color.white,
+			_ => Color.clear,
+		}));
 	}
 	
 	// https://stackoverflow.com/a/32037899

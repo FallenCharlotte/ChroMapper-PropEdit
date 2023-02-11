@@ -7,6 +7,7 @@ using UnityEngine;
 using SimpleJSON;
 
 using Beatmap.Base;
+using Beatmap.Shared;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
@@ -23,8 +24,8 @@ public class Data {
 	
 	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) CustomGetSet<T>(string field_name) where T : struct {
 		System.Func<BaseObject, T?> getter = (o) => {
-			if (o.CustomData?.HasKey(field_name) ?? false) {
-				return CreateConvertFunc<JSONNode, T>()(o.CustomData[field_name]);
+			if (GetNode(o.CustomData, field_name) is JSONNode n) {
+				return CreateConvertFunc<JSONNode, T>()(n);
 			}
 			else {
 				return null;
@@ -32,10 +33,10 @@ public class Data {
 		};
 		System.Action<BaseObject, T?> setter = (o, v) => {
 			if (v is T value) {
-				o.GetOrCreateCustom()[field_name] = CreateConvertFunc<T, SimpleJSON.JSONNode>()(value);
+				SetNode(o.GetOrCreateCustom(), field_name, CreateConvertFunc<T, SimpleJSON.JSONNode>()(value));
 			}
 			else {
-				o.CustomData?.Remove(field_name);
+				RemoveNode(o.CustomData, field_name);
 			}
 			o.RefreshCustom();
 		};
@@ -43,11 +44,65 @@ public class Data {
 	}
 	
 	// I hate C#
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) GetSetString(System.Type type, string field_name) {
-		var field = type.GetProperty(field_name);
-		System.Func<BaseObject, string> getter = (o) => (string)field.GetMethod.Invoke(o, null) ?? null;
+	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSetString(string field_name) {
+		System.Func<BaseObject, string> getter = (o) => {
+			if (GetNode(o.CustomData, field_name) is JSONNode n) {
+				return n.ToString();
+			}
+			else {
+				return null;
+			}
+		};
 		System.Action<BaseObject, string> setter = (o, v) => {
-			field.SetMethod.Invoke(o, new object[] {v});
+			if (v is string value) {
+				SetNode(o.GetOrCreateCustom(), field_name, value);
+			}
+			else {
+				RemoveNode(o.CustomData, field_name);
+			}
+			o.RefreshCustom();
+		};
+		return (getter, setter);
+	}
+	
+	// Create and delete gradient
+	public static (System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>) GetSetGradient() {
+		System.Func<BaseObject, bool?> getter = (o) => ((BaseEvent)o).CustomLightGradient != null;
+		System.Action<BaseObject, bool?> setter = (o, v) => { if (o is BaseEvent e) {
+			if (!(v ?? false)) {
+				e.CustomData?.Remove(e.CustomKeyLightGradient);
+				e.CustomLightGradient = null;
+			}
+			else if (e.CustomLightGradient == null) {
+				// TODO: fix this
+				ColorUtility.TryParseHtmlString("#FFFFFF", out var begin);
+				ColorUtility.TryParseHtmlString("#000000", out var end);
+				e.CustomLightGradient = new ChromaLightGradient(begin, end);
+			}
+		}};
+		return (getter, setter);
+	}
+	
+	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSetColor(string field_name) {
+		System.Func<BaseObject, string> getter = (o) => {
+			if (GetNode(o.CustomData, field_name) is JSONNode n) {
+				var color = n.ReadColor();
+				return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
+			}
+			else {
+				return null;
+			}
+		};
+		System.Action<BaseObject, string> setter = (o, v) => {
+			if (string.IsNullOrEmpty(v)) {
+				RemoveNode(o.CustomData, field_name);
+			}
+			else {
+				ColorUtility.TryParseHtmlString(v, out var color);
+				var jc = new JSONArray();
+				jc.WriteColor(color);
+				SetNode(o.GetOrCreateCustom(), field_name, jc);
+			}
 		};
 		return (getter, setter);
 	}
@@ -88,39 +143,34 @@ public class Data {
 		return last;
 	}
 	
-	// Color float to color int 0-255
-	private static int cftoi(float f) {
-		return System.Math.Min((int) (f * 255), 255);
-	}
-	
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) GetSetColor(string field_name) {
-		System.Func<BaseObject, string> getter = (o) => {
-			if (o.CustomData?.HasKey(field_name) ?? false) {
-				var color = o.CustomData[field_name].ReadColor();
-				return string.Format("#{0:X2}{1:X2}{2:X2}{3:X2}", cftoi(color.r), cftoi(color.g), cftoi(color.b), cftoi(color.a));
-			}
-			else {
+	public static JSONNode GetNode(JSONNode root, string name) {
+		string[] path = name.Split('.');
+		foreach (string node in path) {
+			if (!(root?.HasKey(node) ?? false)) {
 				return null;
 			}
-		};
-		System.Action<BaseObject, string> setter = (o, v) => {
-			if (string.IsNullOrEmpty(v)) {
-				o.CustomColor = null;
-				o.CustomData?.Remove(field_name);
+			root = root[node];
+		}
+		return root;
+	}
+	
+	public static void SetNode(JSONNode root, string name, JSONNode o) {
+		string[] path = name.Split('.');
+		for (int i = 0; i < path.Length - 1; ++i) {
+			root = root[path[i]];
+		}
+		root[path[path.Length-1]] = o;
+	}
+	
+	public static void RemoveNode(JSONNode root, string name) {
+		string[] path = name.Split('.');
+		for (int i = 0; i < path.Length - 1; ++i) {
+			if (!(root?.HasKey(path[i]) ?? false)) {
+				return;
 			}
-			else {
-				ColorUtility.TryParseHtmlString(v, out var color);
-				o.CustomColor = color;
-				var jc = new JSONArray();
-				jc[0] = color.r;
-				jc[1] = color.g;
-				jc[2] = color.b;
-				jc[3] = color.a;
-				o.GetOrCreateCustom()[field_name] = jc;
-				
-			}
-		};
-		return (getter, setter);
+			root = root[path[i]];
+		}
+		root?.Remove(path[path.Length - 1]);
 	}
 	
 	// https://stackoverflow.com/a/32037899

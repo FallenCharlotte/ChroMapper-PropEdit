@@ -44,7 +44,7 @@ public partial class MainWindow {
 					AddDropdown("Direction", Data.GetSet<int>(typeof(BaseNote), "CutDirection"), typeof(CutDirections));
 					AddField("");
 					AddField("Chroma");
-					AddTextbox("Color", Data.GetSetColor(o.CustomKeyColor));
+					AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 					if (o is V2Note) {
 						AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("_disableSpawnEffect"), false);
 					}
@@ -80,7 +80,7 @@ public partial class MainWindow {
 					
 					AddField("");
 					AddField("Chroma");
-					AddTextbox("Color", Data.GetSetColor(o.CustomKeyColor));
+					AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 					
 					AddField("");
 					AddField("Noodle Extensions");
@@ -109,7 +109,15 @@ public partial class MainWindow {
 						// TODO: lightID
 						AddField("");
 						AddField("Chroma");
-						AddTextbox("Color", Data.GetSetColor(o.CustomKeyColor));
+						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+						if (o is V2Event e) {
+							AddCheckbox("Gradient", Data.GetSetGradient(), false);
+							if (e.CustomLightGradient != null) {
+								AddParsed("Duration",     Data.CustomGetSet<float>($"{e.CustomKeyLightGradient}._duration"));
+								AddTextbox("Start Color", Data.CustomGetSetColor($"{e.CustomKeyLightGradient}._startColor"));
+								AddTextbox("End Color",   Data.CustomGetSetColor($"{e.CustomKeyLightGradient}._endColor"));
+							}
+						}
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
@@ -123,7 +131,7 @@ public partial class MainWindow {
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
 						AddField("");
 						AddField("Chroma");
-						AddTextbox("Filter",     Data.GetSetString(typeof(BaseEvent), "CustomNameFilter"));
+						AddTextbox("Filter",     Data.CustomGetSetString(f.CustomKeyNameFilter));
 						if (o is V2Event) {
 							AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
 						}

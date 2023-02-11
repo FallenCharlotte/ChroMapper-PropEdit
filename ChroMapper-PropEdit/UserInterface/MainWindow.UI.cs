@@ -225,7 +225,7 @@ public partial class MainWindow {
 		return toggleComponent;
 	}
 	
-	private UIDropdown AddDropdown(string title, System.ValueTuple<System.Func<BaseObject, int?>, System.Action<BaseObject, int?>> get_set, System.Type type, bool nullable = false) {
+	private UIDropdown AddDropdownI(string title, System.ValueTuple<System.Func<BaseObject, int?>, System.Action<BaseObject, int?>> get_set, Map<int> type, bool nullable = false) {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -240,22 +240,55 @@ public partial class MainWindow {
 			options.Add("Unset");
 			value += 1;
 		}
-		options.AddRange(System.Enum.GetNames(type).ToList());
+		options.AddRange(type.dict.Values.ToList());
 		
 		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, container.transform);
 		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		dropdown.SetOptions(options);
 		dropdown.Dropdown.value = value ?? 0;
 		dropdown.Dropdown.onValueChanged.AddListener((i) => {
-			int ei = System.Enum.GetNames(type).ToList().IndexOf(options[i]);
-			ushort? value = (ei >= 0)
-				? (ushort)System.Enum.GetValues(type).GetValue(ei)
-				: null;
+			int? value = type.Backward(options[i]);
 			UpdateObjects<int>(setter, value);
 		});
 		
 		return dropdown;
 	}
+	
+	// I hate C#
+#nullable enable
+	private UIDropdown AddDropdownS(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, Map type, bool nullable = false) {
+		var container = AddField(title);
+		
+		(var getter, var setter) = get_set;
+		
+		// Get values from selected items
+		var options = new List<string>();
+		var value = Data.GetAllOrNothing(editing, getter);
+		int i = 0;
+		if (value == null) {
+			options.Add("--");
+		}
+		else {
+			i = type.dict.Keys.ToList().IndexOf(value);
+			if (nullable) {
+				options.Add("Unset");
+				i += 1;
+			}
+		}
+		options.AddRange(type.dict.Values.ToList());
+		
+		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, container.transform);
+		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		dropdown.SetOptions(options);
+		dropdown.Dropdown.value = i;
+		dropdown.Dropdown.onValueChanged.AddListener((i) => {
+			string? value = type.Backward(options[i]);
+			UpdateObjects(setter, value);
+		});
+		
+		return dropdown;
+	}
+#nullable disable
 	
 	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, bool nullable = false) where T : struct {
 		var container = AddField(title);
@@ -304,7 +337,7 @@ public partial class MainWindow {
 		
 		(var getter, var setter) = get_set;
 		
-		var value = Data.GetAllOrNothingString(editing, getter);
+		var value = Data.GetAllOrNothing(editing, getter);
 		
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
@@ -313,7 +346,7 @@ public partial class MainWindow {
 			if (s == "") {
 				s = null;
 			}
-			UpdateObjectsString(setter, s);
+			UpdateObjects(setter, s);
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);

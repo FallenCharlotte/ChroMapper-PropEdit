@@ -44,10 +44,10 @@ public class Data {
 	}
 	
 	// I hate C#
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSetString(string field_name) {
+	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSet(string field_name) {
 		System.Func<BaseObject, string> getter = (o) => {
 			if (GetNode(o.CustomData, field_name) is JSONNode n) {
-				return n.ToString();
+				return n.Value;
 			}
 			else {
 				return null;
@@ -129,7 +129,7 @@ public class Data {
 	}
 	
 	// I hate C#
-	public static string GetAllOrNothingString(IEnumerable<BaseObject> editing, System.Func<BaseObject, string> getter) {
+	public static string GetAllOrNothing(IEnumerable<BaseObject> editing, System.Func<BaseObject, string> getter) {
 		var it = editing.GetEnumerator();
 		it.MoveNext();
 		var last = getter(it.Current);

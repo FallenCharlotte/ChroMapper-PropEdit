@@ -82,6 +82,7 @@
     <Compile Include="Components\DragWindowController.cs" />
     <Compile Include="Components\ScrollToTop.cs" />
     <Compile Include="Enums\Events.cs" />
+    <Compile Include="Enums\Map.cs" />
     <Compile Include="Enums\Notes.cs" />
     <Compile Include="Enums\Obstacles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

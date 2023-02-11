@@ -40,8 +40,8 @@ public partial class MainWindow {
 			
 			switch (type) {
 				case ObjectType.Note:
-					AddDropdown("Type", Data.GetSet<int>(typeof(BaseNote), "Type"), typeof(NoteTypes));
-					AddDropdown("Direction", Data.GetSet<int>(typeof(BaseNote), "CutDirection"), typeof(CutDirections));
+					AddDropdownI("Type", Data.GetSet<int>(typeof(BaseNote), "Type"), Notes.NoteTypes);
+					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseNote), "CutDirection"), Notes.CutDirections);
 					AddField("");
 					AddField("Chroma");
 					AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
@@ -75,7 +75,7 @@ public partial class MainWindow {
 					break;
 				case ObjectType.Obstacle:
 					AddParsed("Duration", Data.GetSet<float>(typeof(BaseObstacle), "Duration"));
-					AddDropdown("Height", Data.GetSet<int>(typeof(BaseObstacle), "Type"), typeof(WallHeights));
+					AddDropdownI("Height", Data.GetSet<int>(typeof(BaseObstacle), "Type"), Obstacles.WallHeights);
 					AddParsed("Width", Data.GetSet<int>(typeof(BaseObstacle), "Width"));
 					
 					AddField("");
@@ -105,7 +105,7 @@ public partial class MainWindow {
 					var f = events.First();
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
-						AddDropdown("Value", Data.GetSet<int>(typeof(BaseEvent), "Value"), typeof(LightValues));
+						AddDropdownI("Value", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.LightValues);
 						// TODO: lightID
 						AddField("");
 						AddField("Chroma");
@@ -116,6 +116,7 @@ public partial class MainWindow {
 								AddParsed("Duration",     Data.CustomGetSet<float>($"{e.CustomKeyLightGradient}._duration"));
 								AddTextbox("Start Color", Data.CustomGetSetColor($"{e.CustomKeyLightGradient}._startColor"));
 								AddTextbox("End Color",   Data.CustomGetSetColor($"{e.CustomKeyLightGradient}._endColor"));
+								AddDropdownS("Easing",    Data.CustomGetSet($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false);
 							}
 						}
 					}
@@ -125,13 +126,13 @@ public partial class MainWindow {
 						AddField("");
 						AddField("Chroma");
 						AddCheckbox("Lock Rotation", Data.CustomGetSet<bool> (f.CustomKeyLockRotation), false);
-						AddDropdown("Direction",     Data.CustomGetSet<int>  (f.CustomKeyDirection), typeof(LaserDirection), true);
+						AddDropdownI("Direction",     Data.CustomGetSet<int>  (f.CustomKeyDirection), Events.LaserDirection, true);
 						AddParsed("Precise Speed",   Data.CustomGetSet<float>(f.CustomKeyPreciseSpeed), true);
 					}
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
 						AddField("");
 						AddField("Chroma");
-						AddTextbox("Filter",     Data.CustomGetSetString(f.CustomKeyNameFilter));
+						AddTextbox("Filter",     Data.CustomGetSet(f.CustomKeyNameFilter));
 						if (o is V2Event) {
 							AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
 						}
@@ -139,7 +140,7 @@ public partial class MainWindow {
 						AddParsed("Step",        Data.CustomGetSet<float>(f.CustomKeyStep), true);
 						AddParsed("Propagation", Data.CustomGetSet<float>(f.CustomKeyProp), true);
 						AddParsed("Speed",       Data.CustomGetSet<float>(f.CustomKeySpeed), true);
-						AddDropdown("Direction", Data.CustomGetSet<int>  (f.CustomKeyDirection), typeof(RingDirection), true);
+						AddDropdownI("Direction", Data.CustomGetSet<int>  (f.CustomKeyDirection), Events.RingDirection, true);
 						if (o is V2Event) {
 							AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
 						}
@@ -180,7 +181,7 @@ public partial class MainWindow {
 	}
 	
 	// I hate c#
-	private void UpdateObjectsString(System.Action<BaseObject, string> setter, string value) {
+	private void UpdateObjects(System.Action<BaseObject, string> setter, string value) {
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
 		foreach (var o in editing) {
 			var clone = BeatmapFactory.Clone(o);

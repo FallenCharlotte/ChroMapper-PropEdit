@@ -72,6 +72,9 @@ public class Data {
 		System.Func<BaseObject, bool?> getter = (o) => ((BaseEvent)o).CustomLightGradient != null;
 		System.Action<BaseObject, bool?> setter = (o, v) => { if (o is BaseEvent e) {
 			if (!(v ?? false)) {
+				if (e.CustomLightGradient != null) {
+					e.CustomColor = e.CustomLightGradient.StartColor;
+				}
 				e.CustomData?.Remove(e.CustomKeyLightGradient);
 				e.CustomLightGradient = null;
 			}
@@ -88,6 +91,8 @@ public class Data {
 				float duration = (next != null) ? (next.Time - e.Time) : 1;
 				
 				e.CustomLightGradient = new ChromaLightGradient(begin, end, duration);
+				e.CustomData.Remove(e.CustomKeyColor);
+				e.CustomColor = null;
 			}
 		}};
 		return (getter, setter);

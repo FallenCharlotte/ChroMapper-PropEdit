@@ -8,6 +8,7 @@ using Beatmap.Base;
 using Beatmap.Enums;
 using Beatmap.Helper;
 using Beatmap.V2;
+using Beatmap.V3;
 
 using ChroMapper_PropEdit.Components;
 using ChroMapper_PropEdit.Enums;
@@ -42,6 +43,9 @@ public partial class MainWindow {
 				case ObjectType.Note:
 					AddDropdownI("Type", Data.GetSet<int>(typeof(BaseNote), "Type"), Notes.NoteTypes);
 					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseNote), "CutDirection"), Notes.CutDirections);
+					if (o is V3ColorNote) {
+						AddParsed("Angle Offset", Data.GetSet<int>(typeof(BaseNote), "AngleOffset"));
+					}
 					AddField("");
 					AddField("Chroma");
 					AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));

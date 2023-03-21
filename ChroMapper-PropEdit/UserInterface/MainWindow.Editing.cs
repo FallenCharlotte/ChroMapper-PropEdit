@@ -114,8 +114,12 @@ public partial class MainWindow {
 						AddField("");
 						AddField("Chroma");
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+						if (events.Where(e => e.IsTransition).Count() == editing.Count()) {
+							AddDropdownS("Easing",    Data.CustomGetSet(f.CustomKeyEasing), Events.Easings, false);
+							AddDropdownS("Lerp Type", Data.CustomGetSet(f.CustomKeyLerpType), Events.LerpTypes, false);
+						}
 						if (o is V2Event e) {
-							AddCheckbox("Gradient", Data.GetSetGradient(), false);
+							AddCheckbox("V2 Gradient", Data.GetSetGradient(), false);
 							if (e.CustomLightGradient != null) {
 								AddParsed("Duration",     Data.CustomGetSet<float>($"{e.CustomKeyLightGradient}._duration"));
 								AddTextbox("Start Color", Data.CustomGetSetColor($"{e.CustomKeyLightGradient}._startColor"));

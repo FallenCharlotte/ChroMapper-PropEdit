@@ -60,6 +60,11 @@ public static class Events {
 		{"easeOutBounce", "Bounce Out"},
 		{"easeInOutBounce", "Bounce In/Out"}
 	};
+	
+	public static readonly Map LerpTypes = new Map {
+		{"RGB", "RGB"},
+		{"HSV", "HSV"}
+	};
 }
 
 }

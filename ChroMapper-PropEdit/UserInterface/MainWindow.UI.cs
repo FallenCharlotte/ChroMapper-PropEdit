@@ -179,9 +179,9 @@ public partial class MainWindow {
 	
 #region Form Fields
 	
-	private GameObject AddField(string title) {
+	private GameObject AddField(string title, bool tall = false) {
 		var container = UI.AddChild(panel, title + " Container");
-		UI.AttachTransform(container, new Vector2(0, 20), new Vector2(0, 0));
+		UI.AttachTransform(container, new Vector2(0, tall ? 22 : 20), new Vector2(0, 0));
 		
 		elements.Add(container);
 		
@@ -332,14 +332,15 @@ public partial class MainWindow {
 		return input;
 	}
 	
-	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string>, System.Action<BaseObject, string>> get_set) {
-		var container = AddField(title);
+	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string>, System.Action<BaseObject, string>> get_set, bool tall = false) {
+		var container = AddField(title, tall);
 		
 		(var getter, var setter) = get_set;
 		
 		var value = Data.GetAllOrNothing(editing, getter);
 		
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
+		input.InputField.pointSize = tall ? 12 : 14;
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		input.InputField.text = value ?? "";
 		input.InputField.onEndEdit.AddListener((s) => {

@@ -41,6 +41,7 @@ public partial class MainWindow {
 			
 			switch (type) {
 				case ObjectType.Note:
+					var note = o as BaseNote;
 					AddDropdownI("Type", Data.GetSet<int>(typeof(BaseNote), "Type"), Notes.NoteTypes);
 					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseNote), "CutDirection"), Notes.CutDirections);
 					if (o is V3ColorNote) {
@@ -59,12 +60,15 @@ public partial class MainWindow {
 					AddField("");
 					AddField("Noodle Extensions");
 					AddParsed("Direction", Data.GetSet<int>(typeof(BaseNote), "CustomDirection"), true);
-					// TODO: position, rotation
+					AddTextbox("Position", Data.CustomGetSetJSON(note.CustomKeyCoordinate), true);
+					AddTextbox("Rotation", Data.CustomGetSetJSON(note.CustomKeyWorldRotation), true);
+					AddTextbox("Local Rotation", Data.CustomGetSetJSON(note.CustomKeyLocalRotation), true);
 					if (o is V2Note) {
 						AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
 						AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
 						AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+						AddTextbox("Flip", Data.CustomGetSetJSON("_flip"), true);
 					}
 					else {
 						AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"), true);
@@ -72,12 +76,12 @@ public partial class MainWindow {
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
 						AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
 						AddCheckbox("Disable Look", Data.CustomGetSet<bool>("disableNoteLook"), false);
+						AddTextbox("Flip", Data.CustomGetSetJSON("flip"), true);
 					}
-					
-					// TODO: flip
 					
 					break;
 				case ObjectType.Obstacle:
+					var ob = o as BaseObstacle;
 					AddParsed("Duration", Data.GetSet<float>(typeof(BaseObstacle), "Duration"));
 					AddDropdownI("Height", Data.GetSet<int>(typeof(BaseObstacle), "Type"), Obstacles.WallHeights);
 					AddParsed("Width", Data.GetSet<int>(typeof(BaseObstacle), "Width"));
@@ -88,7 +92,10 @@ public partial class MainWindow {
 					
 					AddField("");
 					AddField("Noodle Extensions");
-					// TODO: position, rotation
+					AddTextbox("Position", Data.CustomGetSetJSON(ob.CustomKeyCoordinate), true);
+					AddTextbox("Rotation", Data.CustomGetSetJSON(ob.CustomKeyWorldRotation), true);
+					AddTextbox("Local Rotation", Data.CustomGetSetJSON(ob.CustomKeyLocalRotation), true);
+					AddTextbox("Scale", Data.CustomGetSetJSON(ob.CustomKeySize), true);
 					if (o is V2Obstacle) {
 						AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
 						AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
@@ -101,7 +108,6 @@ public partial class MainWindow {
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
 					}
 					
-					// TODO: scale
 					break;
 				case ObjectType.Event:
 					var env = BeatSaberSongContainer.Instance.Song.EnvironmentName;
@@ -110,9 +116,9 @@ public partial class MainWindow {
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
 						AddDropdownI("Value", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.LightValues);
-						// TODO: lightID
 						AddField("");
 						AddField("Chroma");
+						AddTextbox("LightID", Data.CustomGetSetJSON(f.CustomKeyLightID), true);
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 						if (events.Where(e => e.IsTransition).Count() == editing.Count()) {
 							AddDropdownS("Easing",    Data.CustomGetSet(f.CustomKeyEasing), Events.Easings, false);

@@ -122,6 +122,28 @@ public class Data {
 		return (getter, setter);
 	}
 	
+	// Fine, I'll do arrays. JSON-array text input. Might make an options page that can split it out later:tm:
+	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSetJSON(string field_name) {
+		System.Func<BaseObject, string> getter = (o) => {
+			if (GetNode(o.CustomData, field_name) is JSONNode n) {
+				return n.ToString();
+			}
+			else {
+				return null;
+			}
+		};
+		System.Action<BaseObject, string> setter = (o, v) => {
+			if (string.IsNullOrEmpty(v)) {
+				RemoveNode(o.CustomData, field_name);
+			}
+			else {
+				var n = JSON.Parse(v);
+				SetNode(o.GetOrCreateCustom(), field_name, n);
+			}
+		};
+		return (getter, setter);
+	}
+	
 #endregion
 	
 	public static T? GetAllOrNothing<T>(IEnumerable<BaseObject> editing, System.Func<BaseObject, T?> getter) where T : struct {

@@ -92,6 +92,7 @@ public partial class MainWindow {
 		var srect = scroll_area.GetComponent<ScrollRect>();
 		srect.vertical = true;
 		srect.horizontal = false;
+		srect.scrollSensitivity = 42.069f;
 		srect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
 		
 		panel = UI.AddChild(scroll_area, "Prop Panel");

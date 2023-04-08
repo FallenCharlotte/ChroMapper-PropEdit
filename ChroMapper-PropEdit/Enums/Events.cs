@@ -17,6 +17,22 @@ public static class Events {
 		{12, "WhiteTrans"},
 	};
 	
+	// Very cursed value split: subtract 1 then mask
+	public static readonly Map<int> LightColors = new Map<int> {
+		{0b0000, "Right"},
+		{0b0100, "Left"},
+		{0b1000, "White"},
+		{0b1111, "Off"},
+	};
+	
+	public static readonly Map<int> LightActions = new Map<int> {
+		{0b00, "On"},
+		{0b01, "Flash"},
+		{0b10, "Fade"},
+		{0b11, "Transition"},
+		{0b1111, "Off"},
+	};
+	
 	public static readonly Map<int> LaserDirection = new Map<int> {
 		{0, "Outward"},
 		{1, "Inward"},

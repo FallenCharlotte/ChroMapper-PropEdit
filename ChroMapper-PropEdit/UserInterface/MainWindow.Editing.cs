@@ -115,7 +115,14 @@ public partial class MainWindow {
 					var f = events.First();
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
-						AddDropdownI("Value", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.LightValues);
+						if (settings["split_val"]) {
+							AddDropdownI("Color", Data.GetSetSplitValue(0b1100), Events.LightColors);
+							AddDropdownI("Action", Data.GetSetSplitValue(0b0011), Events.LightActions);
+						}
+						else {
+							AddDropdownI("Value", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.LightValues);
+						}
+						
 						AddField("");
 						AddField("Chroma");
 						AddTextbox("LightID", Data.CustomGetSetJSON(f.CustomKeyLightID), true);

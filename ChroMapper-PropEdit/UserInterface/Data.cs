@@ -24,6 +24,22 @@ public class Data {
 		return (getter, setter);
 	}
 	
+	// Very cursed value split: subtract 1 then mask
+	public static (System.Func<BaseObject, int?>, System.Action<BaseObject, int?>) GetSetSplitValue(int mask) {
+		System.Func<BaseObject, int?> getter = (o) => {
+			int i = ((BaseEvent)o).Value;
+			return (i == 0)
+				? 0b1111
+				: (i - 1) & mask & 0b1111;
+		};
+		System.Action<BaseObject, int?> setter = (o, v) => {
+			int i = ((BaseEvent)o).Value;
+			// I'm sorry
+			((BaseEvent)o).Value = ((((i - (i == 0 ? 0 : 1)) & (~mask)) | ((int)v)) + 1) & 0b1111;
+		};
+		return (getter, setter);
+	}
+	
 	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) CustomGetSet<T>(string field_name) where T : struct {
 		System.Func<BaseObject, T?> getter = (o) => {
 			if (GetNode(o.CustomData, field_name) is JSONNode n) {

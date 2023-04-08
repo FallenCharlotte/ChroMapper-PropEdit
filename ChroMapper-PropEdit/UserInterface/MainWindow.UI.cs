@@ -24,6 +24,8 @@ namespace ChroMapper_PropEdit.UserInterface {
 public partial class MainWindow {
 	public readonly string SETTINGS_FILE = UnityEngine.Application.persistentDataPath + "/PropEdit.json";
 	
+	public JSONObject settings;
+	
 	public ExtensionButton main_button;
 	public InputAction keybind;
 	public InputAction shift;
@@ -175,6 +177,9 @@ public partial class MainWindow {
 			keybind.Disable();
 		};
 		shift.Enable();
+		
+		LoadSettings();
+		AnchoredPosSave();
 	}
 	
 #region Form Fields
@@ -233,19 +238,23 @@ public partial class MainWindow {
 		// Get values from selected items
 		var options = new List<string>();
 		var value = Data.GetAllOrNothing<int>(editing, getter);
+		int i = 0;
 		if (!value.HasValue) {
 			options.Add("--");
 		}
-		else if (nullable) {
-			options.Add("Unset");
-			value += 1;
+		else {
+			i = type.dict.Keys.ToList().IndexOf((int)value);
+			if (nullable) {
+				options.Add("Unset");
+				i += 1;
+			}
 		}
 		options.AddRange(type.dict.Values.ToList());
 		
 		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, container.transform);
 		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		dropdown.SetOptions(options);
-		dropdown.Dropdown.value = value ?? 0;
+		dropdown.Dropdown.value = i;
 		dropdown.Dropdown.onValueChanged.AddListener((i) => {
 			int? value = type.Backward(options[i]);
 			UpdateObjects<int>(setter, value);
@@ -367,10 +376,16 @@ public partial class MainWindow {
 	private void LoadSettings() {
 		if (File.Exists(SETTINGS_FILE)) {
 			using (var reader = new StreamReader(SETTINGS_FILE)) {
-				var settings = JSON.Parse(reader.ReadToEnd()).AsObject;
+				settings = JSON.Parse(reader.ReadToEnd()).AsObject;
 				window.GetComponent<RectTransform>().anchoredPosition = new Vector2(settings["x"].AsFloat, settings["y"].AsFloat);
 				window.GetComponent<RectTransform>().sizeDelta = new Vector2(settings["w"].AsInt, settings["h"].AsInt);
 			}
+		}
+		else {
+			settings = new JSONObject();
+		}
+		if (!settings.HasKey("split_val")) {
+			settings["split_val"] = true;
 		}
 		var layout = panel.GetComponent<LayoutElement>();
 		layout.minHeight = window.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
@@ -378,11 +393,10 @@ public partial class MainWindow {
 	
 	private void AnchoredPosSave() {
 		var pos = window.GetComponent<RectTransform>().anchoredPosition;
-		var settings = new JSONObject();
-		settings.Add("x", pos.x);
-		settings.Add("y", pos.y);
-		settings.Add("w", window.GetComponent<RectTransform>().sizeDelta.x);
-		settings.Add("h", window.GetComponent<RectTransform>().sizeDelta.y);
+		settings["x"] = pos.x;
+		settings["y"] = pos.y;
+		settings["w"] = window.GetComponent<RectTransform>().sizeDelta.x;
+		settings["h"] = window.GetComponent<RectTransform>().sizeDelta.y;
 		File.WriteAllText(SETTINGS_FILE, settings.ToString(4));
 	}
 	

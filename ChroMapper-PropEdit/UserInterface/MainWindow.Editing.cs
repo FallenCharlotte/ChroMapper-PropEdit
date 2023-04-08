@@ -42,6 +42,8 @@ public partial class MainWindow {
 			switch (type) {
 				case ObjectType.Note:
 					var note = o as BaseNote;
+					AddParsed("Lane", Data.GetSet<int>(typeof(BaseNote), "PosX"));
+					AddParsed("Layer", Data.GetSet<int>(typeof(BaseNote), "PosY"));
 					AddDropdownI("Type", Data.GetSet<int>(typeof(BaseNote), "Type"), Notes.NoteTypes);
 					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseNote), "CutDirection"), Notes.CutDirections);
 					if (o is V3ColorNote) {
@@ -83,8 +85,17 @@ public partial class MainWindow {
 				case ObjectType.Obstacle:
 					var ob = o as BaseObstacle;
 					AddParsed("Duration", Data.GetSet<float>(typeof(BaseObstacle), "Duration"));
-					AddDropdownI("Height", Data.GetSet<int>(typeof(BaseObstacle), "Type"), Obstacles.WallHeights);
-					AddParsed("Width", Data.GetSet<int>(typeof(BaseObstacle), "Width"));
+					if (o is V2Obstacle) {
+						AddParsed("X", Data.GetSet<int>(typeof(BaseObstacle), "PosX"));
+						AddParsed("Width", Data.GetSet<int>(typeof(BaseObstacle), "Width"));
+						AddDropdownI("Height", Data.GetSet<int>(typeof(BaseObstacle), "Type"), Obstacles.WallHeights);
+					}
+					else {
+						AddParsed("X (Left)", Data.GetSet<int>(typeof(BaseObstacle), "PosX"));
+						AddParsed("Y (Bottom)", Data.GetSet<int>(typeof(BaseObstacle), "PosY"));
+						AddParsed("Width", Data.GetSet<int>(typeof(BaseObstacle), "Width"));
+						AddParsed("Height", Data.GetSet<int>(typeof(BaseObstacle), "Height"));
+					}
 					
 					AddField("");
 					AddField("Chroma");

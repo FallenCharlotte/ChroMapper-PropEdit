@@ -20,7 +20,7 @@ public class Data {
 	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) GetSet<T>(System.Type type, string field_name) where T : struct {
 		var field = type.GetProperty(field_name);
 		System.Func<BaseObject, T?> getter = (o) => (T?)field.GetMethod.Invoke(o, null) ?? null;
-		System.Action<BaseObject, T?> setter = (o, v) => field.SetMethod.Invoke(o, new object[] {v});
+		System.Action<BaseObject, T?> setter = (o, v) => { if (v != null) field.SetMethod.Invoke(o, new object[] {v}); };
 		return (getter, setter);
 	}
 	

@@ -299,7 +299,7 @@ public partial class MainWindow {
 	}
 #nullable disable
 	
-	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, bool nullable = false) where T : struct {
+	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set) where T : struct {
 		var container = AddField(title);
 		
 		(var getter, var setter) = get_set;
@@ -321,7 +321,7 @@ public partial class MainWindow {
 			}
 			object[] parameters = new object[]{s, null};
 			bool res = (bool)parse.Invoke(null, parameters);
-			if (!res && nullable) {
+			if (!res) {
 				UpdateObjects<T>(setter, null);
 			}
 			else {

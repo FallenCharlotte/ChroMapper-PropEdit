@@ -59,20 +59,20 @@ public partial class MainWindow {
 					
 					AddField("");
 					AddField("Noodle Extensions");
-					AddParsed("Direction", Data.GetSet<int>(typeof(BaseNote), "CustomDirection"), true);
+					AddParsed("Direction", Data.GetSet<int>(typeof(BaseNote), "CustomDirection"));
 					AddTextbox("Position", Data.CustomGetSetJSON(note.CustomKeyCoordinate), true);
 					AddTextbox("Rotation", Data.CustomGetSetJSON(note.CustomKeyWorldRotation), true);
 					AddTextbox("Local Rotation", Data.CustomGetSetJSON(note.CustomKeyLocalRotation), true);
 					if (o is V2Note) {
-						AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
-						AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
+						AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"));
 						AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
 						AddTextbox("Flip", Data.CustomGetSetJSON("_flip"), true);
 					}
 					else {
-						AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"), true);
-						AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"), true);
+						AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"));
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
 						AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
 						AddCheckbox("Disable Look", Data.CustomGetSet<bool>("disableNoteLook"), false);
@@ -97,14 +97,14 @@ public partial class MainWindow {
 					AddTextbox("Local Rotation", Data.CustomGetSetJSON(ob.CustomKeyLocalRotation), true);
 					AddTextbox("Scale", Data.CustomGetSetJSON(ob.CustomKeySize), true);
 					if (o is V2Obstacle) {
-						AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"), true);
-						AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"), true);
+						AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"));
 						AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
 					}
 					else {
-						AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"), true);
-						AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"), true);
+						AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"));
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
 					}
 					
@@ -143,12 +143,12 @@ public partial class MainWindow {
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
-						AddParsed("Speed", Data.GetSet<int>(typeof(BaseEvent), "Value"), true);
+						AddParsed("Speed", Data.GetSet<int>(typeof(BaseEvent), "Value"));
 						AddField("");
 						AddField("Chroma");
 						AddCheckbox("Lock Rotation", Data.CustomGetSet<bool> (f.CustomKeyLockRotation), false);
 						AddDropdownI("Direction",     Data.CustomGetSet<int>  (f.CustomKeyDirection), Events.LaserDirection, true);
-						AddParsed("Precise Speed",   Data.CustomGetSet<float>(f.CustomKeyPreciseSpeed), true);
+						AddParsed("Precise Speed",   Data.CustomGetSet<float>(f.CustomKeyPreciseSpeed));
 					}
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
 						AddField("");
@@ -157,10 +157,10 @@ public partial class MainWindow {
 						if (o is V2Event) {
 							AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
 						}
-						AddParsed("Rotation",    Data.CustomGetSet<int>  (f.CustomKeyLaneRotation), true);
-						AddParsed("Step",        Data.CustomGetSet<float>(f.CustomKeyStep), true);
-						AddParsed("Propagation", Data.CustomGetSet<float>(f.CustomKeyProp), true);
-						AddParsed("Speed",       Data.CustomGetSet<float>(f.CustomKeySpeed), true);
+						AddParsed("Rotation",    Data.CustomGetSet<int>  (f.CustomKeyLaneRotation));
+						AddParsed("Step",        Data.CustomGetSet<float>(f.CustomKeyStep));
+						AddParsed("Propagation", Data.CustomGetSet<float>(f.CustomKeyProp));
+						AddParsed("Speed",       Data.CustomGetSet<float>(f.CustomKeySpeed));
 						AddDropdownI("Direction", Data.CustomGetSet<int>  (f.CustomKeyDirection), Events.RingDirection, true);
 						if (o is V2Event) {
 							AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
@@ -169,8 +169,8 @@ public partial class MainWindow {
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
 						AddField("");
 						AddField("Chroma");
-						AddParsed("Step",  Data.CustomGetSet<float>(f.CustomKeyStep), true);
-						AddParsed("Speed", Data.CustomGetSet<float>(f.CustomKeySpeed), true);
+						AddParsed("Step",  Data.CustomGetSet<float>(f.CustomKeyStep));
+						AddParsed("Speed", Data.CustomGetSet<float>(f.CustomKeySpeed));
 					}
 					break;
 			}

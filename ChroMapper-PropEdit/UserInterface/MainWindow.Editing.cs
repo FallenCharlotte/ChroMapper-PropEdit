@@ -78,8 +78,12 @@ public partial class MainWindow {
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
 						AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
 						AddCheckbox("Disable Look", Data.CustomGetSet<bool>("disableNoteLook"), false);
+						AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool>("disableBadCutDirection"), false);
+						AddCheckbox("No Badcut Speed", Data.CustomGetSet<bool>("disableBadCutSpeed"), false);
+						AddCheckbox("No Badcut Color", Data.CustomGetSet<bool>("disableBadCutSaberType"), false);
 						AddTextbox("Flip", Data.CustomGetSetJSON("flip"), true);
 					}
+					AddTextbox("Track", Data.CustomGetSet(o.CustomKeyTrack));
 					
 					break;
 				case ObjectType.Obstacle:
@@ -118,6 +122,7 @@ public partial class MainWindow {
 						AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"));
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
 					}
+					AddTextbox("Track", Data.CustomGetSet(o.CustomKeyTrack));
 					
 					break;
 				case ObjectType.Event:

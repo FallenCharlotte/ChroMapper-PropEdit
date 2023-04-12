@@ -40,9 +40,14 @@ public class Data {
 		return (getter, setter);
 	}
 	
-	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) CustomGetSet<T>(string field_name) where T : struct {
+	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) JSONGetSet<T>(System.Type type, string node_name, string field_name) where T : struct {
+		var node = type.GetProperty(node_name);
+		if (node == null) {
+			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
+		}
 		System.Func<BaseObject, T?> getter = (o) => {
-			if (GetNode(o.CustomData, field_name) is JSONNode n) {
+			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
+			if (GetNode(root, field_name) is JSONNode n) {
 				return CreateConvertFunc<JSONNode, T>()(n);
 			}
 			else {
@@ -50,21 +55,28 @@ public class Data {
 			}
 		};
 		System.Action<BaseObject, T?> setter = (o, v) => {
+			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (v is T value) {
-				SetNode(o.GetOrCreateCustom(), field_name, CreateConvertFunc<T, SimpleJSON.JSONNode>()(value));
+				SetNode(root, field_name, CreateConvertFunc<T, SimpleJSON.JSONNode>()(value));
 			}
 			else {
-				RemoveNode(o.CustomData, field_name);
+				RemoveNode(root, field_name);
 			}
+			node.SetMethod.Invoke(o, new object[] { root });
 			o.RefreshCustom();
 		};
 		return (getter, setter);
 	}
 	
 	// I hate C#
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSet(string field_name) {
+	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) JSONGetSet(System.Type type, string node_name, string field_name) {
+		var node = type.GetProperty(node_name);
+		if (node == null) {
+			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
+		}
 		System.Func<BaseObject, string> getter = (o) => {
-			if (GetNode(o.CustomData, field_name) is JSONNode n) {
+			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
+			if (GetNode(root, field_name) is JSONNode n) {
 				return n.Value;
 			}
 			else {
@@ -72,15 +84,58 @@ public class Data {
 			}
 		};
 		System.Action<BaseObject, string> setter = (o, v) => {
+			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (v is string value) {
-				SetNode(o.GetOrCreateCustom(), field_name, value);
+				SetNode(root, field_name, value);
 			}
 			else {
-				RemoveNode(o.CustomData, field_name);
+				RemoveNode(root, field_name);
 			}
+			node.SetMethod.Invoke(o, new object[] { root });
 			o.RefreshCustom();
 		};
 		return (getter, setter);
+	}
+	
+	// Fine, I'll do arrays. JSON-array text input. Might make an options page that can split it out later:tm:
+	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) JSONGetSetRaw(System.Type type, string node_name, string field_name) {
+		var node = type.GetProperty(node_name);
+		if (node == null) {
+			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
+		}
+		System.Func<BaseObject, string> getter = (o) => {
+			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
+			if (GetNode(root, field_name) is JSONNode n) {
+				return n.ToString();
+			}
+			else {
+				return null;
+			}
+		};
+		System.Action<BaseObject, string> setter = (o, v) => {
+			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
+			if (string.IsNullOrEmpty(v)) {
+				RemoveNode(root, field_name);
+			}
+			else {
+				var n = JSON.Parse(v);
+				SetNode(root, field_name, n);
+			}
+			node.SetMethod.Invoke(o, new object[] { root });
+		};
+		return (getter, setter);
+	}
+	
+	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) CustomGetSet<T>(string field_name) where T : struct {
+		return JSONGetSet<T>(typeof(BaseObject), "CustomData", field_name);
+	}
+	
+	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSet(string field_name) {
+		return JSONGetSet(typeof(BaseObject), "CustomData", field_name);
+	}
+	
+	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSetRaw(string field_name) {
+		return JSONGetSetRaw(typeof(BaseObject), "CustomData", field_name);
 	}
 	
 	// Create and delete gradient
@@ -133,28 +188,6 @@ public class Data {
 				var jc = new JSONArray();
 				jc.WriteColor(color);
 				SetNode(o.GetOrCreateCustom(), field_name, jc);
-			}
-		};
-		return (getter, setter);
-	}
-	
-	// Fine, I'll do arrays. JSON-array text input. Might make an options page that can split it out later:tm:
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSetJSON(string field_name) {
-		System.Func<BaseObject, string> getter = (o) => {
-			if (GetNode(o.CustomData, field_name) is JSONNode n) {
-				return n.ToString();
-			}
-			else {
-				return null;
-			}
-		};
-		System.Action<BaseObject, string> setter = (o, v) => {
-			if (string.IsNullOrEmpty(v)) {
-				RemoveNode(o.CustomData, field_name);
-			}
-			else {
-				var n = JSON.Parse(v);
-				SetNode(o.GetOrCreateCustom(), field_name, n);
 			}
 		};
 		return (getter, setter);

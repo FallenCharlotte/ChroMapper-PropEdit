@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace ChroMapper_PropEdit.Enums {
 
 public static class Events {
@@ -96,6 +98,16 @@ public static class Events {
 		{5, "30"},
 		{6, "45"},
 		{7, "60"}
+	};
+	
+	public static readonly Dictionary<string, string[]> NoodleProperties = new Dictionary<string, string[]> {
+		{"Position", new string[] { "_position", "offsetPosition" }},
+		{"Rotation", new string[] { "_rotation", "offsetWorldRotation" }},
+		{"Local Rotation", new string[] { "_localRotation", "localRotation" }},
+		{"Size", new string[] { "_scale", "scale" }},
+		{"Dissolve", new string[] { "_dissolve", "dissolve" }},
+		{"Dissolve Arrow", new string[] { "_dissolveArrow", "dissolveArrow" }},
+		{"Interactable", new string[] { "_interactable", "interactable" }},
 	};
 }
 

@@ -42,8 +42,8 @@ public partial class MainWindow {
 			switch (type) {
 				case ObjectType.Note:
 					var note = o as BaseNote;
-					AddParsed("Lane", Data.GetSet<int>(typeof(BaseNote), "PosX"));
-					AddParsed("Layer", Data.GetSet<int>(typeof(BaseNote), "PosY"));
+					AddParsed("X", Data.GetSet<int>(typeof(BaseNote), "PosX"));
+					AddParsed("Y", Data.GetSet<int>(typeof(BaseNote), "PosY"));
 					AddDropdownI("Type", Data.GetSet<int>(typeof(BaseNote), "Type"), Notes.NoteTypes);
 					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseNote), "CutDirection"), Notes.CutDirections);
 					if (o is V3ColorNote) {
@@ -56,13 +56,13 @@ public partial class MainWindow {
 						AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("_disableSpawnEffect"), false);
 					}
 					else {
-						AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("spawnEffect"), true);
+						AddCheckbox("Spawn Effect", Data.CustomGetSet<bool>("spawnEffect"), true);
 					}
 					
 					AddField("");
 					AddField("Noodle Extensions");
 					AddParsed("Direction", Data.GetSet<int>(typeof(BaseNote), "CustomDirection"));
-					AddTextbox("Position", Data.CustomGetSetJSON(note.CustomKeyCoordinate), true);
+					AddTextbox("Coordinates", Data.CustomGetSetJSON(note.CustomKeyCoordinate), true);
 					AddTextbox("Rotation", Data.CustomGetSetJSON(note.CustomKeyWorldRotation), true);
 					AddTextbox("Local Rotation", Data.CustomGetSetJSON(note.CustomKeyLocalRotation), true);
 					if (o is V2Note) {
@@ -85,6 +85,38 @@ public partial class MainWindow {
 					}
 					AddTextbox("Track", Data.CustomGetSet(o.CustomKeyTrack));
 					
+					break;
+				case ObjectType.Arc:
+					AddParsed("Head X", Data.GetSet<int>(typeof(BaseArc), "PosX"));
+					AddParsed("Head Y", Data.GetSet<int>(typeof(BaseArc), "PosY"));
+					AddDropdownI("Color", Data.GetSet<int>(typeof(BaseArc), "Color"), Notes.ArcColors);
+					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseArc), "CutDirection"), Notes.CutDirections);
+					AddParsed("Head Multiplier", Data.GetSet<float>(typeof(BaseArc), "HeadControlPointLengthMultiplier"));
+					AddParsed("Tail Beat", Data.GetSet<float>(typeof(BaseArc), "TailTime"));
+					AddParsed("Tail X", Data.GetSet<int>(typeof(BaseArc), "TailPosX"));
+					AddParsed("Tail Y", Data.GetSet<int>(typeof(BaseArc), "TailPosY"));
+					AddDropdownI("Tail Direction", Data.GetSet<int>(typeof(BaseArc), "TailCutDirection"), Notes.CutDirections);
+					AddParsed("Tail Multiplier", Data.GetSet<float>(typeof(BaseArc), "TailControlPointLengthMultiplier"));
+					
+					break;
+				case ObjectType.Chain:
+					AddParsed("Head X", Data.GetSet<int>(typeof(BaseChain), "PosX"));
+					AddParsed("Head Y", Data.GetSet<int>(typeof(BaseChain), "PosY"));
+					AddDropdownI("Color", Data.GetSet<int>(typeof(BaseChain), "Color"), Notes.ArcColors);
+					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseChain), "CutDirection"), Notes.CutDirections);
+					AddParsed("Slices", Data.GetSet<int>(typeof(BaseChain), "SliceCount"));
+					AddParsed("Squish", Data.GetSet<float>(typeof(BaseChain), "Squish"));
+					AddParsed("Tail X", Data.GetSet<int>(typeof(BaseChain), "TailPosX"));
+					AddParsed("Tail Y", Data.GetSet<int>(typeof(BaseChain), "TailPosY"));
+					
+					AddField("");
+					AddField("Chroma");
+					AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+					
+					AddField("");
+					AddField("Noodle Extensions");
+					AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
+					AddTextbox("Tail Coordinates", Data.CustomGetSetJSON("tailCoordinates"), true);
 					break;
 				case ObjectType.Obstacle:
 					var ob = o as BaseObstacle;
@@ -138,6 +170,7 @@ public partial class MainWindow {
 						else {
 							AddDropdownI("Value", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.LightValues);
 						}
+						AddParsed("Brightness", Data.GetSet<float>(typeof(BaseEvent), "FloatValue"));
 						
 						AddField("");
 						AddField("Chroma");

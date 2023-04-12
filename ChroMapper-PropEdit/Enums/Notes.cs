@@ -7,6 +7,11 @@ public static class Notes {
 		{3, "Bomb"},
 	};
 	
+	public static readonly Map<int> ArcColors = new Map<int> {
+		{0, "Left"},
+		{1, "Right"},
+	};
+	
 	public static readonly Map<int> CutDirections = new Map<int> {
 		{0, "Up"},
 		{1, "Down"},

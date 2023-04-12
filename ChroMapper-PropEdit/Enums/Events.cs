@@ -81,6 +81,22 @@ public static class Events {
 		{"RGB", "RGB"},
 		{"HSV", "HSV"}
 	};
+	
+	public static readonly Map<int> BoostSets = new Map<int> {
+		{0, "Main"},
+		{1, "Boost"}
+	};
+	
+	public static readonly Map<int> LaneRotaions = new Map<int> {
+		{0, "-60"},
+		{1, "-45"},
+		{2, "-30"},
+		{3, "-15"},
+		{4, "15"},
+		{5, "30"},
+		{6, "45"},
+		{7, "60"}
+	};
 }
 
 }

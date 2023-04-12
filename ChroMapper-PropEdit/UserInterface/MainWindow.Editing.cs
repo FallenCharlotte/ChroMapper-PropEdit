@@ -57,6 +57,7 @@ public partial class MainWindow {
 					}
 					else {
 						AddCheckbox("Spawn Effect", Data.CustomGetSet<bool>("spawnEffect"), true);
+						AddCheckbox("Disable Debris", Data.CustomGetSet<bool>("disableDebris"), false);
 					}
 					
 					AddField("");
@@ -71,6 +72,7 @@ public partial class MainWindow {
 						AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
 						AddTextbox("Flip", Data.CustomGetSetJSON("_flip"), true);
+						AddTextbox("Animation", Data.CustomGetSetJSON("_animation"), true);
 					}
 					else {
 						AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"));
@@ -82,9 +84,14 @@ public partial class MainWindow {
 						AddCheckbox("No Badcut Speed", Data.CustomGetSet<bool>("disableBadCutSpeed"), false);
 						AddCheckbox("No Badcut Color", Data.CustomGetSet<bool>("disableBadCutSaberType"), false);
 						AddTextbox("Flip", Data.CustomGetSetJSON("flip"), true);
+						AddTextbox("Link", Data.CustomGetSet("link"));
+						AddTextbox("Animation", Data.CustomGetSetJSON("animation"), true);
 					}
-					AddTextbox("Track", Data.CustomGetSet(o.CustomKeyTrack));
+					AddTextbox("Track", Data.CustomGetSetJSON(o.CustomKeyTrack), true);
 					
+					break;
+				case ObjectType.CustomNote:
+					AddField("Wow, a custom note! How did you do this?");
 					break;
 				case ObjectType.Arc:
 					AddParsed("Head X", Data.GetSet<int>(typeof(BaseArc), "PosX"));
@@ -142,7 +149,7 @@ public partial class MainWindow {
 					AddTextbox("Position", Data.CustomGetSetJSON(ob.CustomKeyCoordinate), true);
 					AddTextbox("Rotation", Data.CustomGetSetJSON(ob.CustomKeyWorldRotation), true);
 					AddTextbox("Local Rotation", Data.CustomGetSetJSON(ob.CustomKeyLocalRotation), true);
-					AddTextbox("Scale", Data.CustomGetSetJSON(ob.CustomKeySize), true);
+					AddTextbox("Size", Data.CustomGetSetJSON(ob.CustomKeySize), true);
 					if (o is V2Obstacle) {
 						AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"));
@@ -154,7 +161,7 @@ public partial class MainWindow {
 						AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"));
 						AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
 					}
-					AddTextbox("Track", Data.CustomGetSet(o.CustomKeyTrack));
+					AddTextbox("Track", Data.CustomGetSetJSON(o.CustomKeyTrack), true);
 					
 					break;
 				case ObjectType.Event:
@@ -199,6 +206,7 @@ public partial class MainWindow {
 						AddDropdownI("Direction",     Data.CustomGetSet<int>  (f.CustomKeyDirection), Events.LaserDirection, true);
 						AddParsed("Precise Speed",   Data.CustomGetSet<float>(f.CustomKeyPreciseSpeed));
 					}
+					// Ring Rotation
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
 						AddField("");
 						AddField("Chroma");
@@ -215,12 +223,27 @@ public partial class MainWindow {
 							AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
 						}
 					}
+					// Ring Zoom
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
 						AddField("");
 						AddField("Chroma");
 						AddParsed("Step",  Data.CustomGetSet<float>(f.CustomKeyStep));
 						AddParsed("Speed", Data.CustomGetSet<float>(f.CustomKeySpeed));
 					}
+					// Boost Color
+					if (events.Where(e => e.IsColorBoostEvent()).Count() == editing.Count()) {
+						AddDropdownI("Color Set", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.BoostSets);
+					}
+					// Lane Rotations
+					if (events.Where(e => e.IsLaneRotationEvent()).Count() == editing.Count()) {
+						AddDropdownI("Rotation", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.LaneRotaions);
+					}
+					break;
+				case ObjectType.CustomEvent:
+					AddField("Wow, a custom event!");
+					break;
+				case ObjectType.BpmChange:
+					AddParsed("BPM", Data.GetSet<float>(typeof(BaseBpmEvent), "Bpm"));
 					break;
 			}
 		}

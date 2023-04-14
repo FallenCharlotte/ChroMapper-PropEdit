@@ -1,9 +1,6 @@
 using System.Collections.Generic;
-using System.IO;
-using System.Reflection;
 using System.Linq;
 using System.Linq.Expressions;
-using TMPro;
 using UnityEngine;
 using SimpleJSON;
 
@@ -11,7 +8,7 @@ using Beatmap.Base;
 using Beatmap.Enums;
 using Beatmap.Shared;
 
-namespace ChroMapper_PropEdit.UserInterface {
+namespace ChroMapper_PropEdit.Utils {
 
 public class Data {
 	
@@ -240,12 +237,13 @@ public class Data {
 		return root;
 	}
 	
-	public static void SetNode(JSONNode root, string name, JSONNode o) {
+	public static JSONNode SetNode(JSONNode root, string name, JSONNode o) {
 		string[] path = name.Split('.');
 		for (int i = 0; i < path.Length - 1; ++i) {
 			root = root[path[i]];
 		}
 		root[path[path.Length-1]] = o;
+		return o;
 	}
 	
 	public static void RemoveNode(JSONNode root, string name) {

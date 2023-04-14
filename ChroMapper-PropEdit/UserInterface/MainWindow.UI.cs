@@ -1,43 +1,31 @@
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Reflection;
-using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using SimpleJSON;
 
 using Beatmap.Base;
-using Beatmap.Enums;
-using Beatmap.Helper;
-using Beatmap.V2;
 
 using ChroMapper_PropEdit.Components;
 using ChroMapper_PropEdit.Enums;
+using ChroMapper_PropEdit.Utils;
 
 using Convert = System.Convert;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
-public partial class MainWindow {
-	public readonly string SETTINGS_FILE = UnityEngine.Application.persistentDataPath + "/PropEdit.json";
-	
-	public JSONObject settings;
-	
+public partial class Controller {
 	public ExtensionButton main_button;
 	public InputAction keybind;
 	public InputAction shift;
-	public GameObject window;
-	public GameObject title;
+	public Window window;
 	public GameObject panel;
 	public Scrollbar scrollbar;
 	public ScrollToTop scroll_to_top;
 	public List<GameObject> elements = new List<GameObject>();
 	public IEnumerable<BaseObject> editing;
 	
-	public MainWindow() {
+	public Controller() {
 		main_button = ExtensionButtons.AddButton(
 			UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
 			"Prop Edit",
@@ -45,8 +33,7 @@ public partial class MainWindow {
 	}
 	
 	public void ToggleWindow() {
-		LoadSettings();
-		window.SetActive(!window.activeSelf);
+		window.Toggle();
 		UpdateSelection(false);
 	}
 	
@@ -58,26 +45,15 @@ public partial class MainWindow {
 	public void Init(MapEditorUI mapEditorUI) {
 		var parent = mapEditorUI.MainUIGroup[5];
 		
-		window = new GameObject("PropEdit Window");
-		window.transform.parent = parent.transform;
-		// Window Drag
-		window.AddComponent<DragWindowController>();
-		window.GetComponent<DragWindowController>().canvas = parent.GetComponent<Canvas>();
-		window.GetComponent<DragWindowController>().OnDragWindow += AnchoredPosSave;
+		window = new Window("Main", "Prop Editor", parent, new Vector2(220, 256));
+		window.OnShow += Resize;
 		
-		UI.AttachTransform(window, new Vector2(220, 256), new Vector2(0, 0), new Vector2(0.5f, 0.5f));
 		{
-			var image = window.AddComponent<Image>();
-			image.sprite = PersistentUI.Instance.Sprites.Background;
-			image.type = Image.Type.Sliced;
-			image.color = new Color(0.24f, 0.24f, 0.24f, 1);
+			var button = UI.AddButton(window.title, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"), () => Plugin.settings.ToggleWindow());
+			UI.AttachTransform(button.gameObject, pos: new Vector2(-25, -14), size: new Vector2(30, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
 		}
 		
-		window.SetActive(false);
-		
-		title = UI.AddLabel(window.transform, "Title", "Prop Editor", new Vector2(10, -20), size: new Vector2(-10, 30), font_size: 28, anchor_min: new Vector2(0, 1), anchor_max: new Vector2(1, 1), align: TextAlignmentOptions.Left);
-		
-		var container = UI.AddChild(window, "Prop Scroll Container");
+		var container = UI.AddChild(window.game_object, "Prop Scroll Container");
 		UI.AttachTransform(container, new Vector2(-10, -40), new Vector2(0, -15), new Vector2(0, 0), new Vector2(1, 1));
 		{
 			var image = container.AddComponent<Image>();
@@ -121,7 +97,7 @@ public partial class MainWindow {
 		scrollbar.direction = Scrollbar.Direction.BottomToTop;
 		scrollbar.value = 1f;
 		srect.verticalScrollbar = scrollbar;
-		scroll_to_top = window.AddComponent<ScrollToTop>();
+		scroll_to_top = window.game_object.AddComponent<ScrollToTop>();
 		scroll_to_top.scrollbar = scrollbar;
 		
 		var slide = UI.AddChild(scroller, "Slide");
@@ -144,23 +120,13 @@ public partial class MainWindow {
 			scrollbar.handleRect = handle.GetComponent<RectTransform>();
 		}
 		
-		// C.U.M. required
-		typeof(BeatmapActionContainer)
-			.GetEvent("ActionUndoEvent")
-			?.AddMethod
-			?.Invoke(null, new object[] { (System.Action<BeatmapAction>) ((_) => {
-				UpdateSelection(false);
-			})});
-		typeof(BeatmapActionContainer)
-			.GetEvent("ActionRedoEvent")
-			?.AddMethod
-			?.Invoke(null, new object[] { (System.Action<BeatmapAction>) ((_) => {
-				UpdateSelection(false);
-			})});
 		
-		if (typeof(BeatmapActionContainer).GetEvent("ActionUndoEvent") == null) {
-			Debug.LogWarning("Warning: Insufficient C.U.M., PropEdit won't update after undo/redo!");
-		}
+		BeatmapActionContainer.ActionUndoEvent += (_) => {
+			UpdateSelection(false);
+		};
+		BeatmapActionContainer.ActionRedoEvent += (_) => {
+			UpdateSelection(false);
+		};
 		
 		UpdateSelection(true);
 		
@@ -169,70 +135,43 @@ public partial class MainWindow {
 			ToggleWindow();
 		};
 		shift = new InputAction(binding: "<Keyboard>/shift");
-		shift.started += (ctx) => {
+		shift.started += (_) => {
 			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Disable();
 			keybind.Enable();
 		};
-		shift.canceled += (ctx) => {
+		shift.canceled += (_) => {
 			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Enable();
 			keybind.Disable();
 		};
 		shift.Enable();
-		
-		LoadSettings();
-		AnchoredPosSave();
 	}
 	
 #region Form Fields
 	
-	private GameObject AddField(string title, bool tall = false) {
-		var container = UI.AddChild(panel, title + " Container");
-		UI.AttachTransform(container, new Vector2(0, tall ? 22 : 20), new Vector2(0, 0));
-		
+	private GameObject AddLine(string title, Vector2? size = null) {
+		var container = UI.AddField(panel, title, size);
 		elements.Add(container);
-		
-		var label = UI.AddChild(container, title + " Label", typeof(TextMeshProUGUI));
-		UI.AttachTransform(label, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
-		
-		var textComponent = label.GetComponent<TextMeshProUGUI>();
-		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
-		textComponent.alignment = TextAlignmentOptions.Left;
-		textComponent.enableAutoSizing = true;
-		textComponent.fontSizeMin = 8;
-		textComponent.fontSizeMax = 16;
-		textComponent.text = title;
-		
 		return container;
 	}
 	
 	// CustomData node gets removed when value = default
 	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool _default) {
-		var container = AddField(title);
+		var container = AddLine(title);
 		
-		(var getter, var setter) = get_set;
+		var value = Data.GetAllOrNothing<bool>(editing, get_set.Item1) ?? _default;
 		
-		bool value = Data.GetAllOrNothing<bool>(editing, getter) ?? _default;
-		
-		var original = GameObject.Find("Strobe Generator").GetComponentInChildren<Toggle>(true);
-		var toggleObject = UnityEngine.Object.Instantiate(original, container.transform);
-		var toggleComponent = toggleObject.GetComponent<Toggle>();
-		var colorBlock = toggleComponent.colors;
-		colorBlock.normalColor = Color.white;
-		toggleComponent.colors = colorBlock;
-		toggleComponent.isOn = value;
-		toggleComponent.onValueChanged.AddListener((v) => {
+		return UI.AddCheckbox(container, value, (v) => {
 			if (v == _default) {
-				UpdateObjects<bool>(setter, null);
+				UpdateObjects<bool>(get_set.Item2, null);
 			}
 			else {
-				UpdateObjects<bool>(setter, v);
+				UpdateObjects<bool>(get_set.Item2, v);
 			}
 		});
-		return toggleComponent;
 	}
 	
 	private UIDropdown AddDropdownI(string title, System.ValueTuple<System.Func<BaseObject, int?>, System.Action<BaseObject, int?>> get_set, Map<int> type, bool nullable = false) {
-		var container = AddField(title);
+		var container = AddLine(title);
 		
 		(var getter, var setter) = get_set;
 		
@@ -267,7 +206,7 @@ public partial class MainWindow {
 	// I hate C#
 #nullable enable
 	private UIDropdown AddDropdownS(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, Map type, bool nullable = false) {
-		var container = AddField(title);
+		var container = AddLine(title);
 		
 		(var getter, var setter) = get_set;
 		
@@ -301,7 +240,7 @@ public partial class MainWindow {
 #nullable disable
 	
 	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set) where T : struct {
-		var container = AddField(title);
+		var container = AddLine(title);
 		
 		(var getter, var setter) = get_set;
 		
@@ -329,13 +268,13 @@ public partial class MainWindow {
 				UpdateObjects<T>(setter, (T)parameters[1]);
 			}
 			
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Controller), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Controller), ActionMapsDisabled);
 		});
 		input.InputField.onSelect.AddListener(delegate {
 			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
+				CMInputCallbackInstaller.DisableActionMaps(typeof(Controller), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(Controller), ActionMapsDisabled);
 			}
 		});
 		
@@ -343,7 +282,7 @@ public partial class MainWindow {
 	}
 	
 	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string>, System.Action<BaseObject, string>> get_set, bool tall = false) {
-		var container = AddField(title, tall);
+		var container = AddLine(title, tall ? (new Vector2(0, 22)) : null);
 		
 		(var getter, var setter) = get_set;
 		
@@ -359,13 +298,13 @@ public partial class MainWindow {
 			}
 			UpdateObjects(setter, s);
 			
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Controller), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Controller), ActionMapsDisabled);
 		});
 		input.InputField.onSelect.AddListener(delegate {
 			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
+				CMInputCallbackInstaller.DisableActionMaps(typeof(Controller), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(Controller), ActionMapsDisabled);
 			}
 		});
 		
@@ -374,31 +313,9 @@ public partial class MainWindow {
 	
 #endregion
 	
-	private void LoadSettings() {
-		if (File.Exists(SETTINGS_FILE)) {
-			using (var reader = new StreamReader(SETTINGS_FILE)) {
-				settings = JSON.Parse(reader.ReadToEnd()).AsObject;
-				window.GetComponent<RectTransform>().anchoredPosition = new Vector2(settings["x"].AsFloat, settings["y"].AsFloat);
-				window.GetComponent<RectTransform>().sizeDelta = new Vector2(settings["w"].AsInt, settings["h"].AsInt);
-			}
-		}
-		else {
-			settings = new JSONObject();
-		}
-		if (!settings.HasKey("split_val")) {
-			settings["split_val"] = true;
-		}
+	private void Resize() {
 		var layout = panel.GetComponent<LayoutElement>();
-		layout.minHeight = window.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
-	}
-	
-	private void AnchoredPosSave() {
-		var pos = window.GetComponent<RectTransform>().anchoredPosition;
-		settings["x"] = pos.x;
-		settings["y"] = pos.y;
-		settings["w"] = window.GetComponent<RectTransform>().sizeDelta.x;
-		settings["h"] = window.GetComponent<RectTransform>().sizeDelta.y;
-		File.WriteAllText(SETTINGS_FILE, settings.ToString(4));
+		layout.minHeight = window.game_object.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
 	}
 	
 	// Stop textbox input from triggering actions, copied from the node editor

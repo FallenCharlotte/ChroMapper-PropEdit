@@ -4,6 +4,8 @@ using System.IO;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
@@ -29,6 +31,50 @@ public class UI {
 		textComponent.text = text;
 		
 		return entryLabel;
+	}
+	
+	// A container for an input element with a label
+	public static GameObject AddField(GameObject parent, string title, Vector2? size = null) {
+		var container = UI.AddChild(parent, title + " Container");
+		UI.AttachTransform(container, size ?? new Vector2(0, 20), pos: new Vector2(0, 0));
+		
+		var label = UI.AddChild(container, title + " Label", typeof(TextMeshProUGUI));
+		UI.AttachTransform(label, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
+		
+		var textComponent = label.GetComponent<TextMeshProUGUI>();
+		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
+		textComponent.alignment = TextAlignmentOptions.Left;
+		textComponent.enableAutoSizing = true;
+		textComponent.fontSizeMin = 8;
+		textComponent.fontSizeMax = 16;
+		textComponent.text = title;
+		
+		return container;
+	}
+	
+	public static UIButton AddButton(GameObject parent, string text, UnityAction on_press) {
+		var button = Object.Instantiate(PersistentUI.Instance.ButtonPrefab, parent.transform);
+		button.SetText(text);
+		button.Button.onClick.AddListener(on_press);
+		return button;
+	}
+	public static UIButton AddButton(GameObject parent, Sprite sprite, UnityAction on_press) {
+		var button = Object.Instantiate(PersistentUI.Instance.ButtonPrefab, parent.transform);
+		button.SetImage(sprite);
+		button.Button.onClick.AddListener(on_press);
+		return button;
+	}
+	
+	public static Toggle AddCheckbox(GameObject parent, bool value, UnityAction<bool> setter) {
+		var original = GameObject.Find("Strobe Generator").GetComponentInChildren<Toggle>(true);
+		var toggleObject = UnityEngine.Object.Instantiate(original, parent.transform);
+		var toggleComponent = toggleObject.GetComponent<Toggle>();
+		var colorBlock = toggleComponent.colors;
+		colorBlock.normalColor = Color.white;
+		toggleComponent.colors = colorBlock;
+		toggleComponent.isOn = value;
+		toggleComponent.onValueChanged.AddListener(setter);
+		return toggleComponent;
 	}
 	
 	public static RectTransform AttachTransform(GameObject obj,    Vector2 size, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, Vector2? pivot = null) {

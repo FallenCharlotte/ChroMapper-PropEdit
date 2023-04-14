@@ -7,13 +7,15 @@ namespace ChroMapper_PropEdit {
 
 [Plugin("PropEdit")]
 public class Plugin {
-	public static MainWindow main;
+	public static Controller main;
+	public static SettingsController settings;
 	
 	[Init]
 	private void Init() {
 		Debug.Log("PropEdit Plugin has loaded!");
 		SceneManager.sceneLoaded += SceneLoaded;
-		main = new MainWindow();
+		main = new Controller();
+		settings = new SettingsController();
 	}
 	
 	private void SceneLoaded(Scene scene, LoadSceneMode mode) {
@@ -21,6 +23,7 @@ public class Plugin {
 			// Map Edit
 			var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();
 			main.Init(mapEditorUI);
+			settings.Init(mapEditorUI);
 			
 			SelectionController.SelectionChangedEvent += () => main.UpdateSelection(true);
 		}

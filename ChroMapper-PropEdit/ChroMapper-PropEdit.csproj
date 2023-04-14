@@ -79,6 +79,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Plugin.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="Components\DragWindowController.cs" />
     <Compile Include="Components\ScrollToTop.cs" />
     <Compile Include="Enums\Events.cs" />
@@ -86,13 +87,16 @@
     <Compile Include="Enums\Notes.cs" />
     <Compile Include="Enums\Obstacles.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UserInterface\Data.cs" />
     <Compile Include="UserInterface\MainWindow.Editing.cs" />
     <Compile Include="UserInterface\MainWindow.UI.cs" />
+    <Compile Include="UserInterface\SettingsWindow.cs" />
     <Compile Include="UserInterface\UI.cs" />
+    <Compile Include="UserInterface\Window.cs" />
+    <Compile Include="Utils\Data.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icon.png" />
+    <EmbeddedResource Include="Resources\Settings.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

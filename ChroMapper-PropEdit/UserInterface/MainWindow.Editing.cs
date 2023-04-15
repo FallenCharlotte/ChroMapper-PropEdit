@@ -82,7 +82,7 @@ public partial class Controller {
 						else {
 							AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"));
 							AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"));
-							AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
+							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
 							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
 							AddCheckbox("Disable Look", Data.CustomGetSet<bool>("disableNoteLook"), false);
 							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool>("disableBadCutDirection"), false);

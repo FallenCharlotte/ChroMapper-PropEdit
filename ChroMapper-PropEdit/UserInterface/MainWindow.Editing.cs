@@ -26,7 +26,10 @@ public partial class Controller {
 		}
 		elements.Clear();
 		
-		editing = SelectionController.SelectedObjects.Select(it => it);
+		// Hopefully bonk some race conditions
+		if (real) {
+			editing = SelectionController.SelectedObjects.Select(it => it);
+		}
 		
 		if (SelectionController.HasSelectedObjects()) {
 			window.SetTitle($"{SelectionController.SelectedObjects.Count} Items selected");
@@ -39,17 +42,17 @@ public partial class Controller {
 			var o = editing.First();
 			var type = o.ObjectType;
 			
-			AddParsed("Beat", Data.GetSet<float>(typeof(BaseObject), "Time"));
+			AddParsed("Beat", Data.GetSet<float>("Time"));
 			
 			switch (type) {
 				case ObjectType.Note:
 					var note = o as BaseNote;
-					AddParsed("X", Data.GetSet<int>(typeof(BaseNote), "PosX"));
-					AddParsed("Y", Data.GetSet<int>(typeof(BaseNote), "PosY"));
-					AddDropdownI("Type", Data.GetSet<int>(typeof(BaseNote), "Type"), Notes.NoteTypes);
-					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseNote), "CutDirection"), Notes.CutDirections);
+					AddParsed("X", Data.GetSet<int>("PosX"));
+					AddParsed("Y", Data.GetSet<int>("PosY"));
+					AddDropdownI("Type", Data.GetSet<int>("Type"), Notes.NoteTypes);
+					AddDropdownI("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
 					if (o is V3ColorNote) {
-						AddParsed("Angle Offset", Data.GetSet<int>(typeof(BaseNote), "AngleOffset"));
+						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"));
 					}
 					
 					if (Settings.Get("Chroma")?.AsBool ?? false) {
@@ -68,7 +71,7 @@ public partial class Controller {
 					if (Settings.Get("Noodle")?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
-						AddParsed("Direction", Data.GetSet<int>(typeof(BaseNote), "CustomDirection"));
+						AddParsed("Direction", Data.GetSet<int>("CustomDirection"));
 						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true);
 						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true);
@@ -100,27 +103,27 @@ public partial class Controller {
 					AddLine("Wow, a custom note! How did you do this?");
 					break;
 				case ObjectType.Arc:
-					AddParsed("Head X", Data.GetSet<int>(typeof(BaseArc), "PosX"));
-					AddParsed("Head Y", Data.GetSet<int>(typeof(BaseArc), "PosY"));
-					AddDropdownI("Color", Data.GetSet<int>(typeof(BaseArc), "Color"), Notes.ArcColors);
-					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseArc), "CutDirection"), Notes.CutDirections);
-					AddParsed("Head Multiplier", Data.GetSet<float>(typeof(BaseArc), "HeadControlPointLengthMultiplier"));
-					AddParsed("Tail Beat", Data.GetSet<float>(typeof(BaseArc), "TailTime"));
-					AddParsed("Tail X", Data.GetSet<int>(typeof(BaseArc), "TailPosX"));
-					AddParsed("Tail Y", Data.GetSet<int>(typeof(BaseArc), "TailPosY"));
-					AddDropdownI("Tail Direction", Data.GetSet<int>(typeof(BaseArc), "TailCutDirection"), Notes.CutDirections);
-					AddParsed("Tail Multiplier", Data.GetSet<float>(typeof(BaseArc), "TailControlPointLengthMultiplier"));
+					AddParsed("Head X", Data.GetSet<int>("PosX"));
+					AddParsed("Head Y", Data.GetSet<int>("PosY"));
+					AddDropdownI("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
+					AddDropdownI("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
+					AddParsed("Head Multiplier", Data.GetSet<float>("HeadControlPointLengthMultiplier"));
+					AddParsed("Tail Beat", Data.GetSet<float>("TailTime"));
+					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
+					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
+					AddDropdownI("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections);
+					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"));
 					
 					break;
 				case ObjectType.Chain:
-					AddParsed("Head X", Data.GetSet<int>(typeof(BaseChain), "PosX"));
-					AddParsed("Head Y", Data.GetSet<int>(typeof(BaseChain), "PosY"));
-					AddDropdownI("Color", Data.GetSet<int>(typeof(BaseChain), "Color"), Notes.ArcColors);
-					AddDropdownI("Direction", Data.GetSet<int>(typeof(BaseChain), "CutDirection"), Notes.CutDirections);
-					AddParsed("Slices", Data.GetSet<int>(typeof(BaseChain), "SliceCount"));
-					AddParsed("Squish", Data.GetSet<float>(typeof(BaseChain), "Squish"));
-					AddParsed("Tail X", Data.GetSet<int>(typeof(BaseChain), "TailPosX"));
-					AddParsed("Tail Y", Data.GetSet<int>(typeof(BaseChain), "TailPosY"));
+					AddParsed("Head X", Data.GetSet<int>("PosX"));
+					AddParsed("Head Y", Data.GetSet<int>("PosY"));
+					AddDropdownI("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
+					AddDropdownI("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
+					AddParsed("Slices", Data.GetSet<int>("SliceCount"));
+					AddParsed("Squish", Data.GetSet<float>("Squish"));
+					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
+					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
 					
 					if (Settings.Get("Chroma")?.AsBool ?? false) {
 						AddLine("");
@@ -137,17 +140,17 @@ public partial class Controller {
 					break;
 				case ObjectType.Obstacle:
 					var ob = o as BaseObstacle;
-					AddParsed("Duration", Data.GetSet<float>(typeof(BaseObstacle), "Duration"));
+					AddParsed("Duration", Data.GetSet<float>("Duration"));
 					if (o is V2Obstacle) {
-						AddParsed("X", Data.GetSet<int>(typeof(BaseObstacle), "PosX"));
-						AddParsed("Width", Data.GetSet<int>(typeof(BaseObstacle), "Width"));
-						AddDropdownI("Height", Data.GetSet<int>(typeof(BaseObstacle), "Type"), Obstacles.WallHeights);
+						AddParsed("X", Data.GetSet<int>("PosX"));
+						AddParsed("Width", Data.GetSet<int>("Width"));
+						AddDropdownI("Height", Data.GetSet<int>("Type"), Obstacles.WallHeights);
 					}
 					else {
-						AddParsed("X (Left)", Data.GetSet<int>(typeof(BaseObstacle), "PosX"));
-						AddParsed("Y (Bottom)", Data.GetSet<int>(typeof(BaseObstacle), "PosY"));
-						AddParsed("Width", Data.GetSet<int>(typeof(BaseObstacle), "Width"));
-						AddParsed("Height", Data.GetSet<int>(typeof(BaseObstacle), "Height"));
+						AddParsed("X (Left)", Data.GetSet<int>("PosX"));
+						AddParsed("Y (Bottom)", Data.GetSet<int>("PosY"));
+						AddParsed("Width", Data.GetSet<int>("Width"));
+						AddParsed("Height", Data.GetSet<int>("Height"));
 					}
 					
 					if (Settings.Get("Chroma")?.AsBool ?? false) {
@@ -190,9 +193,9 @@ public partial class Controller {
 							AddDropdownI("Action", Data.GetSetSplitValue(0b0011), Events.LightActions);
 						}
 						else {
-							AddDropdownI("Value", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.LightValues);
+							AddDropdownI("Value", Data.GetSet<int>("Value"), Events.LightValues);
 						}
-						AddParsed("Brightness", Data.GetSet<float>(typeof(BaseEvent), "FloatValue"));
+						AddParsed("Brightness", Data.GetSet<float>("FloatValue"));
 						
 						if (Settings.Get("Chroma")?.AsBool ?? false) {
 							AddLine("");
@@ -216,7 +219,7 @@ public partial class Controller {
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
-						AddParsed("Speed", Data.GetSet<int>(typeof(BaseEvent), "Value"));
+						AddParsed("Speed", Data.GetSet<int>("Value"));
 						
 						if (Settings.Get("Chroma")?.AsBool ?? false) {
 							AddLine("");
@@ -256,11 +259,11 @@ public partial class Controller {
 					}
 					// Boost Color
 					if (events.Where(e => e.IsColorBoostEvent()).Count() == editing.Count()) {
-						AddDropdownI("Color Set", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.BoostSets);
+						AddDropdownI("Color Set", Data.GetSet<int>("Value"), Events.BoostSets);
 					}
 					// Lane Rotations
 					if (events.Where(e => e.IsLaneRotationEvent()).Count() == editing.Count()) {
-						AddDropdownI("Rotation", Data.GetSet<int>(typeof(BaseEvent), "Value"), Events.LaneRotaions);
+						AddDropdownI("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions);
 					}
 				}	break;
 				case ObjectType.CustomEvent: {
@@ -330,7 +333,7 @@ public partial class Controller {
 					
 				}	break;
 				case ObjectType.BpmChange:
-					AddParsed("BPM", Data.GetSet<float>(typeof(BaseBpmEvent), "Bpm"));
+					AddParsed("BPM", Data.GetSet<float>("Bpm"));
 					break;
 			}
 		}

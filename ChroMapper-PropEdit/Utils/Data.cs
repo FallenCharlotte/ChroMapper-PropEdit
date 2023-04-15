@@ -16,10 +16,9 @@ public class Data {
 	
 #region Getter/setter factories
 	
-	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) GetSet<T>(System.Type type, string field_name) where T : struct {
-		var field = type.GetProperty(field_name);
-		System.Func<BaseObject, T?> getter = (o) => (T?)field.GetMethod.Invoke(o, null) ?? null;
-		System.Action<BaseObject, T?> setter = (o, v) => { if (v != null) field.SetMethod.Invoke(o, new object[] {v}); };
+	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) GetSet<T>(string field_name) where T : struct {
+		System.Func<BaseObject, T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null) ?? null;
+		System.Action<BaseObject, T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {v}); };
 		return (getter, setter);
 	}
 	

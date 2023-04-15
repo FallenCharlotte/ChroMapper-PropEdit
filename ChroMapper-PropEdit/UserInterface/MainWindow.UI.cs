@@ -14,7 +14,7 @@ using Convert = System.Convert;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
-public partial class Controller {
+public partial class MainWindow {
 	public ExtensionButton main_button;
 	public InputAction keybind;
 	public InputAction shift;
@@ -25,7 +25,7 @@ public partial class Controller {
 	public List<GameObject> elements = new List<GameObject>();
 	public IEnumerable<BaseObject> editing;
 	
-	public Controller() {
+	public MainWindow() {
 		main_button = ExtensionButtons.AddButton(
 			UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
 			"Prop Edit",
@@ -268,13 +268,13 @@ public partial class Controller {
 				UpdateObjects<T>(setter, (T)parameters[1]);
 			}
 			
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Controller), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Controller), ActionMapsDisabled);
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
 		});
 		input.InputField.onSelect.AddListener(delegate {
 			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
-				CMInputCallbackInstaller.DisableActionMaps(typeof(Controller), new[] { typeof(CMInput.INodeEditorActions) });
-				CMInputCallbackInstaller.DisableActionMaps(typeof(Controller), ActionMapsDisabled);
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
 			}
 		});
 		
@@ -298,13 +298,13 @@ public partial class Controller {
 			}
 			UpdateObjects(setter, s);
 			
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Controller), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Controller), ActionMapsDisabled);
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
 		});
 		input.InputField.onSelect.AddListener(delegate {
 			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
-				CMInputCallbackInstaller.DisableActionMaps(typeof(Controller), new[] { typeof(CMInput.INodeEditorActions) });
-				CMInputCallbackInstaller.DisableActionMaps(typeof(Controller), ActionMapsDisabled);
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
 			}
 		});
 		

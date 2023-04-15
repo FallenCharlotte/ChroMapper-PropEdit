@@ -7,14 +7,14 @@ namespace ChroMapper_PropEdit {
 
 [Plugin("PropEdit")]
 public class Plugin {
-	public static Controller main;
+	public static MainWindow main;
 	public static SettingsController settings;
 	
 	[Init]
 	private void Init() {
 		Debug.Log("PropEdit Plugin has loaded!");
 		SceneManager.sceneLoaded += SceneLoaded;
-		main = new Controller();
+		main = new MainWindow();
 		settings = new SettingsController();
 	}
 	

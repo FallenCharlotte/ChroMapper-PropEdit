@@ -19,7 +19,7 @@ using Convert = System.Convert;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
-public partial class Controller {
+public partial class MainWindow {
 	public void UpdateSelection(bool real) {
 		foreach (var e in elements) {
 			Object.Destroy(e);

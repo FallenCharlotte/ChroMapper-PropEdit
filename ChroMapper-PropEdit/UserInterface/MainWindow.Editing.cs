@@ -78,12 +78,11 @@ public partial class Controller {
 							AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
 							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
-							AddTextbox("Animation", Data.CustomGetSetRaw("_animation"), true);
 						}
 						else {
 							AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"));
 							AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"));
-							AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
+							AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
 							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
 							AddCheckbox("Disable Look", Data.CustomGetSet<bool>("disableNoteLook"), false);
 							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool>("disableBadCutDirection"), false);
@@ -91,8 +90,8 @@ public partial class Controller {
 							AddCheckbox("No Badcut Color", Data.CustomGetSet<bool>("disableBadCutSaberType"), false);
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
 							AddTextbox("Link", Data.CustomGetSet("link"));
-							AddTextbox("Animation", Data.CustomGetSetRaw("animation"), true);
 						}
+						AddAnimation(o is V2Note);
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 					}
 					
@@ -175,6 +174,7 @@ public partial class Controller {
 							AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"));
 							AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
 						}
+						AddAnimation(o is V2Obstacle);
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 					}
 					
@@ -308,6 +308,9 @@ public partial class Controller {
 						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true);
 						AddParsed("Duration", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"));
 						AddDropdownS("Easing", Data.JSONGetSet(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false);
+						if (!v2) {
+							AddParsed("Repeat", Data.JSONGetSet<int>(typeof(BaseCustomEvent), "Data", "repeat"));
+						}
 						
 						AddParsed("Attenuation", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", "_attenuation"));
 						AddParsed("Offset", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", "_offset"));
@@ -336,6 +339,19 @@ public partial class Controller {
 		}
 		if (real) {
 			scroll_to_top.Trigger();
+		}
+	}
+	
+	private void AddAnimation(bool v2) {
+		var CustomKeyAnimation = v2 ? "_animation" : "animation";
+		AddCheckbox("Animation", Data.GetSetAnimation(v2), false);
+		if (editing.Where(o => o.CustomData.HasKey(CustomKeyAnimation)).Count() == editing.Count()) {
+			AddCheckbox("  Color", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],"), false);
+			foreach (var property in Events.NoodleProperties) {
+				AddCheckbox("  "+property.Key, Data.CustomGetSetNode(CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2]), false);
+			}
+			AddCheckbox("  Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), true);
+			AddLine("");
 		}
 	}
 	

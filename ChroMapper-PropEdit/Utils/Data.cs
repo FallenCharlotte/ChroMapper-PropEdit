@@ -8,6 +8,8 @@ using Beatmap.Base;
 using Beatmap.Enums;
 using Beatmap.Shared;
 
+using ChroMapper_PropEdit.Enums;
+
 namespace ChroMapper_PropEdit.Utils {
 
 public class Data {
@@ -163,6 +165,26 @@ public class Data {
 				e.CustomColor = null;
 			}
 		}};
+		return (getter, setter);
+	}
+	
+	// Create and delete animation
+	public static (System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>) GetSetAnimation(bool v2) {
+		string animation_key = v2 ? "_animation" : "animation";
+		return CustomGetSetNode(animation_key, "{}");
+	}
+	
+	// Create or remove object with default json
+	public static (System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>) CustomGetSetNode(string path, string json) {
+		System.Func<BaseObject, bool?> getter = (o) => GetNode(o.CustomData, path) != null;
+		System.Action<BaseObject, bool?> setter = (o, v) => {
+			if (!(v ?? false)) {
+				RemoveNode(o.CustomData, path);
+			}
+			else if (GetNode(o.CustomData, path) == null) {
+				SetNode(o.CustomData, path, JSON.Parse(json));
+			}
+		};
 		return (getter, setter);
 	}
 	

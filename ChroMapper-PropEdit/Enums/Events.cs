@@ -101,13 +101,13 @@ public static class Events {
 	};
 	
 	public static readonly Dictionary<string, string[]> NoodleProperties = new Dictionary<string, string[]> {
-		{"Position", new string[] { "_position", "offsetPosition" }},
-		{"Rotation", new string[] { "_rotation", "offsetWorldRotation" }},
-		{"Local Rotation", new string[] { "_localRotation", "localRotation" }},
-		{"Size", new string[] { "_scale", "scale" }},
-		{"Dissolve", new string[] { "_dissolve", "dissolve" }},
-		{"Dissolve Arrow", new string[] { "_dissolveArrow", "dissolveArrow" }},
-		{"Interactable", new string[] { "_interactable", "interactable" }},
+		{"Position", new string[] { "_position", "offsetPosition", "[[0,0,0,0], [0,0,0,0.49]]" }},
+		{"Rotation", new string[] { "_rotation", "offsetWorldRotation", "[[0,0,0,0], [0,0,0,0.49]]" }},
+		{"Local Rotation", new string[] { "_localRotation", "localRotation", "[[0,0,0,0], [0,0,0,0.49]]" }},
+		{"Scale", new string[] { "_scale", "scale", "[[1,1,1,0], [1,1,1,0.49]]" }},
+		{"Dissolve", new string[] { "_dissolve", "dissolve", "[[1,0], [1,0.49]]" }},
+		{"Dissolve Arrow", new string[] { "_dissolveArrow", "dissolveArrow", "[[1,0], [1,0.49]]" }},
+		{"Interactable", new string[] { "_interactable", "interactable", "[[0,0.249], [1,0.25]]" }},
 	};
 }
 

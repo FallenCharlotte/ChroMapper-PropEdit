@@ -17,13 +17,12 @@ namespace ChroMapper_PropEdit.UserInterface {
 public partial class MainWindow {
 	public ExtensionButton main_button;
 	public InputAction keybind;
-	public InputAction shift;
 	public Window window;
 	public GameObject panel;
 	public Scrollbar scrollbar;
 	public ScrollToTop scroll_to_top;
 	public List<GameObject> elements = new List<GameObject>();
-	public IEnumerable<BaseObject> editing;
+	public List<BaseObject> editing;
 	
 	public MainWindow() {
 		main_button = ExtensionButtons.AddButton(
@@ -38,7 +37,7 @@ public partial class MainWindow {
 	}
 	
 	public void Denit() {
-		shift?.Disable();
+		CMInputCallbackInstaller.InputInstance.Utils.ShiftModifier.started -= OnShiftStart;
 		keybind?.Disable();
 	}
 	
@@ -120,30 +119,28 @@ public partial class MainWindow {
 			scrollbar.handleRect = handle.GetComponent<RectTransform>();
 		}
 		
-		
-		BeatmapActionContainer.ActionUndoEvent += (_) => {
-			UpdateSelection(false);
-		};
-		BeatmapActionContainer.ActionRedoEvent += (_) => {
-			UpdateSelection(false);
-		};
-		
 		UpdateSelection(true);
 		
 		keybind = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/n");
-		keybind.performed += (ctx) => {
+		keybind.performed += (_) => {
 			ToggleWindow();
 		};
-		shift = new InputAction(binding: "<Keyboard>/shift");
-		shift.started += (_) => {
-			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Disable();
-			keybind.Enable();
-		};
-		shift.canceled += (_) => {
-			CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Enable();
-			keybind.Disable();
-		};
-		shift.Enable();
+		CMInputCallbackInstaller.InputInstance.Utils.ShiftModifier.started += OnShiftStart;
+		CMInputCallbackInstaller.InputInstance.Utils.ShiftModifier.canceled += OnShiftEnd;
+		
+		SelectionController.SelectionChangedEvent += () => UpdateSelection(true);
+		BeatmapActionContainer.ActionCreatedEvent += (_) => UpdateSelection(false);
+		BeatmapActionContainer.ActionUndoEvent += (_) => UpdateSelection(false);
+		BeatmapActionContainer.ActionRedoEvent += (_) => UpdateSelection(false);
+	}
+	
+	private void OnShiftStart(InputAction.CallbackContext _) {
+		CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Disable();
+		keybind.Enable();
+	}
+	private void OnShiftEnd(InputAction.CallbackContext _) {
+		CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Enable();
+		keybind.Disable();
 	}
 	
 #region Form Fields

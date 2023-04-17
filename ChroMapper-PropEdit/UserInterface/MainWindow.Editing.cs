@@ -26,9 +26,9 @@ public partial class MainWindow {
 		}
 		elements.Clear();
 		
-		// Hopefully bonk some race conditions
+		// Hopefully bonk some race condition
 		if (real) {
-			editing = SelectionController.SelectedObjects.Select(it => it);
+			editing = SelectionController.SelectedObjects.Select(it => it).ToList();
 		}
 		
 		if (SelectionController.HasSelectedObjects()) {
@@ -369,11 +369,8 @@ public partial class MainWindow {
 		}
 		
 		BeatmapActionContainer.AddAction(
-			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."),
+			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
 			true);
-		
-		// Prevent selecting "--"
-		UpdateSelection(false);
 	}
 	
 	// I hate c#
@@ -389,11 +386,8 @@ public partial class MainWindow {
 		}
 		
 		BeatmapActionContainer.AddAction(
-			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({SelectionController.SelectedObjects.Count()}) objects with Prop Edit."),
+			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
 			true);
-		
-		// Prevent selecting "--"
-		UpdateSelection(false);
 	}
 }
 

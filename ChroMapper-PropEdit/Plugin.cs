@@ -24,8 +24,6 @@ public class Plugin {
 			var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();
 			main.Init(mapEditorUI);
 			settings.Init(mapEditorUI);
-			
-			SelectionController.SelectionChangedEvent += () => main.UpdateSelection(true);
 		}
 		else {
 			main.Denit();

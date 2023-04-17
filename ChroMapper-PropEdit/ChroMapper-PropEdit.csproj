@@ -44,6 +44,10 @@
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>
@@ -81,9 +85,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GizmoController.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Components\AxisMovement.cs" />
     <Compile Include="Components\DragWindowController.cs" />
+    <Compile Include="Components\PositionGizmo.cs" />
     <Compile Include="Components\ScrollToTop.cs" />
     <Compile Include="Enums\Events.cs" />
     <Compile Include="Enums\Map.cs" />

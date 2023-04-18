@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -116,7 +117,23 @@ public class Data {
 				RemoveNode(root, field_name);
 			}
 			else {
-				var n = JSON.Parse(v);
+				JSONNode n;
+				try {
+					n = JSON.Parse(v);
+				}
+				catch (Exception) {
+					try {
+						n = JSON.Parse($"[{v}]");
+					}
+					catch (Exception) {
+						try {
+							n = JSON.Parse($"\"{v}\"");
+						}
+						catch (Exception) {
+							return;
+						}
+					}
+				}
 				SetNode(root, field_name, n);
 			}
 			node.SetMethod.Invoke(o, new object[] { root });

@@ -41,6 +41,7 @@ public partial class MainWindow {
 			
 			var o = editing.First();
 			var type = o.ObjectType;
+			var v2 = (o is V2Object);
 			
 			AddParsed("Beat", Data.GetSet<float>("Time"));
 			
@@ -51,7 +52,7 @@ public partial class MainWindow {
 					AddParsed("Y", Data.GetSet<int>("PosY"));
 					AddDropdownI("Type", Data.GetSet<int>("Type"), Notes.NoteTypes);
 					AddDropdownI("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
-					if (o is V3ColorNote) {
+					if (!v2) {
 						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"));
 					}
 					
@@ -71,20 +72,18 @@ public partial class MainWindow {
 					if (Settings.Get("Noodle")?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
-						AddParsed("Direction", Data.GetSet<int>("CustomDirection"));
+						AddParsed("NJS", Data.CustomGetSet<float>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true);
 						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true);
 						if (o is V2Note) {
-							AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"));
-							AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"));
+							AddParsed("Exact Angle", Data.GetSet<int>("CustomDirection"));
 							AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
 							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
 						}
 						else {
-							AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"));
-							AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"));
 							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
 							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
 							AddCheckbox("Disable Look", Data.CustomGetSet<bool>("disableNoteLook"), false);
@@ -94,15 +93,15 @@ public partial class MainWindow {
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
 							AddTextbox("Link", Data.CustomGetSet("link"));
 						}
-						AddAnimation(o is V2Note);
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
+						AddAnimation(v2);
 					}
 					
 					break;
 				case ObjectType.CustomNote:
 					AddLine("Wow, a custom note! How did you do this?");
 					break;
-				case ObjectType.Arc:
+				case ObjectType.Arc: {
 					AddParsed("Head X", Data.GetSet<int>("PosX"));
 					AddParsed("Head Y", Data.GetSet<int>("PosY"));
 					AddDropdownI("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
@@ -114,16 +113,7 @@ public partial class MainWindow {
 					AddDropdownI("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections);
 					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"));
 					
-					break;
-				case ObjectType.Chain:
-					AddParsed("Head X", Data.GetSet<int>("PosX"));
-					AddParsed("Head Y", Data.GetSet<int>("PosY"));
-					AddDropdownI("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
-					AddDropdownI("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
-					AddParsed("Slices", Data.GetSet<int>("SliceCount"));
-					AddParsed("Squish", Data.GetSet<float>("Squish"));
-					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
-					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
+					var s = o as BaseSlider;
 					
 					if (Settings.Get("Chroma")?.AsBool ?? false) {
 						AddLine("");
@@ -134,10 +124,68 @@ public partial class MainWindow {
 					if (Settings.Get("Noodle")?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
-						AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
-						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw("tailCoordinates"), true);
+						AddParsed("NJS", Data.CustomGetSet<float>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
+						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true);
+						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true);
+						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true);
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true);
+						if (v2) {
+							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
+						}
+						else {
+							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
+							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
+							AddTextbox("Link", Data.CustomGetSet("link"));
+						}
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
+						AddAnimation(v2);
 					}
-					break;
+					
+				}	break;
+				case ObjectType.Chain: {
+					AddParsed("Head X", Data.GetSet<int>("PosX"));
+					AddParsed("Head Y", Data.GetSet<int>("PosY"));
+					AddDropdownI("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
+					AddDropdownI("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
+					AddParsed("Slices", Data.GetSet<int>("SliceCount"));
+					AddParsed("Squish", Data.GetSet<float>("Squish"));
+					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
+					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
+					
+					var s = o as BaseSlider;
+					
+					if (Settings.Get("Chroma")?.AsBool ?? false) {
+						AddLine("");
+						AddLine("Chroma");
+						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+					}
+					
+					if (Settings.Get("Noodle")?.AsBool ?? false) {
+						AddLine("");
+						AddLine("Noodle Extensions");
+						AddParsed("NJS", Data.CustomGetSet<float>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
+						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true);
+						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true);
+						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true);
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true);
+						if (v2) {
+							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
+						}
+						else {
+							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
+							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
+							AddTextbox("Link", Data.CustomGetSet("link"));
+						}
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
+						AddAnimation(v2);
+					}
+				}	break;
 				case ObjectType.Obstacle:
 					var ob = o as BaseObstacle;
 					AddParsed("Duration", Data.GetSet<float>("Duration"));
@@ -162,20 +210,18 @@ public partial class MainWindow {
 					if (Settings.Get("Noodle")?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
+						AddParsed("NJS", Data.CustomGetSet<float>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Position", Data.CustomGetSetRaw(ob.CustomKeyCoordinate), true);
 						AddTextbox("Rotation", Data.CustomGetSetRaw(ob.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(ob.CustomKeyLocalRotation), true);
 						AddTextbox("Size", Data.CustomGetSetRaw(ob.CustomKeySize), true);
 						if (o is V2Obstacle) {
-							AddParsed("NJS", Data.CustomGetSet<float>("_noteJumpMovementSpeed"));
-							AddParsed("Spawn Offset", Data.CustomGetSet<float>("_noteJumpStartBeatOffset"));
 							AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
 							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
 						}
 						else {
-							AddParsed("NJS", Data.CustomGetSet<float>("noteJumpMovementSpeed"));
-							AddParsed("Spawn Offset", Data.CustomGetSet<float>("noteJumpStartBeatOffset"));
-							AddCheckbox("Interactable", Data.CustomGetSet<bool>("uninteractable"), false);
+							AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
 						}
 						AddAnimation(o is V2Obstacle);
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
@@ -269,7 +315,6 @@ public partial class MainWindow {
 				case ObjectType.CustomEvent: {
 					var events = editing.Select(o => (BaseCustomEvent)o);
 					var f = events.First();
-					var v2 = (f is V2CustomEvent);
 					
 					if (events.Where(e => e.Type == "AnimateTrack").Count() == editing.Count()) {
 						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true);

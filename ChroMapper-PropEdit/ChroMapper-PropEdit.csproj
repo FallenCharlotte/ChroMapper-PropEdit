@@ -34,6 +34,9 @@
     <Reference Include="Input">
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\Input.dll</HintPath>
     </Reference>
+    <Reference Include="LiteNetLib">
+      <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\LiteNetLib.dll</HintPath>
+    </Reference>
     <Reference Include="Plugins">
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\Plugins.dll</HintPath>
     </Reference>

@@ -78,7 +78,7 @@ public partial class MainWindow {
 						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true);
 						if (o is V2Note) {
-							AddParsed("Exact Angle", Data.GetSet<int>("CustomDirection"));
+							AddParsed("Exact Angle", Data.GetSet<float>("CustomDirection"));
 							AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
 							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
@@ -223,8 +223,8 @@ public partial class MainWindow {
 						else {
 							AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
 						}
-						AddAnimation(o is V2Obstacle);
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
+						AddAnimation(o is V2Obstacle);
 					}
 					
 					break;
@@ -284,7 +284,7 @@ public partial class MainWindow {
 							if (o is V2Event) {
 								AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
 							}
-							AddParsed("Rotation",    Data.CustomGetSet<int>  (f.CustomKeyLaneRotation));
+							AddParsed("Rotation",    Data.CustomGetSet<float>(f.CustomKeyLaneRotation));
 							AddParsed("Step",        Data.CustomGetSet<float>(f.CustomKeyStep));
 							AddParsed("Propagation", Data.CustomGetSet<float>(f.CustomKeyProp));
 							AddParsed("Speed",       Data.CustomGetSet<float>(f.CustomKeySpeed));

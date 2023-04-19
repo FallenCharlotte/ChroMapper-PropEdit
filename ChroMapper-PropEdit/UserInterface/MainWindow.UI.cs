@@ -29,6 +29,18 @@ public partial class MainWindow {
 			UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
 			"Prop Edit",
 			ToggleWindow);
+		
+		var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
+			.Where(x => x.name == "Node Editor")
+			.FirstOrDefault();
+		map.Disable();
+		keybind = map.AddAction("Prop Editor", type: InputActionType.Button);
+		keybind.AddCompositeBinding("ButtonWithOneModifier")
+			.With("Modifier", "<Keyboard>/shift")
+			.With("Button", "<Keyboard>/n");
+		keybind.performed += (_) => ToggleWindow();
+		keybind.Disable();
+		map.Enable();
 	}
 	
 	public void ToggleWindow() {
@@ -36,9 +48,8 @@ public partial class MainWindow {
 		UpdateSelection(false);
 	}
 	
-	public void Denit() {
-		CMInputCallbackInstaller.InputInstance.Utils.ShiftModifier.started -= OnShiftStart;
-		keybind?.Disable();
+	public void Disable() {
+		keybind.Disable();
 	}
 	
 	public void Init(MapEditorUI mapEditorUI) {
@@ -121,26 +132,12 @@ public partial class MainWindow {
 		
 		UpdateSelection(true);
 		
-		keybind = new InputAction(type: InputActionType.Button, binding: "<Keyboard>/n");
-		keybind.performed += (_) => {
-			ToggleWindow();
-		};
-		CMInputCallbackInstaller.InputInstance.Utils.ShiftModifier.started += OnShiftStart;
-		CMInputCallbackInstaller.InputInstance.Utils.ShiftModifier.canceled += OnShiftEnd;
-		
 		SelectionController.SelectionChangedEvent += () => UpdateSelection(true);
 		BeatmapActionContainer.ActionCreatedEvent += (_) => UpdateSelection(false);
 		BeatmapActionContainer.ActionUndoEvent += (_) => UpdateSelection(false);
 		BeatmapActionContainer.ActionRedoEvent += (_) => UpdateSelection(false);
-	}
-	
-	private void OnShiftStart(InputAction.CallbackContext _) {
-		CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Disable();
+		
 		keybind.Enable();
-	}
-	private void OnShiftEnd(InputAction.CallbackContext _) {
-		CMInputCallbackInstaller.InputInstance.NodeEditor.ToggleNodeEditor.Enable();
-		keybind.Disable();
 	}
 	
 #region Form Fields

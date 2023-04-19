@@ -393,7 +393,7 @@ public partial class MainWindow {
 	private void AddAnimation(bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
 		AddCheckbox("Animation", Data.GetSetAnimation(v2), false);
-		if (editing.Where(o => o.CustomData.HasKey(CustomKeyAnimation)).Count() == editing.Count()) {
+		if (editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() == editing.Count()) {
 			AddCheckbox("  Color", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],"), false);
 			foreach (var property in Events.NoodleProperties) {
 				AddCheckbox("  "+property.Key, Data.CustomGetSetNode(CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2]), false);

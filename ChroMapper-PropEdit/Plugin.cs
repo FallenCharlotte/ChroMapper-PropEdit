@@ -26,7 +26,7 @@ public class Plugin {
 			settings.Init(mapEditorUI);
 		}
 		else {
-			main.Denit();
+			main.Disable();
 		}
 	}
 	

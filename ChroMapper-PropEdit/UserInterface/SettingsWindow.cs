@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+using ChroMapper_PropEdit.Components;
+
 namespace ChroMapper_PropEdit.UserInterface {
 
 public class SettingsController {
@@ -12,8 +14,9 @@ public class SettingsController {
 	public void Init(MapEditorUI mapEditorUI) {
 		var parent = mapEditorUI.MainUIGroup[5];
 		
-		window = new Window("Settings", "Settings", parent, size: new Vector2(200, 80));
-		panel = UI.AddChild(window.game_object, "Settings Panel");
+		var window_obj = new GameObject("Settings Window");
+		window = window_obj.AddComponent<Window>().Init("Settings", "Settings", parent.transform, size: new Vector2(200, 80));
+		panel = UI.AddChild(window_obj, "Settings Panel");
 		UI.AttachTransform(panel, new Vector2(-10, -40), new Vector2(0, -15), new Vector2(0, 0), new Vector2(1, 1));
 		{
 			var layout = panel.AddComponent<VerticalLayoutGroup>();

@@ -84,7 +84,9 @@
     <Compile Include="Plugin.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="Components\DragWindowController.cs" />
+    <Compile Include="Components\ResizeWindowController.cs" />
     <Compile Include="Components\ScrollToTop.cs" />
+    <Compile Include="Components\Window.cs" />
     <Compile Include="Enums\Events.cs" />
     <Compile Include="Enums\Map.cs" />
     <Compile Include="Enums\Notes.cs" />
@@ -94,7 +96,6 @@
     <Compile Include="UserInterface\MainWindow.UI.cs" />
     <Compile Include="UserInterface\SettingsWindow.cs" />
     <Compile Include="UserInterface\UI.cs" />
-    <Compile Include="UserInterface\Window.cs" />
     <Compile Include="Utils\Data.cs" />
   </ItemGroup>
   <ItemGroup>

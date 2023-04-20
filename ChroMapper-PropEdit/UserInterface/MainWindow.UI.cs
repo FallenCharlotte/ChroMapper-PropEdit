@@ -55,15 +55,17 @@ public partial class MainWindow {
 	public void Init(MapEditorUI mapEditorUI) {
 		var parent = mapEditorUI.MainUIGroup[5];
 		
-		window = new Window("Main", "Prop Editor", parent, new Vector2(220, 256));
-		window.OnShow += Resize;
+		var window_obj = new GameObject("Main Window");
+		window = window_obj.AddComponent<Window>().Init("Main", "Prop Editor", parent.transform, new Vector2(220, 256));
+		window.onShow += Resize;
+		window.onResize += Resize;
 		
 		{
 			var button = UI.AddButton(window.title, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"), () => Plugin.settings.ToggleWindow());
 			UI.AttachTransform(button.gameObject, pos: new Vector2(-25, -14), size: new Vector2(30, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
 		}
 		
-		var container = UI.AddChild(window.game_object, "Prop Scroll Container");
+		var container = UI.AddChild(window_obj, "Prop Scroll Container");
 		UI.AttachTransform(container, new Vector2(-10, -40), new Vector2(0, -15), new Vector2(0, 0), new Vector2(1, 1));
 		{
 			var image = container.AddComponent<Image>();
@@ -107,7 +109,7 @@ public partial class MainWindow {
 		scrollbar.direction = Scrollbar.Direction.BottomToTop;
 		scrollbar.value = 1f;
 		srect.verticalScrollbar = scrollbar;
-		scroll_to_top = window.game_object.AddComponent<ScrollToTop>();
+		scroll_to_top = window_obj.AddComponent<ScrollToTop>();
 		scroll_to_top.scrollbar = scrollbar;
 		
 		var slide = UI.AddChild(scroller, "Slide");
@@ -309,7 +311,7 @@ public partial class MainWindow {
 	
 	private void Resize() {
 		var layout = panel.GetComponent<LayoutElement>();
-		layout.minHeight = window.game_object.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
+		layout.minHeight = window.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
 	}
 	
 	// Stop textbox input from triggering actions, copied from the node editor

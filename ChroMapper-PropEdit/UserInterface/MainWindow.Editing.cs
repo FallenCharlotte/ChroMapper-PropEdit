@@ -26,12 +26,9 @@ public partial class MainWindow {
 		}
 		elements.Clear();
 		
-		// Hopefully bonk some race condition
-		if (real) {
-			editing = SelectionController.SelectedObjects.Select(it => it).ToList();
-		}
+		editing = SelectionController.SelectedObjects.Select(it => it).ToList();
 		
-		if (SelectionController.HasSelectedObjects()) {
+		if (SelectionController.HasSelectedObjects() && editing.Count() > 0) {
 			window.SetTitle($"{SelectionController.SelectedObjects.Count} Items selected");
 			
 			if (editing.GroupBy(o => o.ObjectType).Count() > 1) {

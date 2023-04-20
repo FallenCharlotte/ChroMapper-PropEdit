@@ -1,3 +1,6 @@
+
+v0.3.12.3
+	Fix keybind
 	Window resizing!
 
 v0.3.12.2

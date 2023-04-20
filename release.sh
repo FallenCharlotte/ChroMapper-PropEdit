@@ -11,10 +11,10 @@ done
 
 sed -i 's/AssemblyVersion(.*)/AssemblyVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
 sed -i 's/AssemblyFileVersion(.*)/AssemblyFileVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
-sed -i "1i v${short}" Changelog
-sed -i '1i\\' Changelog
+sed -i "1i v${short}" Changelog.txt
+sed -i '1i\\' Changelog.txt
 
-git add $PROJECT/Properties/AssemblyInfo.cs Changelog
+git add $PROJECT/Properties/AssemblyInfo.cs Changelog.txt
 git commit -nm "v${short}"
 git tag "v${short}"
 msbuild

@@ -37,7 +37,11 @@ public partial class MainWindow {
 		keybind.AddCompositeBinding("ButtonWithOneModifier")
 			.With("Modifier", "<Keyboard>/shift")
 			.With("Button", "<Keyboard>/n");
-		keybind.performed += (_) => ToggleWindow();
+		keybind.performed += (_) => {
+			if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+				ToggleWindow();
+			}
+		};
 		keybind.Disable();
 		map.Enable();
 	}

@@ -44,6 +44,10 @@
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\UnityEngine.UI.dll</HintPath>
       <Private>False</Private>

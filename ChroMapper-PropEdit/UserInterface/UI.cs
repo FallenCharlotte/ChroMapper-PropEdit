@@ -15,6 +15,11 @@ public class UI {
 		obj.transform.SetParent(parent.transform);
 		return obj;
 	}
+	public static GameObject AddChild(Transform parent, string name, params System.Type[] components) {
+		var obj = new GameObject(name, components);
+		obj.transform.SetParent(parent);
+		return obj;
+	}
 	
 	public static GameObject AddLabel(Transform parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center) {
 		var entryLabel = new GameObject(title + " Label", typeof(TextMeshProUGUI));

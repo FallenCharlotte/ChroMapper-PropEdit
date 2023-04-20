@@ -19,8 +19,7 @@ public partial class MainWindow {
 	public InputAction keybind;
 	public Window window;
 	public GameObject panel;
-	public Scrollbar scrollbar;
-	public ScrollToTop scroll_to_top;
+	public ScrollBox scrollbox;
 	public List<GameObject> elements = new List<GameObject>();
 	public List<BaseObject> editing;
 	
@@ -55,8 +54,7 @@ public partial class MainWindow {
 	public void Init(MapEditorUI mapEditorUI) {
 		var parent = mapEditorUI.MainUIGroup[5];
 		
-		var window_obj = new GameObject("Main Window");
-		window = window_obj.AddComponent<Window>().Init("Main", "Prop Editor", parent.transform, new Vector2(220, 256));
+		window = Window.Create("Main", "Prop Editor", parent.transform, new Vector2(220, 256));
 		window.onShow += Resize;
 		window.onResize += Resize;
 		
@@ -65,7 +63,7 @@ public partial class MainWindow {
 			UI.AttachTransform(button.gameObject, pos: new Vector2(-25, -14), size: new Vector2(30, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
 		}
 		
-		var container = UI.AddChild(window_obj, "Prop Scroll Container");
+		var container = UI.AddChild(window.gameObject, "Prop Scroll Container");
 		UI.AttachTransform(container, new Vector2(-10, -40), new Vector2(0, -15), new Vector2(0, 0), new Vector2(1, 1));
 		{
 			var image = container.AddComponent<Image>();
@@ -74,17 +72,10 @@ public partial class MainWindow {
 			image.color = new Color(0.1f, 0.1f, 0.1f, 1);
 		}
 		
-		var scroll_area = UI.AddChild(container, "Scroll Area", typeof(ScrollRect));
+		var scroll_area = UI.AddChild(container, "Scroll Area");
 		UI.AttachTransform(scroll_area, new Vector2(0, -10), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
-		var mask = scroll_area.AddComponent<RectMask2D>();
-		var srect = scroll_area.GetComponent<ScrollRect>();
-		srect.vertical = true;
-		srect.horizontal = false;
-		srect.scrollSensitivity = 42.069f;
-		srect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
-		
 		panel = UI.AddChild(scroll_area, "Prop Panel");
-		srect.content = UI.AttachTransform(panel, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1));
+		scrollbox = scroll_area.AddComponent<ScrollBox>().Init(UI.AttachTransform(panel, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1)));
 		{
 			var layout = panel.AddComponent<VerticalLayoutGroup>();
 			layout.padding = new RectOffset(10, 15, 0, 0);
@@ -100,36 +91,6 @@ public partial class MainWindow {
 		{
 			var fitter = panel.AddComponent<ContentSizeFitter>();
 			fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-		}
-		
-		var scroller = UI.AddChild(container, "Scroll Bar", typeof(Scrollbar));
-		UI.AttachTransform(scroller, new Vector2(10, 0), new Vector2(-5.5f, 0), new Vector2(1, 0), new Vector2(1, 1));
-		scrollbar = scroller.GetComponent<Scrollbar>();
-		scrollbar.transition = Selectable.Transition.ColorTint;
-		scrollbar.direction = Scrollbar.Direction.BottomToTop;
-		scrollbar.value = 1f;
-		srect.verticalScrollbar = scrollbar;
-		scroll_to_top = window_obj.AddComponent<ScrollToTop>();
-		scroll_to_top.scrollbar = scrollbar;
-		
-		var slide = UI.AddChild(scroller, "Slide");
-		UI.AttachTransform(slide, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
-		{
-			var image = slide.AddComponent<Image>();
-			image.sprite = PersistentUI.Instance.Sprites.Background;
-			image.type = Image.Type.Sliced;
-			image.color = new Color(0.24f, 0.24f, 0.24f, 1);
-		}
-		
-		var handle = UI.AddChild(slide, "Handle", typeof(Canvas));
-		UI.AttachTransform(handle, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
-		{
-			var image = handle.AddComponent<Image>();
-			image.sprite = PersistentUI.Instance.Sprites.Background;
-			image.type = Image.Type.Sliced;
-			image.color = new Color(0.7f, 0.7f, 0.7f, 1);
-			scrollbar.targetGraphic = image;
-			scrollbar.handleRect = handle.GetComponent<RectTransform>();
 		}
 		
 		UpdateSelection(true);

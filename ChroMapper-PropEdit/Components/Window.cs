@@ -16,6 +16,11 @@ public class Window : MonoBehaviour {
 	
 	public string settings_key;
 	
+	public static Window Create(string name, string title, Transform parent, Vector2 size) {
+		var obj = new GameObject($"name Window");
+		return obj.AddComponent<Window>().Init(name, title, parent, size);
+	}
+	
 	public Window Init(string name, string title, Transform parent, Vector2 size) {
 		var canvas = parent.GetComponent<Canvas>();
 		gameObject.transform.parent = parent;

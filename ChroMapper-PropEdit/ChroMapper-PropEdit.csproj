@@ -85,7 +85,7 @@
     <Compile Include="Settings.cs" />
     <Compile Include="Components\DragWindowController.cs" />
     <Compile Include="Components\ResizeWindowController.cs" />
-    <Compile Include="Components\ScrollToTop.cs" />
+    <Compile Include="Components\ScrollBox.cs" />
     <Compile Include="Components\Window.cs" />
     <Compile Include="Enums\Events.cs" />
     <Compile Include="Enums\Map.cs" />

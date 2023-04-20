@@ -14,9 +14,8 @@ public class SettingsController {
 	public void Init(MapEditorUI mapEditorUI) {
 		var parent = mapEditorUI.MainUIGroup[5];
 		
-		var window_obj = new GameObject("Settings Window");
-		window = window_obj.AddComponent<Window>().Init("Settings", "Settings", parent.transform, size: new Vector2(200, 80));
-		panel = UI.AddChild(window_obj, "Settings Panel");
+		window = Window.Create("Settings", "Settings", parent.transform, size: new Vector2(200, 80));
+		panel = UI.AddChild(window.gameObject, "Settings Panel");
 		UI.AttachTransform(panel, new Vector2(-10, -40), new Vector2(0, -15), new Vector2(0, 0), new Vector2(1, 1));
 		{
 			var layout = panel.AddComponent<VerticalLayoutGroup>();

@@ -383,7 +383,7 @@ public partial class MainWindow {
 			window.SetTitle("No items selected");
 		}
 		if (real) {
-			scroll_to_top.Trigger();
+			scrollbox.ScrollToTop();
 		}
 	}
 	

@@ -20,7 +20,6 @@ public partial class MainWindow {
 	public Window? window;
 	public GameObject? panel;
 	public ScrollBox? scrollbox;
-	public List<GameObject> elements = new List<GameObject>();
 	public List<BaseObject>? editing;
 	
 	public MainWindow() {
@@ -48,7 +47,7 @@ public partial class MainWindow {
 	
 	public void ToggleWindow() {
 		window!.Toggle();
-		UpdateSelection(false);
+		UpdateSelection(window!.gameObject.activeSelf);
 	}
 	
 	public void Disable() {
@@ -111,42 +110,39 @@ public partial class MainWindow {
 	
 	private GameObject AddLine(string title, Vector2? size = null) {
 		var container = UI.AddField(panel!, title, size);
-		elements.Add(container);
 		return container;
 	}
 	
 	// CustomData node gets removed when value = default
 	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool _default) {
 		var container = AddLine(title);
-		
-		bool value = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1) ?? _default;
+		var staged = editing!;
+		var value = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1) ?? _default;
 		
 		return UI.AddCheckbox(container, value, (v) => {
 			if (v == _default) {
-				UpdateObjects<bool?>(get_set.Item2, null);
+				Data.UpdateObjects<bool?>(staged, get_set.Item2, null);
 			}
 			else {
-				UpdateObjects<bool?>(get_set.Item2, v);
+				Data.UpdateObjects<bool?>(staged, get_set.Item2, v);
 			}
 		});
 	}
 	
 	private UIDropdown AddDropdown<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, Map<T?> type, bool nullable = false) {
 		var container = AddLine(title);
-		
-		T? value = Data.GetAllOrNothing<T>(editing!, get_set.Item1);
+		var staged = editing!;
+		var value = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
 		return UI.AddDropdown(container, value, (v) => {
-			UpdateObjects<T?>(get_set.Item2, v);
+			Data.UpdateObjects<T?>(staged, get_set.Item2, v);
 		}, type, nullable);
 	}
 	
 	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set) where T : struct {
 		var container = AddLine(title);
-		
-		(var getter, var setter) = get_set;
-		
-		T? value = Data.GetAllOrNothing<T?>(editing!, getter);
+		var staged = editing!;
+		var value = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
@@ -168,10 +164,10 @@ public partial class MainWindow {
 			object?[] parameters = new object?[]{s, null};
 			bool res = (bool)parse.Invoke(null, parameters);
 			if (!res) {
-				UpdateObjects<T?>(setter, null);
+				Data.UpdateObjects<T?>(staged, get_set.Item2, null);
 			}
 			else {
-				UpdateObjects<T?>(setter, (T)parameters[1]!);
+				Data.UpdateObjects<T?>(staged, get_set.Item2, (T)parameters[1]!);
 			}
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
@@ -189,10 +185,8 @@ public partial class MainWindow {
 	
 	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, bool tall = false) {
 		var container = AddLine(title, tall ? (new Vector2(0, 22)) : null);
-		
-		(var getter, var setter) = get_set;
-		
-		var value = Data.GetAllOrNothing<string>(editing!, getter);
+		var staged = editing!;
+		var value = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
 		
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
 		input.InputField.pointSize = tall ? 12 : 14;
@@ -202,7 +196,7 @@ public partial class MainWindow {
 			if (s == "") {
 				s = null;
 			}
-			UpdateObjects<string?>(setter, s);
+			Data.UpdateObjects<string?>(staged, get_set.Item2, s);
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);

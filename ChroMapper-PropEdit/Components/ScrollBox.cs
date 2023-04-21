@@ -62,11 +62,12 @@ public class ScrollBox : MonoBehaviour {
 	}
 	
 	private IEnumerator scroll_to_top() {
-		yield return new WaitForEndOfFrame();
-		scrollbar!.value = 1f;
-		// For some reason we still have occasional race conditions, even though it's frame-locked...
-		yield return new WaitForEndOfFrame();
-		scrollbar.value = 1f;
+		for (int i = 0; i < 3; ++i) {
+			if (scrollbar != null) {
+				scrollbar.value = 1f;
+			}
+			yield return new WaitForEndOfFrame();
+		}
 		yield return null;
 	}
 }

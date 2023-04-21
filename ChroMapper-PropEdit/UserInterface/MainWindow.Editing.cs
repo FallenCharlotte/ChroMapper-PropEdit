@@ -6,7 +6,6 @@ using UnityEngine;
 using Beatmap.Base;
 using Beatmap.Base.Customs;
 using Beatmap.Enums;
-using Beatmap.Helper;
 using Beatmap.V2;
 using Beatmap.V2.Customs;
 using Beatmap.V3;
@@ -20,11 +19,10 @@ using Convert = System.Convert;
 namespace ChroMapper_PropEdit.UserInterface {
 
 public partial class MainWindow {
-	public void UpdateSelection(bool real) {
-		foreach (var e in elements) {
-			Object.Destroy(e);
+	public void UpdateSelection(bool real) { lock(this) {
+		foreach (Transform child in panel!.transform) {
+			GameObject.Destroy(child.gameObject);
 		}
-		elements.Clear();
 		
 		editing = SelectionController.SelectedObjects.Select(it => it).ToList();
 		
@@ -32,7 +30,7 @@ public partial class MainWindow {
 			window!.SetTitle($"{SelectionController.SelectedObjects.Count} Items selected");
 			
 			if (editing.GroupBy(o => o.ObjectType).Count() > 1) {
-				elements.Add(UI.AddLabel(panel!.transform, "Unsupported", "Multi-Type Unsupported!", new Vector2(0, 0)));
+				UI.AddLabel(panel!.transform, "Unsupported", "Multi-Type Unsupported!", Vector2.zero);
 				return;
 			}
 			
@@ -385,7 +383,7 @@ public partial class MainWindow {
 		if (real) {
 			scrollbox!.ScrollToTop();
 		}
-	}
+	}}
 	
 	private void AddAnimation(bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
@@ -398,22 +396,6 @@ public partial class MainWindow {
 			AddCheckbox("  Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), true);
 			AddLine("");
 		}
-	}
-	
-	private void UpdateObjects<T>(System.Action<BaseObject, T?> setter, T? value) {
-		var beatmapActions = new List<BeatmapObjectModifiedAction>();
-		foreach (var o in editing!) {
-			var clone = BeatmapFactory.Clone(o);
-			
-			setter(o, value);
-			o.RefreshCustom();
-			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, clone, $"Edited a {o.ObjectType} with Prop Edit.", true));
-		}
-		
-		BeatmapActionContainer.AddAction(
-			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
-			true);
 	}
 }
 

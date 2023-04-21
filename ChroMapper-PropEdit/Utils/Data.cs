@@ -7,6 +7,7 @@ using SimpleJSON;
 
 using Beatmap.Base;
 using Beatmap.Enums;
+using Beatmap.Helper;
 using Beatmap.Shared;
 
 using ChroMapper_PropEdit.Enums;
@@ -221,6 +222,22 @@ public class Data {
 		}
 		
 		return last;
+	}
+	
+	public static void UpdateObjects<T>(IEnumerable<BaseObject> editing, System.Action<BaseObject, T?> setter, T? value) {
+		var beatmapActions = new List<BeatmapObjectModifiedAction>();
+		foreach (var o in editing!) {
+			var clone = BeatmapFactory.Clone(o);
+			
+			setter(o, value);
+			o.RefreshCustom();
+			
+			beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, clone, $"Edited a {o.ObjectType} with Prop Edit.", true));
+		}
+		
+		BeatmapActionContainer.AddAction(
+			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
+			true);
 	}
 	
 	public static JSONNode? GetNode(JSONNode root, string name) {

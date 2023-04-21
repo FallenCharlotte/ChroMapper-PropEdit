@@ -8,9 +8,9 @@ using ChroMapper_PropEdit.UserInterface;
 namespace ChroMapper_PropEdit.Components {
 
 public class ScrollBox : MonoBehaviour {
-	public RectTransform content;
+	public RectTransform? content;
 	
-	public Scrollbar scrollbar;
+	public Scrollbar? scrollbar;
 	
 	public ScrollBox Init(RectTransform content) {
 		this.content = content;
@@ -63,7 +63,7 @@ public class ScrollBox : MonoBehaviour {
 	
 	private IEnumerator scroll_to_top() {
 		yield return new WaitForEndOfFrame();
-		scrollbar.value = 1f;
+		scrollbar!.value = 1f;
 		// For some reason we still have occasional race conditions, even though it's frame-locked...
 		yield return new WaitForEndOfFrame();
 		scrollbar.value = 1f;

@@ -29,10 +29,10 @@ public partial class MainWindow {
 		editing = SelectionController.SelectedObjects.Select(it => it).ToList();
 		
 		if (SelectionController.HasSelectedObjects() && editing.Count() > 0) {
-			window.SetTitle($"{SelectionController.SelectedObjects.Count} Items selected");
+			window!.SetTitle($"{SelectionController.SelectedObjects.Count} Items selected");
 			
 			if (editing.GroupBy(o => o.ObjectType).Count() > 1) {
-				elements.Add(UI.AddLabel(panel.transform, "Unsupported", "Multi-Type Unsupported!", new Vector2(0, 0)));
+				elements.Add(UI.AddLabel(panel!.transform, "Unsupported", "Multi-Type Unsupported!", new Vector2(0, 0)));
 				return;
 			}
 			
@@ -44,11 +44,11 @@ public partial class MainWindow {
 			
 			switch (type) {
 				case ObjectType.Note:
-					var note = o as BaseNote;
+					var note = (o as BaseNote)!;
 					AddParsed("X", Data.GetSet<int>("PosX"));
 					AddParsed("Y", Data.GetSet<int>("PosY"));
-					AddDropdownI("Type", Data.GetSet<int>("Type"), Notes.NoteTypes);
-					AddDropdownI("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
+					AddDropdown<int?>("Type", Data.GetSet<int>("Type"), Notes.NoteTypes);
+					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
 					if (!v2) {
 						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"));
 					}
@@ -58,37 +58,37 @@ public partial class MainWindow {
 						AddLine("Chroma");
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 						if (o is V2Note) {
-							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool>("_disableSpawnEffect"), false);
+							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false);
 						}
 						else {
-							AddCheckbox("Spawn Effect", Data.CustomGetSet<bool>("spawnEffect"), true);
-							AddCheckbox("Disable Debris", Data.CustomGetSet<bool>("disableDebris"), false);
+							AddCheckbox("Spawn Effect", Data.CustomGetSet<bool?>("spawnEffect"), true);
+							AddCheckbox("Disable Debris", Data.CustomGetSet<bool?>("disableDebris"), false);
 						}
 					}
 					
 					if (Settings.Get("Noodle")?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
-						AddParsed("NJS", Data.CustomGetSet<float>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true);
 						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true);
 						if (o is V2Note) {
-							AddParsed("Exact Angle", Data.GetSet<float>("CustomDirection"));
-							AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
-							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+							AddParsed("Exact Angle", Data.CustomGetSet<float?>("_cutDirection"));
+							AddCheckbox("Fake", Data.CustomGetSet<bool?>("_fake"), false);
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true);
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
 						}
 						else {
-							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
-							AddCheckbox("Disable Look", Data.CustomGetSet<bool>("disableNoteLook"), false);
-							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool>("disableBadCutDirection"), false);
-							AddCheckbox("No Badcut Speed", Data.CustomGetSet<bool>("disableBadCutSpeed"), false);
-							AddCheckbox("No Badcut Color", Data.CustomGetSet<bool>("disableBadCutSaberType"), false);
+							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false);
+							AddCheckbox("Disable Look", Data.CustomGetSet<bool?>("disableNoteLook"), false);
+							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool?>("disableBadCutDirection"), false);
+							AddCheckbox("No Badcut Speed", Data.CustomGetSet<bool?>("disableBadCutSpeed"), false);
+							AddCheckbox("No Badcut Color", Data.CustomGetSet<bool?>("disableBadCutSaberType"), false);
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
-							AddTextbox("Link", Data.CustomGetSet("link"));
+							AddTextbox("Link", Data.CustomGetSet<string>("link"));
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 						AddAnimation(v2);
@@ -101,16 +101,16 @@ public partial class MainWindow {
 				case ObjectType.Arc: {
 					AddParsed("Head X", Data.GetSet<int>("PosX"));
 					AddParsed("Head Y", Data.GetSet<int>("PosY"));
-					AddDropdownI("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
-					AddDropdownI("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
+					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
+					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
 					AddParsed("Head Multiplier", Data.GetSet<float>("HeadControlPointLengthMultiplier"));
 					AddParsed("Tail Beat", Data.GetSet<float>("TailTime"));
 					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
 					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
-					AddDropdownI("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections);
+					AddDropdown<int?>("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections);
 					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"));
 					
-					var s = o as BaseSlider;
+					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get("Chroma")?.AsBool ?? false) {
 						AddLine("");
@@ -121,21 +121,21 @@ public partial class MainWindow {
 					if (Settings.Get("Noodle")?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
-						AddParsed("NJS", Data.CustomGetSet<float>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true);
 						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true);
 						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true);
 						if (v2) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true);
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
 						}
 						else {
-							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
+							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false);
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
-							AddTextbox("Link", Data.CustomGetSet("link"));
+							AddTextbox("Link", Data.CustomGetSet<string>("link"));
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 						AddAnimation(v2);
@@ -145,14 +145,14 @@ public partial class MainWindow {
 				case ObjectType.Chain: {
 					AddParsed("Head X", Data.GetSet<int>("PosX"));
 					AddParsed("Head Y", Data.GetSet<int>("PosY"));
-					AddDropdownI("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
-					AddDropdownI("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
+					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
+					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
 					AddParsed("Slices", Data.GetSet<int>("SliceCount"));
 					AddParsed("Squish", Data.GetSet<float>("Squish"));
 					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
 					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
 					
-					var s = o as BaseSlider;
+					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get("Chroma")?.AsBool ?? false) {
 						AddLine("");
@@ -163,33 +163,33 @@ public partial class MainWindow {
 					if (Settings.Get("Noodle")?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
-						AddParsed("NJS", Data.CustomGetSet<float>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true);
 						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true);
 						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true);
 						if (v2) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true);
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
 						}
 						else {
-							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool>("disableNoteGravity"), false);
+							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false);
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
-							AddTextbox("Link", Data.CustomGetSet("link"));
+							AddTextbox("Link", Data.CustomGetSet<string>("link"));
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 						AddAnimation(v2);
 					}
 				}	break;
 				case ObjectType.Obstacle:
-					var ob = o as BaseObstacle;
+					var ob = (o as BaseObstacle)!;
 					AddParsed("Duration", Data.GetSet<float>("Duration"));
 					if (o is V2Obstacle) {
 						AddParsed("X", Data.GetSet<int>("PosX"));
 						AddParsed("Width", Data.GetSet<int>("Width"));
-						AddDropdownI("Height", Data.GetSet<int>("Type"), Obstacles.WallHeights);
+						AddDropdown<int?>("Height", Data.GetSet<int>("Type"), Obstacles.WallHeights);
 					}
 					else {
 						AddParsed("X (Left)", Data.GetSet<int>("PosX"));
@@ -207,18 +207,18 @@ public partial class MainWindow {
 					if (Settings.Get("Noodle")?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
-						AddParsed("NJS", Data.CustomGetSet<float>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Position", Data.CustomGetSetRaw(ob.CustomKeyCoordinate), true);
 						AddTextbox("Rotation", Data.CustomGetSetRaw(ob.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(ob.CustomKeyLocalRotation), true);
 						AddTextbox("Size", Data.CustomGetSetRaw(ob.CustomKeySize), true);
 						if (o is V2Obstacle) {
-							AddCheckbox("Fake", Data.CustomGetSet<bool>("_fake"), false);
-							AddCheckbox("Interactable", Data.CustomGetSet<bool>("_interactable"), true);
+							AddCheckbox("Fake", Data.CustomGetSet<bool?>("_fake"), false);
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true);
 						}
 						else {
-							AddCheckbox("Uninteractable", Data.CustomGetSet<bool>("uninteractable"), false);
+							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 						AddAnimation(o is V2Obstacle);
@@ -231,12 +231,12 @@ public partial class MainWindow {
 					var f = events.First();
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
-						if (Settings.Get("split_val", true).AsBool) {
-							AddDropdownI("Color", Data.GetSetSplitValue(0b1100), Events.LightColors);
-							AddDropdownI("Action", Data.GetSetSplitValue(0b0011), Events.LightActions);
+						if (Settings.Get("split_val", true)!.AsBool) {
+							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors);
+							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions);
 						}
 						else {
-							AddDropdownI("Value", Data.GetSet<int>("Value"), Events.LightValues);
+							AddDropdown<int?>("Value", Data.GetSet<int>("Value"), Events.LightValues);
 						}
 						AddParsed("Brightness", Data.GetSet<float>("FloatValue"));
 						
@@ -246,16 +246,16 @@ public partial class MainWindow {
 							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true);
 							AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 							if (events.Where(e => e.IsTransition).Count() == editing.Count()) {
-								AddDropdownS("Easing",    Data.CustomGetSet(f.CustomKeyEasing), Events.Easings, false);
-								AddDropdownS("Lerp Type", Data.CustomGetSet(f.CustomKeyLerpType), Events.LerpTypes, false);
+								AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true);
+								AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true);
 							}
 							if (o is V2Event e) {
 								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false);
 								if (e.CustomLightGradient != null) {
-									AddParsed("Duration",     Data.CustomGetSet<float>($"{e.CustomKeyLightGradient}._duration"));
+									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"));
 									AddTextbox("Start Color", Data.CustomGetSetColor($"{e.CustomKeyLightGradient}._startColor"));
 									AddTextbox("End Color",   Data.CustomGetSetColor($"{e.CustomKeyLightGradient}._endColor"));
-									AddDropdownS("Easing",    Data.CustomGetSet($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false);
+									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false);
 								}
 							}
 						}
@@ -267,9 +267,9 @@ public partial class MainWindow {
 						if (Settings.Get("Chroma")?.AsBool ?? false) {
 							AddLine("");
 							AddLine("Chroma");
-							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool> (f.CustomKeyLockRotation), false);
-							AddDropdownI("Direction",     Data.CustomGetSet<int>  (f.CustomKeyDirection), Events.LaserDirection, true);
-							AddParsed("Precise Speed",   Data.CustomGetSet<float>(f.CustomKeyPreciseSpeed));
+							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false);
+							AddDropdown<int?>("Direction",     Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.LaserDirection, true);
+							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeyPreciseSpeed));
 						}
 					}
 					// Ring Rotation
@@ -277,17 +277,17 @@ public partial class MainWindow {
 						if (Settings.Get("Chroma")?.AsBool ?? false) {
 							AddLine("");
 							AddLine("Chroma");
-							AddTextbox("Filter",     Data.CustomGetSet(f.CustomKeyNameFilter));
+							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter));
 							if (o is V2Event) {
-								AddCheckbox("Reset", Data.CustomGetSet<bool>("_reset"), false);
+								AddCheckbox("Reset", Data.CustomGetSet<bool?>("_reset"), false);
 							}
-							AddParsed("Rotation",    Data.CustomGetSet<float>(f.CustomKeyLaneRotation));
-							AddParsed("Step",        Data.CustomGetSet<float>(f.CustomKeyStep));
-							AddParsed("Propagation", Data.CustomGetSet<float>(f.CustomKeyProp));
-							AddParsed("Speed",       Data.CustomGetSet<float>(f.CustomKeySpeed));
-							AddDropdownI("Direction", Data.CustomGetSet<int>  (f.CustomKeyDirection), Events.RingDirection, true);
+							AddParsed("Rotation",    Data.CustomGetSet<float?>(f.CustomKeyLaneRotation));
+							AddParsed("Step",        Data.CustomGetSet<float?>(f.CustomKeyStep));
+							AddParsed("Propagation", Data.CustomGetSet<float?>(f.CustomKeyProp));
+							AddParsed("Speed",       Data.CustomGetSet<float?>(f.CustomKeySpeed));
+							AddDropdown<int?>("Direction", Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.RingDirection, true);
 							if (o is V2Event) {
-								AddCheckbox("Counter Spin", Data.CustomGetSet<bool>("_counterSpin"), false);
+								AddCheckbox("Counter Spin", Data.CustomGetSet<bool?>("_counterSpin"), false);
 							}
 						}
 					}
@@ -296,17 +296,17 @@ public partial class MainWindow {
 						if (Settings.Get("Chroma")?.AsBool ?? false) {
 							AddLine("");
 							AddLine("Chroma");
-							AddParsed("Step",  Data.CustomGetSet<float>(f.CustomKeyStep));
-							AddParsed("Speed", Data.CustomGetSet<float>(f.CustomKeySpeed));
+							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep));
+							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed));
 						}
 					}
 					// Boost Color
 					if (events.Where(e => e.IsColorBoostEvent()).Count() == editing.Count()) {
-						AddDropdownI("Color Set", Data.GetSet<int>("Value"), Events.BoostSets);
+						AddDropdown<int?>("Color Set", Data.GetSet<int>("Value"), Events.BoostSets);
 					}
 					// Lane Rotations
 					if (events.Where(e => e.IsLaneRotationEvent()).Count() == editing.Count()) {
-						AddDropdownI("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions);
+						AddDropdown<int?>("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions);
 					}
 				}	break;
 				case ObjectType.CustomEvent: {
@@ -315,10 +315,10 @@ public partial class MainWindow {
 					
 					if (events.Where(e => e.Type == "AnimateTrack").Count() == editing.Count()) {
 						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true);
-						AddParsed("Duration", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"));
-						AddDropdownS("Easing", Data.JSONGetSet(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false);
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false);
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int>(typeof(BaseCustomEvent), "Data", "repeat"));
+							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"));
 						}
 						AddLine("");
 						AddTextbox("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), true);
@@ -329,10 +329,10 @@ public partial class MainWindow {
 					}
 					if (events.Where(e => e.Type == "AssignPathAnimation").Count() == editing.Count()) {
 						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true);
-						AddParsed("Duration", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"));
-						AddDropdownS("Easing", Data.JSONGetSet(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false);
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false);
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int>(typeof(BaseCustomEvent), "Data", "repeat"));
+							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"));
 						}
 						AddLine("");
 						AddTextbox("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), true);
@@ -342,32 +342,32 @@ public partial class MainWindow {
 						AddTextbox("Definite Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_definitePosition" : "definitePosition"), true);
 					}
 					if (events.Where(e => e.Type == "AssignTrackParent").Count() == editing.Count()) {
-						AddTextbox("Parent", Data.JSONGetSet(typeof(BaseCustomEvent), "Data", v2 ? "_parentTrack" : "parentTrack"), true);
+						AddTextbox("Parent", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_parentTrack" : "parentTrack"), true);
 						AddTextbox("Children", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_childrenTracks" : "childrenTracks"), true);
-						AddCheckbox("Keep Position", Data.JSONGetSet<bool>(typeof(BaseCustomEvent), "Data", v2 ? "_worldPositionStays" : "worldPositionStays"), false);
+						AddCheckbox("Keep Position", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", v2 ? "_worldPositionStays" : "worldPositionStays"), false);
 					}
 					if (events.Where(e => e.Type == "AssignPlayerToTrack").Count() == editing.Count()) {
-						AddTextbox("Track", Data.JSONGetSet(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true);
+						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true);
 					}
 					if (events.Where(e => e.Type == "AssignFogTrack").Count() == editing.Count()) {
 						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true);
-						AddParsed("Duration", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"));
-						AddDropdownS("Easing", Data.JSONGetSet(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false);
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false);
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int>(typeof(BaseCustomEvent), "Data", "repeat"));
+							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"));
 						}
 						
-						AddParsed("Attenuation", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", "_attenuation"));
-						AddParsed("Offset", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", "_offset"));
-						AddParsed("Start Y", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", "_startY"));
-						AddParsed("Height", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", "_height"));
+						AddParsed("Attenuation", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_attenuation"));
+						AddParsed("Offset", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_offset"));
+						AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_startY"));
+						AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_height"));
 					}
 					if (events.Where(e => e.Type == "AssignComponent").Count() == editing.Count()) {
 						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true);
-						AddParsed("Duration", Data.JSONGetSet<float>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"));
-						AddDropdownS("Easing", Data.JSONGetSet(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false);
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false);
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int>(typeof(BaseCustomEvent), "Data", "repeat"));
+							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"));
 						}
 						AddTextbox("Environment Fog", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "BloomFogEnvironment"));
 						AddTextbox("Tube Bloom Light", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "TubeBloomPrePassLight"));
@@ -380,10 +380,10 @@ public partial class MainWindow {
 			}
 		}
 		else {
-			window.SetTitle("No items selected");
+			window!.SetTitle("No items selected");
 		}
 		if (real) {
-			scrollbox.ScrollToTop();
+			scrollbox!.ScrollToTop();
 		}
 	}
 	
@@ -400,25 +400,9 @@ public partial class MainWindow {
 		}
 	}
 	
-	private void UpdateObjects<T>(System.Action<BaseObject, T?> setter, T? value) where T : struct {
+	private void UpdateObjects<T>(System.Action<BaseObject, T?> setter, T? value) {
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
-		foreach (var o in editing) {
-			var clone = BeatmapFactory.Clone(o);
-			
-			setter(o, value);
-			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, clone, $"Edited a {o.ObjectType} with Prop Edit.", true));
-		}
-		
-		BeatmapActionContainer.AddAction(
-			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
-			true);
-	}
-	
-	// I hate c#
-	private void UpdateObjects(System.Action<BaseObject, string> setter, string value) {
-		var beatmapActions = new List<BeatmapObjectModifiedAction>();
-		foreach (var o in editing) {
+		foreach (var o in editing!) {
 			var clone = BeatmapFactory.Clone(o);
 			
 			setter(o, value);

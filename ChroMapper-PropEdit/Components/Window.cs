@@ -9,12 +9,12 @@ using ChroMapper_PropEdit.UserInterface;
 namespace ChroMapper_PropEdit.Components {
 
 public class Window : MonoBehaviour {
-	public event Action onShow;
-	public event Action onResize;
+	public event Action? onShow;
+	public event Action? onResize;
 	
-	public GameObject title;
+	public GameObject? title;
 	
-	public string settings_key;
+	public string? settings_key;
 	
 	public static Window Create(string name, string title, Transform parent, Vector2 size) {
 		var obj = new GameObject($"name Window");
@@ -68,15 +68,15 @@ public class Window : MonoBehaviour {
 	}
 	
 	public void SetTitle(string text) {
-		title.GetComponent<TextMeshProUGUI>().text = text;
+		title!.GetComponent<TextMeshProUGUI>().text = text;
 	}
 	
 	private void PosLoad() {
 		Settings.Reload();
-		if (Settings.Get(settings_key) == null) {
+		var settings = Settings.Get(settings_key!)?.AsObject;
+		if (settings == null) {
 			return;
 		}
-		var settings = Settings.Get(settings_key).AsObject;
 		GetComponent<RectTransform>().anchoredPosition =
 			new Vector2(settings["x"].AsFloat, settings["y"].AsFloat);
 		GetComponent<RectTransform>().sizeDelta =
@@ -90,7 +90,7 @@ public class Window : MonoBehaviour {
 		settings["y"] = pos.y;
 		settings["w"] = GetComponent<RectTransform>().sizeDelta.x;
 		settings["h"] = GetComponent<RectTransform>().sizeDelta.y;
-		Settings.Set(settings_key, settings);
+		Settings.Set(settings_key!, settings);
 		onResize?.Invoke();
 	}
 }

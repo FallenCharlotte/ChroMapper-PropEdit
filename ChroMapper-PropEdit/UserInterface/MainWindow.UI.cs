@@ -17,11 +17,11 @@ namespace ChroMapper_PropEdit.UserInterface {
 public partial class MainWindow {
 	public ExtensionButton main_button;
 	public InputAction keybind;
-	public Window window;
-	public GameObject panel;
-	public ScrollBox scrollbox;
+	public Window? window;
+	public GameObject? panel;
+	public ScrollBox? scrollbox;
 	public List<GameObject> elements = new List<GameObject>();
-	public List<BaseObject> editing;
+	public List<BaseObject>? editing;
 	
 	public MainWindow() {
 		main_button = ExtensionButtons.AddButton(
@@ -47,7 +47,7 @@ public partial class MainWindow {
 	}
 	
 	public void ToggleWindow() {
-		window.Toggle();
+		window!.Toggle();
 		UpdateSelection(false);
 	}
 	
@@ -63,7 +63,7 @@ public partial class MainWindow {
 		window.onResize += Resize;
 		
 		{
-			var button = UI.AddButton(window.title, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"), () => Plugin.settings.ToggleWindow());
+			var button = UI.AddButton(window.title!, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"), () => Plugin.settings!.ToggleWindow());
 			UI.AttachTransform(button.gameObject, pos: new Vector2(-25, -14), size: new Vector2(30, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
 		}
 		
@@ -110,7 +110,7 @@ public partial class MainWindow {
 #region Form Fields
 	
 	private GameObject AddLine(string title, Vector2? size = null) {
-		var container = UI.AddField(panel, title, size);
+		var container = UI.AddField(panel!, title, size);
 		elements.Add(container);
 		return container;
 	}
@@ -119,114 +119,59 @@ public partial class MainWindow {
 	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool _default) {
 		var container = AddLine(title);
 		
-		var value = Data.GetAllOrNothing<bool>(editing, get_set.Item1) ?? _default;
+		bool value = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1) ?? _default;
 		
 		return UI.AddCheckbox(container, value, (v) => {
 			if (v == _default) {
-				UpdateObjects<bool>(get_set.Item2, null);
+				UpdateObjects<bool?>(get_set.Item2, null);
 			}
 			else {
-				UpdateObjects<bool>(get_set.Item2, v);
+				UpdateObjects<bool?>(get_set.Item2, v);
 			}
 		});
 	}
 	
-	private UIDropdown AddDropdownI(string title, System.ValueTuple<System.Func<BaseObject, int?>, System.Action<BaseObject, int?>> get_set, Map<int> type, bool nullable = false) {
+	private UIDropdown AddDropdown<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, Map<T?> type, bool nullable = false) {
 		var container = AddLine(title);
 		
-		(var getter, var setter) = get_set;
+		T? value = Data.GetAllOrNothing<T>(editing!, get_set.Item1);
 		
-		// Get values from selected items
-		var options = new List<string>();
-		var value = Data.GetAllOrNothing<int>(editing, getter);
-		int i = 0;
-		if (!value.HasValue) {
-			options.Add("--");
-		}
-		else {
-			i = type.dict.Keys.ToList().IndexOf((int)value);
-			if (nullable) {
-				options.Add("Unset");
-				i += 1;
-			}
-		}
-		options.AddRange(type.dict.Values.ToList());
-		
-		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, container.transform);
-		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		dropdown.SetOptions(options);
-		dropdown.Dropdown.value = i;
-		dropdown.Dropdown.onValueChanged.AddListener((i) => {
-			int? value = type.Backward(options[i]);
-			UpdateObjects<int>(setter, value);
-		});
-		
-		return dropdown;
+		return UI.AddDropdown(container, value, (v) => {
+			UpdateObjects<T?>(get_set.Item2, v);
+		}, type, nullable);
 	}
-	
-	// I hate C#
-#nullable enable
-	private UIDropdown AddDropdownS(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, Map type, bool nullable = false) {
-		var container = AddLine(title);
-		
-		(var getter, var setter) = get_set;
-		
-		// Get values from selected items
-		var options = new List<string>();
-		var value = Data.GetAllOrNothing(editing, getter);
-		int i = 0;
-		if (value == null) {
-			options.Add("--");
-		}
-		else {
-			i = type.dict.Keys.ToList().IndexOf(value);
-			if (nullable) {
-				options.Add("Unset");
-				i += 1;
-			}
-		}
-		options.AddRange(type.dict.Values.ToList());
-		
-		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, container.transform);
-		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		dropdown.SetOptions(options);
-		dropdown.Dropdown.value = i;
-		dropdown.Dropdown.onValueChanged.AddListener((i) => {
-			string? value = type.Backward(options[i]);
-			UpdateObjects(setter, value);
-		});
-		
-		return dropdown;
-	}
-#nullable disable
 	
 	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set) where T : struct {
 		var container = AddLine(title);
 		
 		(var getter, var setter) = get_set;
 		
-		var value = Data.GetAllOrNothing<T>(editing, getter);
+		T? value = Data.GetAllOrNothing<T?>(editing!, getter);
 		
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		input.InputField.text = value.HasValue ? (string)Convert.ChangeType(value, typeof(string)) : "";
+		input.InputField.text = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
 		input.InputField.onEndEdit.AddListener((s) => {
 			// No IParsable in mono ;_;
 			var methods = typeof(T).GetMethods();
-			System.Reflection.MethodInfo parse = null;
+			System.Reflection.MethodInfo? parse = null;
 			foreach (var method in methods) {
 				if (method.Name == "TryParse") {
 					parse = method;
 					break;
 				}
 			}
-			object[] parameters = new object[]{s, null};
+			if (parse == null) {
+				Debug.LogError("Tried to parse a non-parsable type!");
+				return;
+			}
+			object?[] parameters = new object?[]{s, null};
 			bool res = (bool)parse.Invoke(null, parameters);
 			if (!res) {
-				UpdateObjects<T>(setter, null);
+				UpdateObjects<T?>(setter, null);
 			}
 			else {
-				UpdateObjects<T>(setter, (T)parameters[1]);
+				UpdateObjects<T?>(setter, (T)parameters[1]!);
 			}
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
@@ -242,22 +187,22 @@ public partial class MainWindow {
 		return input;
 	}
 	
-	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string>, System.Action<BaseObject, string>> get_set, bool tall = false) {
+	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, bool tall = false) {
 		var container = AddLine(title, tall ? (new Vector2(0, 22)) : null);
 		
 		(var getter, var setter) = get_set;
 		
-		var value = Data.GetAllOrNothing(editing, getter);
+		var value = Data.GetAllOrNothing<string>(editing!, getter);
 		
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
 		input.InputField.pointSize = tall ? 12 : 14;
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		input.InputField.text = value ?? "";
-		input.InputField.onEndEdit.AddListener((s) => {
+		input.InputField.onEndEdit.AddListener((string? s) => {
 			if (s == "") {
 				s = null;
 			}
-			UpdateObjects(setter, s);
+			UpdateObjects<string?>(setter, s);
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
@@ -275,8 +220,8 @@ public partial class MainWindow {
 #endregion
 	
 	private void Resize() {
-		var layout = panel.GetComponent<LayoutElement>();
-		layout.minHeight = window.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
+		var layout = panel!.GetComponent<LayoutElement>();
+		layout!.minHeight = window!.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
 	}
 	
 	// Stop textbox input from triggering actions, copied from the node editor

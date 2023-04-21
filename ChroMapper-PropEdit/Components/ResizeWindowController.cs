@@ -7,13 +7,13 @@ namespace ChroMapper_PropEdit.Components {
 
 public class ResizeWindowController : MonoBehaviour, IDragHandler, IEndDragHandler
 {
-	public Canvas canvas { set; get; }
-	public event Action onResizeWindow;
+	public float canvas_scale = 1f;
+	public event Action? onResizeWindow;
 	
 	public Vector2 mask = Vector2.zero;
 	
 	public ResizeWindowController Init(Canvas canvas, Action onResizeWindow, Vector2 mask) {
-		this.canvas = canvas;
+		this.canvas_scale = canvas.scaleFactor;
 		this.onResizeWindow = onResizeWindow;
 		this.mask = mask;
 		
@@ -27,7 +27,7 @@ public class ResizeWindowController : MonoBehaviour, IDragHandler, IEndDragHandl
 	
 	public void OnDrag(PointerEventData eventData) {
 		var target = GetComponentInParent<Window>();
-		var delta = Vector2.Scale(mask, eventData.delta / canvas.scaleFactor);
+		var delta = Vector2.Scale(mask, eventData.delta / canvas_scale);
 		target.GetComponent<RectTransform>().sizeDelta += Vector2.Scale(delta, new Vector2(1, -1));
 		target.GetComponent<RectTransform>().anchoredPosition += delta / 2;
 	}

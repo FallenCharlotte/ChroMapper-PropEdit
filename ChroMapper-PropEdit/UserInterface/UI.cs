@@ -1,11 +1,15 @@
 // Static UI helper functions
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+
+using ChroMapper_PropEdit.Enums;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
@@ -70,6 +74,8 @@ public class UI {
 		return button;
 	}
 	
+#region Input Fields
+	
 	public static Toggle AddCheckbox(GameObject parent, bool value, UnityAction<bool> setter) {
 		var original = GameObject.Find("Strobe Generator").GetComponentInChildren<Toggle>(true);
 		var toggleObject = UnityEngine.Object.Instantiate(original, parent.transform);
@@ -81,6 +87,36 @@ public class UI {
 		toggleComponent.onValueChanged.AddListener(setter);
 		return toggleComponent;
 	}
+	
+	public static UIDropdown AddDropdown<T>(GameObject parent, T? value, UnityAction<T?> setter, Map<T?> type, bool nullable = false) {
+		// Get values from selected items
+		var options = new List<string>();
+		int i = 0;
+		if (value == null) {
+			options.Add("--");
+		}
+		else {
+			i = type.dict.Keys.ToList().IndexOf((T)value);
+			if (nullable) {
+				options.Add("Unset");
+				i += 1;
+			}
+		}
+		options.AddRange(type.dict.Values.ToList());
+		
+		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, parent.transform);
+		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		dropdown.SetOptions(options);
+		dropdown.Dropdown.value = i;
+		dropdown.Dropdown.onValueChanged.AddListener((i) => {
+			T? value = type.Backward(options[i]);
+			setter(value);
+		});
+		
+		return dropdown;
+	}
+	
+#endregion
 	
 	public static RectTransform AttachTransform(GameObject obj,    Vector2 size, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, Vector2? pivot = null) {
 		var rectTransform = obj.GetComponent<RectTransform>();

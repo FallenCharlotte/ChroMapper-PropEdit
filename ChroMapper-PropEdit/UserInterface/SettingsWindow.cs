@@ -6,10 +6,10 @@ using ChroMapper_PropEdit.Components;
 namespace ChroMapper_PropEdit.UserInterface {
 
 public class SettingsController {
-	public Window window;
-	public GameObject panel;
-	public Toggle chroma_toggle;
-	public Toggle noodle_toggle;
+	public Window? window;
+	public GameObject? panel;
+	public Toggle? chroma_toggle;
+	public Toggle? noodle_toggle;
 	
 	public void Init(MapEditorUI mapEditorUI) {
 		var parent = mapEditorUI.MainUIGroup[5];
@@ -31,14 +31,14 @@ public class SettingsController {
 			var container = UI.AddField(panel, "Chroma");
 			chroma_toggle = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set("Chroma", v);
-				Plugin.main.UpdateSelection(false);
+				Plugin.main?.UpdateSelection(false);
 			});
 		}
 		{
 			var container = UI.AddField(panel, "Noodle Extensions");
 			noodle_toggle = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set("Noodle", v);
-				Plugin.main.UpdateSelection(false);
+				Plugin.main?.UpdateSelection(false);
 			});
 		}
 		
@@ -46,13 +46,13 @@ public class SettingsController {
 	}
 	
 	public void Refresh() {
-		chroma_toggle.isOn = Settings.Get("Chroma", true);
-		noodle_toggle.isOn = Settings.Get("Noodle", true);
+		chroma_toggle!.isOn = Settings.Get("Chroma", true);
+		noodle_toggle!.isOn = Settings.Get("Noodle", true);
 	}
 	
 	public void ToggleWindow() {
 		Refresh();
-		window.Toggle();
+		window!.Toggle();
 	}
 }
 

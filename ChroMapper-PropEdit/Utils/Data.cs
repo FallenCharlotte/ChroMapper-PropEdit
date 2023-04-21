@@ -22,6 +22,11 @@ public class Data {
 		System.Action<BaseObject, T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {v}); };
 		return (getter, setter);
 	}
+	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) GetSetTest<T>(string field_name) {
+		System.Func<BaseObject, T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null);
+		System.Action<BaseObject, T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {(T)v}); };
+		return (getter, setter);
+	}
 	
 	// Very cursed value split: subtract 1 then mask
 	public static (System.Func<BaseObject, int?>, System.Action<BaseObject, int?>) GetSetSplitValue(int mask) {
@@ -32,78 +37,51 @@ public class Data {
 				: (i - 1) & mask & 0b1111;
 		};
 		System.Action<BaseObject, int?> setter = (o, v) => {
-			int i = ((BaseEvent)o).Value;
-			// I'm sorry
-			((BaseEvent)o).Value = ((((i - (i == 0 ? 0 : 1)) & (~mask)) | ((int)v)) + 1) & 0b1111;
+			if (v is int value) {
+				int i = ((BaseEvent)o).Value;
+				// I'm sorry
+				((BaseEvent)o).Value = ((((i - (i == 0 ? 0 : 1)) & (~mask)) | (value)) + 1) & 0b1111;
+			}
 		};
 		return (getter, setter);
 	}
 	
-	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) JSONGetSet<T>(System.Type type, string node_name, string field_name) where T : struct {
+	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) JSONGetSet<T>(System.Type type, string node_name, string field_name) {
 		var node = type.GetProperty(node_name);
 		if (node == null) {
 			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
 		}
 		System.Func<BaseObject, T?> getter = (o) => {
-			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
+			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (GetNode(root, field_name) is JSONNode n) {
 				return CreateConvertFunc<JSONNode, T>()(n);
 			}
 			else {
-				return null;
+				return default!;
 			}
 		};
 		System.Action<BaseObject, T?> setter = (o, v) => {
-			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
+			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (v is T value) {
 				SetNode(root, field_name, CreateConvertFunc<T, SimpleJSON.JSONNode>()(value));
 			}
 			else {
 				RemoveNode(root, field_name);
 			}
-			node.SetMethod.Invoke(o, new object[] { root });
-			o.RefreshCustom();
-		};
-		return (getter, setter);
-	}
-	
-	// I hate C#
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) JSONGetSet(System.Type type, string node_name, string field_name) {
-		var node = type.GetProperty(node_name);
-		if (node == null) {
-			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
-		}
-		System.Func<BaseObject, string> getter = (o) => {
-			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
-			if (GetNode(root, field_name) is JSONNode n) {
-				return n.Value;
-			}
-			else {
-				return null;
-			}
-		};
-		System.Action<BaseObject, string> setter = (o, v) => {
-			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
-			if (v is string value) {
-				SetNode(root, field_name, value);
-			}
-			else {
-				RemoveNode(root, field_name);
-			}
-			node.SetMethod.Invoke(o, new object[] { root });
+			node!.SetMethod.Invoke(o, new object[] { root });
 			o.RefreshCustom();
 		};
 		return (getter, setter);
 	}
 	
 	// Fine, I'll do arrays. JSON-array text input. Might make an options page that can split it out later:tm:
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) JSONGetSetRaw(System.Type type, string node_name, string field_name) {
+	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) JSONGetSetRaw(System.Type type, string node_name, string field_name) {
 		var node = type.GetProperty(node_name);
 		if (node == null) {
 			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
 		}
-		System.Func<BaseObject, string> getter = (o) => {
-			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
+		System.Func<BaseObject, string?> getter = (o) => {
+			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (GetNode(root, field_name) is JSONNode n) {
 				return n.ToString();
 			}
@@ -111,8 +89,8 @@ public class Data {
 				return null;
 			}
 		};
-		System.Action<BaseObject, string> setter = (o, v) => {
-			var root = (SimpleJSON.JSONNode)node.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
+		System.Action<BaseObject, string?> setter = (o, v) => {
+			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (string.IsNullOrEmpty(v)) {
 				RemoveNode(root, field_name);
 			}
@@ -130,6 +108,7 @@ public class Data {
 							n = JSON.Parse($"\"{v}\"");
 						}
 						catch (Exception) {
+							Debug.LogWarning($"Couldn't interpret \"{v}\" as JSON");
 							return;
 						}
 					}
@@ -141,15 +120,11 @@ public class Data {
 		return (getter, setter);
 	}
 	
-	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) CustomGetSet<T>(string field_name) where T : struct {
-		return JSONGetSet<T>(typeof(BaseObject), "CustomData", field_name);
+	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) CustomGetSet<T>(string field_name) {
+		return JSONGetSet<T?>(typeof(BaseObject), "CustomData", field_name);
 	}
 	
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSet(string field_name) {
-		return JSONGetSet(typeof(BaseObject), "CustomData", field_name);
-	}
-	
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSetRaw(string field_name) {
+	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) CustomGetSetRaw(string field_name) {
 		return JSONGetSetRaw(typeof(BaseObject), "CustomData", field_name);
 	}
 	
@@ -159,10 +134,12 @@ public class Data {
 		System.Action<BaseObject, bool?> setter = (o, v) => { if (o is BaseEvent e) {
 			if (!(v ?? false)) {
 				if (e.CustomLightGradient != null) {
-					e.CustomColor = e.CustomLightGradient.StartColor;
+					var jc = new JSONArray();
+					jc.WriteColor(e.CustomLightGradient.StartColor);
+					e.CustomData[e.CustomKeyColor] = jc;
 				}
 				e.CustomData?.Remove(e.CustomKeyLightGradient);
-				e.CustomLightGradient = null;
+				Debug.Log("Yeet gradient");
 			}
 			else if (e.CustomLightGradient == null) {
 				var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.Event);
@@ -176,9 +153,10 @@ public class Data {
 				
 				float duration = (next != null) ? (next.Time - e.Time) : 1;
 				
-				e.CustomLightGradient = new ChromaLightGradient(begin, end, duration);
+				e.GetOrCreateCustom()[e.CustomKeyLightGradient] = (new ChromaLightGradient(begin, end, duration)).ToJson();
 				e.CustomData.Remove(e.CustomKeyColor);
-				e.CustomColor = null;
+				
+				Debug.Log("Birth gradient");
 			}
 		}};
 		return (getter, setter);
@@ -204,8 +182,8 @@ public class Data {
 		return (getter, setter);
 	}
 	
-	public static (System.Func<BaseObject, string>, System.Action<BaseObject, string>) CustomGetSetColor(string field_name) {
-		System.Func<BaseObject, string> getter = (o) => {
+	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) CustomGetSetColor(string field_name) {
+		System.Func<BaseObject, string?> getter = (o) => {
 			if (GetNode(o.CustomData, field_name) is JSONNode n) {
 				var color = n.ReadColor();
 				return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
@@ -214,7 +192,7 @@ public class Data {
 				return null;
 			}
 		};
-		System.Action<BaseObject, string> setter = (o, v) => {
+		System.Action<BaseObject, string?> setter = (o, v) => {
 			if (string.IsNullOrEmpty(v)) {
 				RemoveNode(o.CustomData, field_name);
 			}
@@ -230,33 +208,14 @@ public class Data {
 	
 #endregion
 	
-	public static T? GetAllOrNothing<T>(IEnumerable<BaseObject> editing, System.Func<BaseObject, T?> getter) where T : struct {
+	public static T? GetAllOrNothing<T>(IEnumerable<BaseObject> editing, System.Func<BaseObject, T?> getter) {
 		var it = editing.GetEnumerator();
 		it.MoveNext();
 		var last = getter(it.Current);
-		// baby C# though null checks
-		if (last is T l) {
-			while (it.MoveNext()) {
-				if (getter(it.Current) is T v) {
-					if (!EqualityComparer<T>.Default.Equals(v, l)) {
-						last = null;
-						break;
-					}
-				}
-			}
-		}
-		
-		return last;
-	}
-	
-	// I hate C#
-	public static string GetAllOrNothing(IEnumerable<BaseObject> editing, System.Func<BaseObject, string> getter) {
-		var it = editing.GetEnumerator();
-		it.MoveNext();
-		var last = getter(it.Current);
-		while (last != null && it.MoveNext()) {
-			if (last != getter(it.Current)) {
-				last = null;
+		while (it.MoveNext()) {
+			T? v = getter(it.Current);
+			if (v == null || last == null || !(v!.Equals(last))) {
+				last = default!;
 				break;
 			}
 		}
@@ -264,7 +223,7 @@ public class Data {
 		return last;
 	}
 	
-	public static JSONNode GetNode(JSONNode root, string name) {
+	public static JSONNode? GetNode(JSONNode root, string name) {
 		string[] path = name.Split('.');
 		foreach (string node in path) {
 			if (!(root?.HasKey(node) ?? false)) {

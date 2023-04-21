@@ -6,7 +6,7 @@ using ChroMapper_PropEdit.Utils;
 namespace ChroMapper_PropEdit {
 
 public class Settings {
-	public static JSONNode Get(string name, JSONNode d = null) {
+	public static JSONNode? Get(string name, JSONNode? d = null) {
 		var o = Data.GetNode(Settings.Instance.json, name);
 		if (o == null && d != null) {
 			o = Settings.Set(name, d);
@@ -26,7 +26,7 @@ public class Settings {
 	
 	public readonly string SETTINGS_FILE = UnityEngine.Application.persistentDataPath + "/PropEdit.json";
 	
-	private static Settings _instance;
+	private static Settings? _instance;
 	private static Settings Instance {
 		get {
 			if (_instance == null) {

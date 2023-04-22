@@ -6,6 +6,9 @@ using ChroMapper_PropEdit.Utils;
 namespace ChroMapper_PropEdit {
 
 public class Settings {
+	public static readonly string ShowChromaKey = "Chroma";
+	public static readonly string ShowNoodleKey = "Noodle";
+	
 	public static JSONNode? Get(string name, JSONNode? d = null) {
 		var o = Data.GetNode(Settings.Instance.json, name);
 		if (o == null && d != null) {

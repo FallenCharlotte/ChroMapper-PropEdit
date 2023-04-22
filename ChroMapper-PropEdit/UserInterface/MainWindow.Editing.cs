@@ -51,7 +51,7 @@ public partial class MainWindow {
 						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"));
 					}
 					
-					if (Settings.Get("Chroma")?.AsBool ?? false) {
+					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Chroma");
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
@@ -64,7 +64,7 @@ public partial class MainWindow {
 						}
 					}
 					
-					if (Settings.Get("Noodle")?.AsBool ?? false) {
+					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
@@ -110,13 +110,13 @@ public partial class MainWindow {
 					
 					var s = (o as BaseSlider)!;
 					
-					if (Settings.Get("Chroma")?.AsBool ?? false) {
+					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Chroma");
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 					}
 					
-					if (Settings.Get("Noodle")?.AsBool ?? false) {
+					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
@@ -152,13 +152,13 @@ public partial class MainWindow {
 					
 					var s = (o as BaseSlider)!;
 					
-					if (Settings.Get("Chroma")?.AsBool ?? false) {
+					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Chroma");
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 					}
 					
-					if (Settings.Get("Noodle")?.AsBool ?? false) {
+					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
@@ -196,13 +196,13 @@ public partial class MainWindow {
 						AddParsed("Height", Data.GetSet<int>("Height"));
 					}
 					
-					if (Settings.Get("Chroma")?.AsBool ?? false) {
+					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Chroma");
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 					}
 					
-					if (Settings.Get("Noodle")?.AsBool ?? false) {
+					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						AddLine("");
 						AddLine("Noodle Extensions");
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
@@ -238,7 +238,7 @@ public partial class MainWindow {
 						}
 						AddParsed("Brightness", Data.GetSet<float>("FloatValue"));
 						
-						if (Settings.Get("Chroma")?.AsBool ?? false) {
+						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							AddLine("");
 							AddLine("Chroma");
 							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true);
@@ -262,7 +262,7 @@ public partial class MainWindow {
 					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
 						AddParsed("Speed", Data.GetSet<int>("Value"));
 						
-						if (Settings.Get("Chroma")?.AsBool ?? false) {
+						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							AddLine("");
 							AddLine("Chroma");
 							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false);
@@ -272,7 +272,7 @@ public partial class MainWindow {
 					}
 					// Ring Rotation
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
-						if (Settings.Get("Chroma")?.AsBool ?? false) {
+						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							AddLine("");
 							AddLine("Chroma");
 							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter));
@@ -291,7 +291,7 @@ public partial class MainWindow {
 					}
 					// Ring Zoom
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
-						if (Settings.Get("Chroma")?.AsBool ?? false) {
+						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							AddLine("");
 							AddLine("Chroma");
 							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep));

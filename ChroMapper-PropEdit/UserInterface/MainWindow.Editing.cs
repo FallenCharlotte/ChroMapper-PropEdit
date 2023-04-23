@@ -38,6 +38,8 @@ public partial class MainWindow {
 			var type = o.ObjectType;
 			var v2 = (o is V2Object);
 			
+			current_panel = panel;
+			
 			AddParsed("Beat", Data.GetSet<float>("Time"));
 			
 			switch (type) {
@@ -50,10 +52,10 @@ public partial class MainWindow {
 					if (!v2) {
 						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"));
 					}
-					
+					AddLine("");
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						AddLine("");
-						AddLine("Chroma");
+						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+						current_panel = collapsible.panel;
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 						if (o is V2Note) {
 							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false);
@@ -62,11 +64,12 @@ public partial class MainWindow {
 							AddCheckbox("Spawn Effect", Data.CustomGetSet<bool?>("spawnEffect"), true);
 							AddCheckbox("Disable Debris", Data.CustomGetSet<bool?>("disableDebris"), false);
 						}
+						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						AddLine("");
-						AddLine("Noodle Extensions");
+						var collapsible = UI.AddChild(panel, "Noodle Extensions").AddComponent<Collapsible>().Init("Noodle Extensions", true);
+						current_panel = collapsible.panel;
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true);
@@ -90,6 +93,7 @@ public partial class MainWindow {
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 						AddAnimation(v2);
+						current_panel = panel;
 					}
 					
 					break;
@@ -107,18 +111,20 @@ public partial class MainWindow {
 					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
 					AddDropdown<int?>("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections);
 					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"));
+					AddLine("");
 					
 					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						AddLine("");
-						AddLine("Chroma");
+						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+						current_panel = collapsible.panel;
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						AddLine("");
-						AddLine("Noodle Extensions");
+						var collapsible = UI.AddChild(panel, "Noodle Extensions").AddComponent<Collapsible>().Init("Noodle Extensions", true);
+						current_panel = collapsible.panel;
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true);
@@ -137,6 +143,7 @@ public partial class MainWindow {
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 						AddAnimation(v2);
+						current_panel = panel;
 					}
 					
 				}	break;
@@ -149,18 +156,20 @@ public partial class MainWindow {
 					AddParsed("Squish", Data.GetSet<float>("Squish"));
 					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
 					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
+					AddLine("");
 					
 					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						AddLine("");
-						AddLine("Chroma");
+						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+						current_panel = collapsible.panel;
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						AddLine("");
-						AddLine("Noodle Extensions");
+						var collapsible = UI.AddChild(panel, "Noodle Extensions").AddComponent<Collapsible>().Init("Noodle Extensions", true);
+						current_panel = collapsible.panel;
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true);
@@ -179,7 +188,9 @@ public partial class MainWindow {
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 						AddAnimation(v2);
+						current_panel = panel;
 					}
+					
 				}	break;
 				case ObjectType.Obstacle:
 					var ob = (o as BaseObstacle)!;
@@ -195,16 +206,18 @@ public partial class MainWindow {
 						AddParsed("Width", Data.GetSet<int>("Width"));
 						AddParsed("Height", Data.GetSet<int>("Height"));
 					}
+					AddLine("");
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						AddLine("");
-						AddLine("Chroma");
+						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+						current_panel = collapsible.panel;
 						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						AddLine("");
-						AddLine("Noodle Extensions");
+						var collapsible = UI.AddChild(panel, "Noodle Extensions").AddComponent<Collapsible>().Init("Noodle Extensions", true);
+						current_panel = collapsible.panel;
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Position", Data.CustomGetSetRaw(ob.CustomKeyCoordinate), true);
@@ -220,6 +233,7 @@ public partial class MainWindow {
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
 						AddAnimation(o is V2Obstacle);
+						current_panel = panel;
 					}
 					
 					break;
@@ -237,10 +251,11 @@ public partial class MainWindow {
 							AddDropdown<int?>("Value", Data.GetSet<int>("Value"), Events.LightValues);
 						}
 						AddParsed("Brightness", Data.GetSet<float>("FloatValue"));
+						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							AddLine("");
-							AddLine("Chroma");
+							var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+							current_panel = collapsible.panel;
 							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true);
 							AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
 							if (events.Where(e => e.IsTransition).Count() == editing.Count()) {
@@ -256,25 +271,29 @@ public partial class MainWindow {
 									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false);
 								}
 							}
+							current_panel = panel;
 						}
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
 						AddParsed("Speed", Data.GetSet<int>("Value"));
+						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							AddLine("");
-							AddLine("Chroma");
+							var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+							current_panel = collapsible.panel;
 							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false);
 							AddDropdown<int?>("Direction",     Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.LaserDirection, true);
 							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeyPreciseSpeed));
+							current_panel = panel;
 						}
 					}
 					// Ring Rotation
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
+						AddLine("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							AddLine("");
-							AddLine("Chroma");
+							var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+							current_panel = collapsible.panel;
 							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter));
 							if (o is V2Event) {
 								AddCheckbox("Reset", Data.CustomGetSet<bool?>("_reset"), false);
@@ -287,15 +306,18 @@ public partial class MainWindow {
 							if (o is V2Event) {
 								AddCheckbox("Counter Spin", Data.CustomGetSet<bool?>("_counterSpin"), false);
 							}
+							current_panel = panel;
 						}
 					}
 					// Ring Zoom
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
+						AddLine("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							AddLine("");
-							AddLine("Chroma");
+							var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+							current_panel = collapsible.panel;
 							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep));
 							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed));
+							current_panel = panel;
 						}
 					}
 					// Boost Color

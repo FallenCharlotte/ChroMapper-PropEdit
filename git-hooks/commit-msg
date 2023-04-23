@@ -1,3 +1,4 @@
 #!/bin/bash
 
 sed -ie  "1i\\\t$(cat $1)" Changelog
+git add Changelog

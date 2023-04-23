@@ -140,7 +140,6 @@ public class Data {
 					e.CustomData[e.CustomKeyColor] = jc;
 				}
 				e.CustomData?.Remove(e.CustomKeyLightGradient);
-				Debug.Log("Yeet gradient");
 			}
 			else if (e.CustomLightGradient == null) {
 				var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.Event);
@@ -156,8 +155,6 @@ public class Data {
 				
 				e.GetOrCreateCustom()[e.CustomKeyLightGradient] = (new ChromaLightGradient(begin, end, duration)).ToJson();
 				e.CustomData.Remove(e.CustomKeyColor);
-				
-				Debug.Log("Birth gradient");
 			}
 		}};
 		return (getter, setter);

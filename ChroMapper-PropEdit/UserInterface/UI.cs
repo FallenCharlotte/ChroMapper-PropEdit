@@ -26,12 +26,10 @@ public class UI {
 	}
 	
 	public static GameObject AddLabel(Transform parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center) {
-		var entryLabel = new GameObject(title + " Label", typeof(TextMeshProUGUI));
-		var rectTransform = ((RectTransform)entryLabel.transform);
-		rectTransform.SetParent(parent);
+		var entryLabel = AddChild(parent, title + " Label");
+		AttachTransform(entryLabel, size ?? new Vector2(110, 24), pos, anchor_min ?? new Vector2(0.5f, 1), anchor_max ?? new Vector2(0.5f, 1));
 		
-		MoveTransform(rectTransform, size ?? new Vector2(110, 24), pos, anchor_min ?? new Vector2(0.5f, 1), anchor_max ?? new Vector2(0.5f, 1));
-		var textComponent = entryLabel.GetComponent<TextMeshProUGUI>();
+		var textComponent = entryLabel.AddComponent<TextMeshProUGUI>();
 		
 		textComponent.name = title;
 		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;

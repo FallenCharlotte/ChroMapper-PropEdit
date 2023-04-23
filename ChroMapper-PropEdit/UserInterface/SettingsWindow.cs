@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -15,6 +16,7 @@ namespace ChroMapper_PropEdit.UserInterface {
 public class SettingsController {
 	public Window? window;
 	public GameObject? panel;
+	public GameObject? map_panel;
 	public Toggle? chroma_enable;
 	public Toggle? noodle_enable;
 	public ScrollBox? scrollbox;
@@ -28,6 +30,9 @@ public class SettingsController {
 		var parent = mapEditorUI.MainUIGroup[5];
 		
 		window = Window.Create("Settings", "Settings", parent.transform, size: new Vector2(200, 80));
+		window.onShow += OnResize;
+		window.onResize += OnResize;
+		
 		var window_content = UI.AddChild(window.gameObject, "Settings Window Content");
 		UI.AttachTransform(window_content, new Vector2(-10, -40), new Vector2(0, -15), new Vector2(0, 0), new Vector2(1, 1));
 		{
@@ -38,24 +43,10 @@ public class SettingsController {
 		}
 		var scroll_area = UI.AddChild(window_content, "Scroll Area");
 		UI.AttachTransform(scroll_area, new Vector2(0, -10), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
-		panel = UI.AddChild(scroll_area, "Setting Panel");
-		scrollbox = scroll_area.AddComponent<ScrollBox>().Init(UI.AttachTransform(panel, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1)));
-		{
-			var layout = panel.AddComponent<VerticalLayoutGroup>();
-			layout.padding = new RectOffset(10, 15, 0, 0);
-			layout.spacing = 0;
-			layout.childControlHeight = false;
-			layout.childForceExpandHeight = false;
-			layout.childForceExpandWidth = true;
-			layout.childAlignment = TextAnchor.UpperCenter;
-		}
-		{
-			var layout = panel.AddComponent<LayoutElement>();
-		}
-		{
-			var fitter = panel.AddComponent<ContentSizeFitter>();
-			fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-		}
+		scrollbox = scroll_area.AddComponent<ScrollBox>().Init(scroll_area.transform);
+		panel = scrollbox.content;
+		UI.AttachTransform(panel!, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1));
+		
 		
 		UI.AddLabel(panel!.transform, "PropEdit", "PropEdit Settings", Vector2.zero);
 		{
@@ -75,8 +66,9 @@ public class SettingsController {
 		
 		UI.AddField(panel, "");
 		UI.AddLabel(panel!.transform, "Map", "Map Settings", Vector2.zero);
+		var collapsible = UI.AddChild(panel, "Requirements").AddComponent<Collapsible>().Init("Requirements", true);
+		map_panel = collapsible.panel;
 		
-		UI.AddField(panel, "Requirements");
 		foreach (var rc in default_reqchecks) {
 			AddReqField(rc.Key, false);
 		}
@@ -103,11 +95,11 @@ public class SettingsController {
 	}
 	
 	private void AddReqField(string name, bool force) {
-		var container = UI.AddField(panel!, name);
+		var container = UI.AddField(map_panel!, name);
 		requirements[name] = UI.AddDropdown(container, 0, (v) => {
 			SetForced(name, true);
 		}, MapSettings.RequirementStatus);
-		var container2 = UI.AddField(panel!, "Override");
+		var container2 = UI.AddField(map_panel!, "Override");
 		forced[name] = UI.AddCheckbox(container2, force, (v) => {
 			// Can't un-force a custom requirement
 			if (!default_reqchecks.ContainsKey(name)) {
@@ -159,10 +151,14 @@ public class SettingsController {
 		}
 	}
 	
+	private void OnResize() {
+		var layout = panel!.GetComponent<LayoutElement>();
+		layout!.minHeight = window!.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
+	}
+	
 	public void ToggleWindow() {
 		Refresh();
 		window!.Toggle();
-		scrollbox!.ScrollToTop();
 	}
 }
 

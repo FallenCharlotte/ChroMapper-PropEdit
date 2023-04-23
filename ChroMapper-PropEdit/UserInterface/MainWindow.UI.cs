@@ -19,6 +19,7 @@ public partial class MainWindow {
 	public InputAction keybind;
 	public Window? window;
 	public GameObject? panel;
+	public GameObject? current_panel;
 	public ScrollBox? scrollbox;
 	public List<BaseObject>? editing;
 	
@@ -77,24 +78,9 @@ public partial class MainWindow {
 		
 		var scroll_area = UI.AddChild(container, "Scroll Area");
 		UI.AttachTransform(scroll_area, new Vector2(0, -10), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
-		panel = UI.AddChild(scroll_area, "Prop Panel");
-		scrollbox = scroll_area.AddComponent<ScrollBox>().Init(UI.AttachTransform(panel, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1)));
-		{
-			var layout = panel.AddComponent<VerticalLayoutGroup>();
-			layout.padding = new RectOffset(10, 15, 0, 0);
-			layout.spacing = 0;
-			layout.childControlHeight = false;
-			layout.childForceExpandHeight = false;
-			layout.childForceExpandWidth = true;
-			layout.childAlignment = TextAnchor.UpperCenter;
-		}
-		{
-			var layout = panel.AddComponent<LayoutElement>();
-		}
-		{
-			var fitter = panel.AddComponent<ContentSizeFitter>();
-			fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-		}
+		scrollbox = scroll_area.AddComponent<ScrollBox>().Init(scroll_area.transform);
+		panel = scrollbox.content;
+		UI.AttachTransform(panel!, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1));
 		
 		UpdateSelection(true);
 		
@@ -109,8 +95,7 @@ public partial class MainWindow {
 #region Form Fields
 	
 	private GameObject AddLine(string title, Vector2? size = null) {
-		var container = UI.AddField(panel!, title, size);
-		return container;
+		return UI.AddField(current_panel!, title, size);
 	}
 	
 	// CustomData node gets removed when value = default

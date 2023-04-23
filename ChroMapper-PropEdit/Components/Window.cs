@@ -17,7 +17,7 @@ public class Window : MonoBehaviour {
 	public string? settings_key;
 	
 	public static Window Create(string name, string title, Transform parent, Vector2 size) {
-		var obj = new GameObject($"name Window");
+		var obj = new GameObject($"{name} Window");
 		return obj.AddComponent<Window>().Init(name, title, parent, size);
 	}
 	
@@ -39,17 +39,17 @@ public class Window : MonoBehaviour {
 		{
 			var handle = UI.AddChild(gameObject, "Resize Height");
 			UI.AttachTransform(handle, new Vector2(0, 12), new Vector2(0, 4), new Vector2(0, 0), new Vector2(1, 0));
-			handle.AddComponent<ResizeWindowController>().Init(canvas, PosSave, new Vector2(0, 1));
+			handle.AddComponent<ResizeWindowController>().Init(canvas, SizeSave, new Vector2(0, 1));
 		}
 		{
 			var handle = UI.AddChild(gameObject, "Resize Width");
 			UI.AttachTransform(handle, new Vector2(12, 0), new Vector2(-4, 0), new Vector2(1, 0), new Vector2(1, 1));
-			handle.AddComponent<ResizeWindowController>().Init(canvas, PosSave, new Vector2(1, 0));
+			handle.AddComponent<ResizeWindowController>().Init(canvas, SizeSave, new Vector2(1, 0));
 		}
 		{
 			var handle = UI.AddChild(gameObject, "Resize Corner");
 			UI.AttachTransform(handle, new Vector2(12, 12), new Vector2(-4, 4), new Vector2(1, 0), new Vector2(1, 0));
-			handle.AddComponent<ResizeWindowController>().Init(canvas, PosSave, new Vector2(1, 1));
+			handle.AddComponent<ResizeWindowController>().Init(canvas, SizeSave, new Vector2(1, 1));
 		}
 		
 		this.title = UI.AddLabel(transform, "Title", title, pos: new Vector2(10, -20), size: new Vector2(-10, 30), font_size: 28, anchor_min: new Vector2(0, 1), anchor_max: new Vector2(1, 1), align: TextAlignmentOptions.Left);
@@ -91,6 +91,10 @@ public class Window : MonoBehaviour {
 		settings["w"] = GetComponent<RectTransform>().sizeDelta.x;
 		settings["h"] = GetComponent<RectTransform>().sizeDelta.y;
 		Settings.Set(settings_key!, settings);
+	}
+	
+	private void SizeSave() {
+		PosSave();
 		onResize?.Invoke();
 	}
 }

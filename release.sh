@@ -11,7 +11,7 @@ done
 
 sed -i 's/AssemblyVersion(.*)/AssemblyVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
 sed -i 's/AssemblyFileVersion(.*)/AssemblyFileVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
-sed -i "1i v${short}" Changelog
+sed -i -e "1i v${short}" Changelog
 cat Changelog > Changelog.txt
 sed -i '1i\\' Changelog
 

@@ -16,7 +16,9 @@ namespace ChroMapper_PropEdit.UserInterface {
 public class SettingsController {
 	public Window? window;
 	public GameObject? panel;
-	public GameObject? map_panel;
+	public GameObject? requirements_panel;
+	public GameObject? settings_panel;
+	public GameObject? current_panel;
 	public Toggle? chroma_enable;
 	public Toggle? noodle_enable;
 	public ScrollBox? scrollbox;
@@ -66,40 +68,157 @@ public class SettingsController {
 		
 		UI.AddField(panel, "");
 		UI.AddLabel(panel!.transform, "Map", "Map Settings", Vector2.zero);
-		var collapsible = UI.AddChild(panel, "Requirements").AddComponent<Collapsible>().Init("Requirements", true);
-		map_panel = collapsible.panel;
-		
-		foreach (var rc in default_reqchecks) {
-			AddReqField(rc.Key, false);
-		}
-		
-		foreach (var req_status in (new Dictionary<string, RequirementCheck.RequirementType>() {{"_requirements", RequirementCheck.RequirementType.Requirement}, {"_suggestions", RequirementCheck.RequirementType.Suggestion}})) {
-			if (BeatSaberSongContainer.Instance.DifficultyData.CustomData?[req_status.Key] is JSONArray reqs) {
-				foreach (var req in reqs.Children) {
-					var reqcheck = GetReqCheck(req);
-					if (reqcheck == null) {
-						RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value));
-						AddReqField(req, true);
-					}
-					else {
-						if (reqcheck.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map) != req_status.Value) {
-							// Triggers forced
-							requirements[req].Dropdown.value = (int)req_status.Value;
+		{
+			var collapsible = UI.AddChild(panel, "Requirements").AddComponent<Collapsible>().Init("Requirements", true);
+			requirements_panel = collapsible.panel;
+			
+			foreach (var rc in default_reqchecks) {
+				AddReqField(rc.Key, false);
+			}
+			
+			foreach (var req_status in (new Dictionary<string, RequirementCheck.RequirementType>() {{"_requirements", RequirementCheck.RequirementType.Requirement}, {"_suggestions", RequirementCheck.RequirementType.Suggestion}})) {
+				if (BeatSaberSongContainer.Instance.DifficultyData.CustomData?[req_status.Key] is JSONArray reqs) {
+					foreach (var req in reqs.Children) {
+						var reqcheck = GetReqCheck(req);
+						if (reqcheck == null) {
+							RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value));
+							AddReqField(req, true);
+						}
+						else {
+							if (reqcheck.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map) != req_status.Value) {
+								// Triggers forced
+								requirements[req].Dropdown.value = (int)req_status.Value;
+							}
 						}
 					}
 				}
 			}
 		}
 		
+		{
+			var collapsible = UI.AddChild(panel, "Map Options").AddComponent<Collapsible>().Init("Map Options", true);
+			{
+				var c2 = UI.AddChild(collapsible.panel!, "Player Options").AddComponent<Collapsible>().Init("Player Options", true);
+				prefix = "_playerOptions";
+				current_panel = c2.panel;
+				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool);
+				AddParsed<float>("Player Height", "_playerHeight");
+				AddDropdown("Automatic Player Height", "_automaticPlayerHeight", MapSettings.OptionBool);
+				AddParsed<float>("Sfx Volume", "_sfxVolume");
+				AddDropdown("Reduce Debris", "_reduceDebris", MapSettings.OptionBool);
+				AddDropdown("No Hud", "_noTextsAndHuds", MapSettings.OptionBool);
+				AddDropdown("Hide Miss Text", "_noFailEffects", MapSettings.OptionBool);
+				AddDropdown("Advanced Hud", "_advancedHud", MapSettings.OptionBool);
+				AddDropdown("Auto Restart", "_autoRestart", MapSettings.OptionBool);
+				AddParsed<float>("Saber Trail Intensity", "_saberTrailIntensity");
+				AddDropdown("Note Jump Duration Type", "_noteJumpDurationTypeSettings", MapSettings.JumpDurationTypes);
+				AddParsed<float>("Fixed Note Jump Duration", "_noteJumpFixedDuration");
+				AddParsed<float>("Note Jump Offset", "_noteJumpStartBeatOffset");
+				AddDropdown("Hide Note Spawn Effect", "_hideNoteSpawnEffect", MapSettings.OptionBool);
+				AddDropdown("Adaptive Sfx", "_adaptiveSfx", MapSettings.OptionBool);
+				AddDropdown("Expert- Effects Filter", "_environmentEffectsFilterDefaultPreset", MapSettings.EffectsFilters);
+				AddDropdown("Expert+ Effects Filter", "_environmentEffectsFilterExpertPlusPreset", MapSettings.EffectsFilters);
+			}
+			{
+				var c2 = UI.AddChild(collapsible.panel!, "Modifiers").AddComponent<Collapsible>().Init("Modifiers", true);
+				prefix = "_modifiers";
+				current_panel = c2.panel;
+				AddDropdown("Energy Type", "_energyType", MapSettings.EnergyTypes);
+				AddDropdown("No Fail", "_noFailOn0Energy", MapSettings.OptionBool);
+				AddDropdown("Instant Fail", "_instaFail", MapSettings.OptionBool);
+				AddDropdown("Fail When Sabers Touch", "_failOnSaberClash", MapSettings.OptionBool);
+				AddDropdown("Enabled Obstacle Types", "_enabledObstacleType", MapSettings.ObstacleTypes);
+				AddDropdown("Fast Notes", "_fastNotes", MapSettings.OptionBool);
+				AddDropdown("Strict Angles", "_strictAngles", MapSettings.OptionBool);
+				AddDropdown("Disappearing Arrows", "_disappearingArrows", MapSettings.OptionBool);
+				AddDropdown("Ghost Notes", "_ghostNotes", MapSettings.OptionBool);
+				AddDropdown("No Bombs", "_noBombs", MapSettings.OptionBool);
+				AddDropdown("Song Speed", "_songSpeed", MapSettings.SongSpeeds);
+				AddDropdown("No Arrows", "_noArrows", MapSettings.OptionBool);
+				AddDropdown("Pro Mode", "_proMode", MapSettings.OptionBool);
+				AddDropdown("Zen Mode", "_zenMode", MapSettings.OptionBool);
+				AddDropdown("Small Cubes", "_smallCubes", MapSettings.OptionBool);
+			}
+			{
+				var c2 = UI.AddChild(collapsible.panel!, "Environments").AddComponent<Collapsible>().Init("Environments", true);
+				prefix = "_environments";
+				current_panel = c2.panel;
+				AddDropdown("Override Environments", "_overrideEnvironments", MapSettings.OptionBool);
+			}
+			{
+				var c2 = UI.AddChild(collapsible.panel!, "Colors").AddComponent<Collapsible>().Init("Colors", true);
+				prefix = "_colors";
+				current_panel = c2.panel;
+				AddDropdown("Override Colors", "_overrideDefaultColors", MapSettings.OptionBool);
+			}
+			{
+				var c2 = UI.AddChild(collapsible.panel!, "_graphics").AddComponent<Collapsible>().Init("_graphics", true);
+				prefix = "_graphics";
+				current_panel = c2.panel;
+				AddParsed<int>("Mirror Quality", "_mirrorGraphicsSettings");
+				AddParsed<int>("Bloom Post Process", "_mainEffectGraphicsSettings");
+				AddParsed<int>("Smoke", "_smokeGraphicsSettings");
+				AddDropdown("Burn Mark Trails", "_burnMarkTrailsEnabled", MapSettings.OptionBool);
+				AddDropdown("Screen Displacement", "_screenDisplacementEffectsEnabled", MapSettings.OptionBool);
+				AddParsed<int>("Max Shockwave Particles", "_maxShockwaveParticles");
+			}
+			{
+				var c2 = UI.AddChild(collapsible.panel!, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+				prefix = "_chroma";
+				current_panel = c2.panel;
+				AddDropdown("Disable Chroma Events", "_disableChromaEvents", MapSettings.OptionBool);
+				AddDropdown("Disable Environment Enhancements", "_disableEnvironmentEnhancements", MapSettings.OptionBool);
+				AddDropdown("Disable Note Coloring", "_disableNoteColoring", MapSettings.OptionBool);
+				AddDropdown("Force Zen Mode Walls", "_forceZenModeWalls", MapSettings.OptionBool);
+			}
+		}
+		
+		
 		Refresh();
 	}
 	
+	private void AddDropdown<T>(string name, string path, Map<T?> options) {
+		path = $"_settings.{prefix}.{path}";
+		var container = UI.AddField(current_panel!, name);
+		var node = Data.GetNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path);
+		var value = (node == null)
+			? default(T)!
+			: Data.CreateConvertFunc<JSONNode, T>()(node);
+		UI.AddDropdown<T>(container, value, (v) => {
+			if (v == null) {
+				Data.RemoveNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path);
+			}
+			else {
+				Data.SetNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path, Data.CreateConvertFunc<T, SimpleJSON.JSONNode>()(v));
+			}
+		}, options, true);
+	}
+	
+	private void AddParsed<T>(string name, string path) where T : struct {
+		path = $"_settings.{prefix}.{path}";
+		var container = UI.AddField(current_panel!, name);
+		var node = Data.GetNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path);
+		T? value = (node == null)
+			? null
+			: Data.CreateConvertFunc<JSONNode, T>()(node);
+		UI.AddParsed<T>(container, value, (v) => {
+			if (v == null) {
+				Data.RemoveNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path);
+			}
+			else {
+				Data.SetNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path, Data.CreateConvertFunc<T, SimpleJSON.JSONNode>()((T)v));
+			}
+		});
+	}
+	
+	private string prefix = "";
+	
 	private void AddReqField(string name, bool force) {
-		var container = UI.AddField(map_panel!, name);
+		var container = UI.AddField(requirements_panel!, name);
 		requirements[name] = UI.AddDropdown(container, 0, (v) => {
 			SetForced(name, true);
 		}, MapSettings.RequirementStatus);
-		var container2 = UI.AddField(map_panel!, "Override");
+		var container2 = UI.AddField(requirements_panel!, "Override");
 		forced[name] = UI.AddCheckbox(container2, force, (v) => {
 			// Can't un-force a custom requirement
 			if (!default_reqchecks.ContainsKey(name)) {

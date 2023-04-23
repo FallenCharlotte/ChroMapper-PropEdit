@@ -90,6 +90,7 @@ public class ScrollBox : MonoBehaviour {
 		Justification = "This is called indirectly via Unity Message.")]
 	private IEnumerator DirtyPanel(bool first)
 	{
+		/*
 		var layout = content!.GetComponent<VerticalLayoutGroup>();
 		if (first) {
 			yield return new WaitForEndOfFrame();
@@ -102,6 +103,18 @@ public class ScrollBox : MonoBehaviour {
 		scrollbar!.value = 1f;
 		yield return new WaitForEndOfFrame();
 		scrollbar!.value = 1f;
+		* */
+		// This is a little less obtrusive
+		var target = GetComponentInParent<Window>();
+		float scroll = first ? 1 : scrollbar!.value;
+		for (var i = 0; i < 5; ++i) {
+			target.GetComponent<RectTransform>().sizeDelta += new Vector2(0.25f, 0);
+			scrollbar!.value = scroll;
+			yield return new WaitForEndOfFrame();
+			target.GetComponent<RectTransform>().sizeDelta += new Vector2(-0.25f, 0);
+			scrollbar!.value = scroll;
+			yield return new WaitForEndOfFrame();
+		}
 	}
 	
 	private IEnumerator scroll_to_top() {

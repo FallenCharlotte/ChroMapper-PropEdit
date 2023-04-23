@@ -11,6 +11,8 @@ using UnityEngine.UI;
 
 using ChroMapper_PropEdit.Enums;
 
+using Convert = System.Convert;
+
 namespace ChroMapper_PropEdit.UserInterface {
 
 public class UI {
@@ -114,6 +116,41 @@ public class UI {
 		return dropdown;
 	}
 	
+	public static UITextInput AddParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
+		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, parent.transform);
+		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		input.InputField.text = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
+		input.InputField.onEndEdit.AddListener((s) => {
+			// No IParsable in mono ;_;
+			var methods = typeof(T).GetMethods();
+			System.Reflection.MethodInfo? parse = null;
+			foreach (var method in methods) {
+				if (method.Name == "TryParse") {
+					parse = method;
+					break;
+				}
+			}
+			if (parse == null) {
+				Debug.LogError("Tried to parse a non-parsable type!");
+				return;
+			}
+			object?[] parameters = new object?[]{s, null};
+			bool res = (bool)parse.Invoke(null, parameters);
+			setter(res ? (T)parameters[1]! : null);
+			
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+		});
+		input.InputField.onSelect.AddListener(delegate {
+			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
+				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
+			}
+		});
+		
+		return input;
+	}
+	
 #endregion
 	
 	public static RectTransform AttachTransform(GameObject obj,    Vector2 size, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, Vector2? pivot = null) {
@@ -145,6 +182,14 @@ public class UI {
 		
 		return Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), new Vector2(0, 0), 100.0f);
 	}
+	
+	private static readonly System.Type[] actionMapsEnabledWhenNodeEditing = {
+		typeof(CMInput.ICameraActions), typeof(CMInput.IBeatmapObjectsActions), typeof(CMInput.INodeEditorActions),
+		typeof(CMInput.ISavingActions), typeof(CMInput.ITimelineActions)
+	};
+	
+	private static System.Type[] ActionMapsDisabled => typeof(CMInput).GetNestedTypes()
+		.Where(x => x.IsInterface && !actionMapsEnabledWhenNodeEditing.Contains(x)).ToArray();
 }
 
 }

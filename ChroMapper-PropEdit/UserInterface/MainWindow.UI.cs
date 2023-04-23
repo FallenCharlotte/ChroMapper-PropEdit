@@ -129,43 +129,9 @@ public partial class MainWindow {
 		var staged = editing!;
 		var value = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
-		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
-		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		input.InputField.text = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
-		input.InputField.onEndEdit.AddListener((s) => {
-			// No IParsable in mono ;_;
-			var methods = typeof(T).GetMethods();
-			System.Reflection.MethodInfo? parse = null;
-			foreach (var method in methods) {
-				if (method.Name == "TryParse") {
-					parse = method;
-					break;
-				}
-			}
-			if (parse == null) {
-				Debug.LogError("Tried to parse a non-parsable type!");
-				return;
-			}
-			object?[] parameters = new object?[]{s, null};
-			bool res = (bool)parse.Invoke(null, parameters);
-			if (!res) {
-				Data.UpdateObjects<T?>(staged, get_set.Item2, null);
-			}
-			else {
-				Data.UpdateObjects<T?>(staged, get_set.Item2, (T)parameters[1]!);
-			}
-			
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
+		return UI.AddParsed<T>(container, value, (v) => {
+			Data.UpdateObjects<T?>(staged, get_set.Item2, v);
 		});
-		input.InputField.onSelect.AddListener(delegate {
-			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
-			}
-		});
-		
-		return input;
 	}
 	
 	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, bool tall = false) {

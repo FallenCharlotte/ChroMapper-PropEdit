@@ -98,7 +98,7 @@ public class SettingsController {
 		{
 			var collapsible = UI.AddChild(panel, "Map Options").AddComponent<Collapsible>().Init("Map Options", true);
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "Player Options").AddComponent<Collapsible>().Init("Player Options", true);
+				var c2 = UI.AddChild(collapsible.panel!, "_playerOptions").AddComponent<Collapsible>().Init("Player Options", true);
 				prefix = "_playerOptions";
 				current_panel = c2.panel;
 				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool);
@@ -120,7 +120,7 @@ public class SettingsController {
 				AddDropdown("Expert+ Effects Filter", "_environmentEffectsFilterExpertPlusPreset", MapSettings.EffectsFilters);
 			}
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "Modifiers").AddComponent<Collapsible>().Init("Modifiers", true);
+				var c2 = UI.AddChild(collapsible.panel!, "_modifiers").AddComponent<Collapsible>().Init("Modifiers", true);
 				prefix = "_modifiers";
 				current_panel = c2.panel;
 				AddDropdown("Energy Type", "_energyType", MapSettings.EnergyTypes);
@@ -140,7 +140,7 @@ public class SettingsController {
 				AddDropdown("Small Cubes", "_smallCubes", MapSettings.OptionBool);
 			}
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "Environments").AddComponent<Collapsible>().Init("Environments", true);
+				var c2 = UI.AddChild(collapsible.panel!, "_environments").AddComponent<Collapsible>().Init("Environments", true);
 				prefix = "_environments";
 				current_panel = c2.panel;
 				AddDropdown("Override Environments", "_overrideEnvironments", MapSettings.OptionBool);
@@ -152,7 +152,7 @@ public class SettingsController {
 				AddDropdown("Override Colors", "_overrideDefaultColors", MapSettings.OptionBool);
 			}
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "_graphics").AddComponent<Collapsible>().Init("_graphics", true);
+				var c2 = UI.AddChild(collapsible.panel!, "_graphics").AddComponent<Collapsible>().Init("Graphics", true);
 				prefix = "_graphics";
 				current_panel = c2.panel;
 				AddParsed<int>("Mirror Quality", "_mirrorGraphicsSettings");
@@ -163,7 +163,7 @@ public class SettingsController {
 				AddParsed<int>("Max Shockwave Particles", "_maxShockwaveParticles");
 			}
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+				var c2 = UI.AddChild(collapsible.panel!, "_chroma").AddComponent<Collapsible>().Init("Chroma", true);
 				prefix = "_chroma";
 				current_panel = c2.panel;
 				AddDropdown("Disable Chroma Events", "_disableChromaEvents", MapSettings.OptionBool);

@@ -80,7 +80,8 @@ public class Collapsible : MonoBehaviour
 			layout.childForceExpandWidth = true;
 			layout.childAlignment = TextAnchor.UpperCenter;
 		}
-		SetExpanded(expanded);
+		
+		SetExpanded(Settings.Get($"{gameObject.name}_expanded", expanded));
 		
 		return this;
 	}
@@ -94,6 +95,7 @@ public class Collapsible : MonoBehaviour
 		panel!.SetActive(expanded);
 		expandToggle!.transform.localEulerAngles = (expanded ? 1 : 0) * 180f * Vector3.forward;
 		SendMessageUpwards("DirtyPanel", false);
+		Settings.Set($"{gameObject.name}_expanded", expanded);
 	}
 }
 

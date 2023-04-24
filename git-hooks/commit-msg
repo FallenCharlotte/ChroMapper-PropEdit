@@ -1,4 +1,0 @@
-#!/bin/bash
-
-sed -i -e "1i\\\t$(cat $1)" Changelog
-git add Changelog

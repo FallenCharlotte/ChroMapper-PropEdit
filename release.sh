@@ -11,9 +11,14 @@ done
 
 sed -i 's/AssemblyVersion(.*)/AssemblyVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
 sed -i 's/AssemblyFileVersion(.*)/AssemblyFileVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
-sed -i -e "1i v${short}" Changelog
-cat Changelog > Changelog.txt
-sed -i '1i\\' Changelog
+
+mv Changelog.txt{,.old}
+echo "v${short}" > Changelog.txt
+git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:'   %s' >> Changelog.txt
+echo "" >> Changelog.txt
+cat Changelog.txt.old >> Changelog.txt
+rm Changelog.txt.old
+$EDITOR Changelog.txt
 
 git add $PROJECT/Properties/AssemblyInfo.cs Changelog
 git commit -nm "v${short}"

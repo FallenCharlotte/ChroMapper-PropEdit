@@ -42,7 +42,10 @@ public class Collapsible : MonoBehaviour
 		}
 		
 		var header = UI.AddField(gameObject, label);
-		((RectTransform)header.transform.GetChild(0)).anchoredPosition += new Vector2(5, 0);
+		{
+			var _label = header.transform.GetChild(0).gameObject;
+			_label.GetComponent<RectTransform>().anchoredPosition += new Vector2(5, 0);
+		}
 		expandToggle = UI.AddCheckbox(header, true, SetExpanded);
 		Sprite[] sprites = (Sprite[])Resources.FindObjectsOfTypeAll(typeof(Sprite));
 		Sprite arrow = sprites.Single(s => s.name == "ArrowIcon");

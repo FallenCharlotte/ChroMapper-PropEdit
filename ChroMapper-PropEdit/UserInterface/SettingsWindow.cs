@@ -35,6 +35,11 @@ public class SettingsController {
 		window.onShow += OnResize;
 		window.onResize += OnResize;
 		
+		{
+			var button = UI.AddButton(window.title!, "Close", ToggleWindow);
+			UI.AttachTransform(button.gameObject, pos: new Vector2(-35, -14), size: new Vector2(50, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
+		}
+		
 		var window_content = UI.AddChild(window.gameObject, "Settings Window Content");
 		UI.AttachTransform(window_content, new Vector2(-10, -40), new Vector2(0, -15), new Vector2(0, 0), new Vector2(1, 1));
 		{

@@ -109,8 +109,6 @@ public class ScrollBox : MonoBehaviour {
 		float scroll = first ? 1 : scrollbar!.value;
 		for (var i = 0; i < 5; ++i) {
 			target.GetComponent<RectTransform>().sizeDelta += new Vector2(0.25f, 0);
-			scrollbar!.value = scroll;
-			yield return new WaitForEndOfFrame();
 			target.GetComponent<RectTransform>().sizeDelta += new Vector2(-0.25f, 0);
 			scrollbar!.value = scroll;
 			yield return new WaitForEndOfFrame();

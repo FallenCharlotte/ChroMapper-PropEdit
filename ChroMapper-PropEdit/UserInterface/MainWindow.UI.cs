@@ -130,7 +130,9 @@ public partial class MainWindow {
 		var value = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
 		return UI.AddParsed<T>(container, value, (v) => {
-			Data.UpdateObjects<T?>(staged, get_set.Item2, v);
+			if (!(v == null && value == null)) {
+				Data.UpdateObjects<T?>(staged, get_set.Item2, v);
+			}
 		});
 	}
 	
@@ -147,7 +149,9 @@ public partial class MainWindow {
 			if (s == "") {
 				s = null;
 			}
-			Data.UpdateObjects<string?>(staged, get_set.Item2, s);
+			if (s != value) {
+				Data.UpdateObjects<string?>(staged, get_set.Item2, s);
+			}
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);

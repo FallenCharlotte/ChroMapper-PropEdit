@@ -1,3 +1,8 @@
+v0.4.1
+	Click anywhere on a collapsible's label to toggle!
+	No longer yeets values when selecting and unselecting an empty textbox!
+	Collapsibles remember their state!
+
 v0.4
 	Map Settings!
 	Collapsible categories!

@@ -1,5 +1,6 @@
 v0.4.1
 	Click anywhere on a collapsible's label to toggle!
+	Add option for splitting light values!
 	No longer yeets values when selecting and unselecting an empty textbox!
 	Collapsibles remember their state!
 

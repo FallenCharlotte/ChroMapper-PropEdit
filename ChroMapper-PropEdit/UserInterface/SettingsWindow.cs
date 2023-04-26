@@ -21,6 +21,7 @@ public class SettingsController {
 	public GameObject? current_panel;
 	public Toggle? chroma_enable;
 	public Toggle? noodle_enable;
+	public Toggle? split_value;
 	public ScrollBox? scrollbox;
 	
 	public Dictionary<string, UIDropdown> requirements = new Dictionary<string, UIDropdown>();
@@ -67,6 +68,13 @@ public class SettingsController {
 			var container = UI.AddField(panel, "Show Noodle Extensions");
 			noodle_enable = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.ShowNoodleKey, v);
+				Plugin.main?.UpdateSelection(false);
+			});
+		}
+		{
+			var container = UI.AddField(panel, "Split light values");
+			split_value = UI.AddCheckbox(container, false, (v) => {
+				Settings.Set(Settings.SplitValue, v);
 				Plugin.main?.UpdateSelection(false);
 			});
 		}
@@ -270,6 +278,7 @@ public class SettingsController {
 	public void Refresh() {
 		chroma_enable!.isOn = Settings.Get(Settings.ShowChromaKey, true);
 		noodle_enable!.isOn = Settings.Get(Settings.ShowNoodleKey, true);
+		split_value!.isOn = Settings.Get(Settings.SplitValue, true);
 		foreach (var r in requirements) {
 			r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map)));
 		}

@@ -243,7 +243,7 @@ public partial class MainWindow {
 					var f = events.First();
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
-						if (Settings.Get("split_val", true)!.AsBool) {
+						if (Settings.Get(Settings.SplitValue, true)!.AsBool) {
 							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors);
 							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions);
 						}

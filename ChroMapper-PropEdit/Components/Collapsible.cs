@@ -42,6 +42,16 @@ public class Collapsible : MonoBehaviour
 		}
 		
 		var header = UI.AddField(gameObject, label);
+		// Invisible image to make it clickable... Unity is a truly magical engine
+		{
+			var image = header.AddComponent<Image>();
+			image.sprite = PersistentUI.Instance.Sprites.Background;
+			image.type = Image.Type.Sliced;
+			image.color = new Color(0, 0, 0, 0);
+		}
+		header.AddComponent<Clickable>().onClick += () => {
+			expandToggle!.isOn = !expandToggle!.isOn;
+		};
 		{
 			var _label = header.transform.GetChild(0).gameObject;
 			_label.GetComponent<RectTransform>().anchoredPosition += new Vector2(5, 0);

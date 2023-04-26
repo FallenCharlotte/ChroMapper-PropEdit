@@ -88,6 +88,7 @@
   <ItemGroup>
     <Compile Include="Plugin.cs" />
     <Compile Include="Settings.cs" />
+    <Compile Include="Components\Clickable.cs" />
     <Compile Include="Components\Collapsible.cs" />
     <Compile Include="Components\DragWindowController.cs" />
     <Compile Include="Components\ResizeWindowController.cs" />

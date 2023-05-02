@@ -1,3 +1,6 @@
+v0.4.2
+	Color format option
+
 v0.4.1
 	Click anywhere on a collapsible's label to toggle!
 	Add option for splitting light values!

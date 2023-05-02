@@ -56,7 +56,7 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
 						current_panel = collapsible.panel;
-						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+						AddColor("Color", o.CustomKeyColor);
 						if (o is V2Note) {
 							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false);
 						}
@@ -118,7 +118,7 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
 						current_panel = collapsible.panel;
-						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+						AddColor("Color", o.CustomKeyColor);
 						current_panel = panel;
 					}
 					
@@ -163,7 +163,7 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
 						current_panel = collapsible.panel;
-						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+						AddColor("Color", o.CustomKeyColor);
 						current_panel = panel;
 					}
 					
@@ -211,7 +211,7 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
 						current_panel = collapsible.panel;
-						AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+						AddColor("Color", o.CustomKeyColor);
 						current_panel = panel;
 					}
 					
@@ -257,7 +257,7 @@ public partial class MainWindow {
 							var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
 							current_panel = collapsible.panel;
 							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true);
-							AddTextbox("Color", Data.CustomGetSetColor(o.CustomKeyColor));
+							AddColor("Color", o.CustomKeyColor);
 							if (events.Where(e => e.IsTransition).Count() == editing.Count()) {
 								AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true);
 								AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true);
@@ -266,8 +266,8 @@ public partial class MainWindow {
 								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false);
 								if (e.CustomLightGradient != null) {
 									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"));
-									AddTextbox("Start Color", Data.CustomGetSetColor($"{e.CustomKeyLightGradient}._startColor"));
-									AddTextbox("End Color",   Data.CustomGetSetColor($"{e.CustomKeyLightGradient}._endColor"));
+									AddColor("Start Color", $"{e.CustomKeyLightGradient}._startColor");
+									AddColor("End Color", $"{e.CustomKeyLightGradient}._endColor");
 									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false);
 								}
 							}
@@ -417,6 +417,15 @@ public partial class MainWindow {
 			}
 			AddCheckbox("  Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), true);
 			AddLine("");
+		}
+	}
+	
+	private void AddColor(string label, string key) {
+		if (Settings.Get(Settings.ColorHex, true)) {
+			AddTextbox(label, Data.CustomGetSetColor(key));
+		}
+		else {
+			AddTextbox(label, Data.CustomGetSetRaw(key), true);
 		}
 	}
 }

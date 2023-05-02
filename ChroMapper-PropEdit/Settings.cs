@@ -9,6 +9,7 @@ public class Settings {
 	public static readonly string ShowChromaKey = "Chroma";
 	public static readonly string ShowNoodleKey = "Noodle";
 	public static readonly string SplitValue = "split_val";
+	public static readonly string ColorHex = "color_hex";
 	
 	public static JSONNode? Get(string name, JSONNode? d = null) {
 		var o = Data.GetNode(Settings.Instance.json, name);

@@ -145,13 +145,13 @@ public class Data {
 				var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.Event);
 				
 				var next = (BaseEvent) collection.LoadedObjects
-					.Where(n => (((BaseEvent)n).Type == e.Type) && (n.Time > e.Time))
+					.Where(n => (((BaseEvent)n).Type == e.Type) && (n.JsonTime > e.JsonTime))
 					.FirstOrDefault();
 				
 				Color begin = GetColor(e);
 				Color end = (next != null) ? GetColor(next) : begin;
 				
-				float duration = (next != null) ? (next.Time - e.Time) : 1;
+				float duration = (next != null) ? (next.JsonTime - e.JsonTime) : 1;
 				
 				e.GetOrCreateCustom()[e.CustomKeyLightGradient] = (new ChromaLightGradient(begin, end, duration)).ToJson();
 				e.CustomData.Remove(e.CustomKeyColor);

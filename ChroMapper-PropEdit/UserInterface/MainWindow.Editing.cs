@@ -40,7 +40,7 @@ public partial class MainWindow {
 			
 			current_panel = panel;
 			
-			AddParsed("Beat", Data.GetSet<float>("Time"));
+			AddParsed("Beat", Data.GetSet<float>("JsonTime"));
 			
 			switch (type) {
 				case ObjectType.Note:
@@ -106,7 +106,7 @@ public partial class MainWindow {
 					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
 					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
 					AddParsed("Head Multiplier", Data.GetSet<float>("HeadControlPointLengthMultiplier"));
-					AddParsed("Tail Beat", Data.GetSet<float>("TailTime"));
+					AddParsed("Tail Beat", Data.GetSet<float>("TailJsonTime"));
 					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
 					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
 					AddDropdown<int?>("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections);

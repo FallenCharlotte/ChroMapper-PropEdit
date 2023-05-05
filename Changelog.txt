@@ -1,3 +1,6 @@
+v0.4.3
+	ChroMapper 0.8.580
+
 v0.4.2
 	Color format option
 

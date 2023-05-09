@@ -26,7 +26,9 @@ public class SettingsController {
 	public ScrollBox? scrollbox;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
+	//UITextInput? new_requirement;
 	
+	public List<string> custom_reqs = new List<string>();
 	public Dictionary<string, UIDropdown> requirements = new Dictionary<string, UIDropdown>();
 	public Dictionary<string, Toggle> forced = new Dictionary<string, Toggle>();
 	public Dictionary<string, Type> default_reqchecks = new Dictionary<string, Type>();
@@ -90,39 +92,19 @@ public class SettingsController {
 		}
 		
 		UI.AddField(panel, "");
-		UI.AddLabel(panel!.transform, "Map", "Settings Override", Vector2.zero);
+		UI.AddLabel(panel!.transform, "Map", "Map Settings", Vector2.zero);
 		{
 			var collapsible = UI.AddChild(panel, "Requirements").AddComponent<Collapsible>().Init("Requirements", true);
 			requirements_panel = collapsible.panel;
 			
-			foreach (var rc in default_reqchecks) {
-				AddReqField(rc.Key, false);
-			}
-			
-			foreach (var req_status in (new Dictionary<string, RequirementCheck.RequirementType>() {{"_requirements", RequirementCheck.RequirementType.Requirement}, {"_suggestions", RequirementCheck.RequirementType.Suggestion}})) {
-				if (BeatSaberSongContainer.Instance.DifficultyData.CustomData?[req_status.Key] is JSONArray reqs) {
-					foreach (var req in reqs.Children) {
-						var reqcheck = GetReqCheck(req);
-						if (reqcheck == null) {
-							RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value));
-							AddReqField(req, true);
-						}
-						else {
-							if (reqcheck.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map) != req_status.Value) {
-								// Triggers forced
-								requirements[req].Dropdown.value = (int)req_status.Value;
-							}
-						}
-					}
-				}
-			}
+			RefreshRequirements();
 		}
 		
 		information_editor = UI.AddChild(panel, "Information").AddComponent<ArrayEditor>().Init(BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_information", "Information");
 		warnings_editor = UI.AddChild(panel, "Warnings").AddComponent<ArrayEditor>().Init(BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_warnings", "Warnings");
 		
 		{
-			var collapsible = UI.AddChild(panel, "Map Options").AddComponent<Collapsible>().Init("Map Options", true);
+			var collapsible = UI.AddChild(panel, "Settings Override").AddComponent<Collapsible>().Init("Map Options", true);
 			{
 				var c2 = UI.AddChild(collapsible.panel!, "_playerOptions").AddComponent<Collapsible>().Init("Player Options", true);
 				prefix = "_playerOptions";
@@ -237,6 +219,60 @@ public class SettingsController {
 	}
 	
 	private string prefix = "";
+	
+	private readonly Dictionary<string, RequirementCheck.RequirementType> req_statuses = new Dictionary<string, RequirementCheck.RequirementType>() {
+		{"_requirements", RequirementCheck.RequirementType.Requirement},
+		{"_suggestions", RequirementCheck.RequirementType.Suggestion}
+	};
+	
+	private void RefreshRequirements() {
+		foreach (Transform child in requirements_panel!.transform) {
+			GameObject.Destroy(child.gameObject);
+		}
+		requirements = new Dictionary<string, UIDropdown>();
+		forced = new Dictionary<string, Toggle>();
+		
+		foreach (var rc in default_reqchecks) {
+			AddReqField(rc.Key, false);
+		}
+		
+		foreach (var req_status in req_statuses) {
+			if (BeatSaberSongContainer.Instance.DifficultyData.CustomData?[req_status.Key] is JSONArray reqs) {
+				foreach (var req in reqs.Children) {
+					var reqcheck = GetReqCheck(req);
+					if (reqcheck == null) {
+						RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value));
+					}
+					else {
+						if (reqcheck.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map) != req_status.Value) {
+							// Triggers forced
+							requirements[req].Dropdown.value = (int)req_status.Value;
+						}
+					}
+				}
+			}
+		}
+		
+		foreach (var reqcheck in requirementsAndSuggestions!) {
+			if (!default_reqchecks.ContainsKey(reqcheck.Name)) {
+				AddReqField(reqcheck.Name, true);
+			}
+		}
+		{
+			var input = UI.AddTextbox(requirements_panel!, "", (s) => {
+				if (s == null || s == "") {
+					return;
+				}
+				
+				RequirementCheck.RegisterRequirement(new CustomRequirement(s!, RequirementCheck.RequirementType.Requirement));
+				
+				RefreshRequirements();
+				Refresh();
+			});
+			
+			UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 20), new Vector2(0, 0));
+		}
+	}
 	
 	private void AddReqField(string name, bool force) {
 		var container = UI.AddField(requirements_panel!, name);

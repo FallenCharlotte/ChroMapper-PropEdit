@@ -20,7 +20,7 @@ echo -e "\n" >> "$CHANGELOG"
 cat "$CHANGELOG".old >> "$CHANGELOG"
 $EDITOR "$CHANGELOG"
 _status=$?
-if [[ ! $_status ]] then
+if [[ $_status != 0 ]]; then
 	echo "Aborting..."
 	rm "$CHANGELOG"
 	mv "$CHANGELOG"{.old,}

@@ -1,3 +1,8 @@
+v0.5
+	Add your own custom requirements/suggestions!
+	Yells at you when there's an update!
+	Edit map information and warnings fields!
+
 v0.4.3
 	ChroMapper 0.8.580
 

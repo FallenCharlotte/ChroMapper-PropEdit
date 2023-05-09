@@ -151,6 +151,27 @@ public class UI {
 		return input;
 	}
 	
+	public static UITextInput AddTextbox(GameObject parent, string? value, UnityAction<string?> setter, bool tall = false) {
+		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, parent.transform);
+		input.InputField.pointSize = tall ? 12 : 14;
+		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		input.InputField.text = value ?? "";
+		input.InputField.onEndEdit.AddListener((string? s) => {
+			setter(s);
+			
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+		});
+		input.InputField.onSelect.AddListener(delegate {
+			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
+				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
+			}
+		});
+		
+		return input;
+	}
+	
 #endregion
 	
 	public static RectTransform AttachTransform(GameObject obj,    Vector2 size, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, Vector2? pivot = null) {
@@ -182,6 +203,8 @@ public class UI {
 		
 		return Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), new Vector2(0, 0), 100.0f);
 	}
+	
+	// Stop textbox input from triggering actions, copied from the node editor
 	
 	private static readonly System.Type[] actionMapsEnabledWhenNodeEditing = {
 		typeof(CMInput.ICameraActions), typeof(CMInput.IBeatmapObjectsActions), typeof(CMInput.INodeEditorActions),

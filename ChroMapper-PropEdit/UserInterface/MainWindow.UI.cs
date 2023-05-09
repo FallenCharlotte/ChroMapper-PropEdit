@@ -141,29 +141,14 @@ public partial class MainWindow {
 		var staged = editing!;
 		var value = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
 		
-		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, container.transform);
-		input.InputField.pointSize = tall ? 12 : 14;
-		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		input.InputField.text = value ?? "";
-		input.InputField.onEndEdit.AddListener((string? s) => {
-			if (s == "") {
-				s = null;
+		return UI.AddTextbox(container, value, (v) => {
+			if (v == "") {
+				v = null;
 			}
-			if (s != value) {
-				Data.UpdateObjects<string?>(staged, get_set.Item2, s);
+			if (v != value) {
+				Data.UpdateObjects<string?>(staged, get_set.Item2, v);
 			}
-			
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(MainWindow), ActionMapsDisabled);
-		});
-		input.InputField.onSelect.AddListener(delegate {
-			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), new[] { typeof(CMInput.INodeEditorActions) });
-				CMInputCallbackInstaller.DisableActionMaps(typeof(MainWindow), ActionMapsDisabled);
-			}
-		});
-		
-		return input;
+		}, tall);
 	}
 	
 #endregion
@@ -172,16 +157,6 @@ public partial class MainWindow {
 		var layout = panel!.GetComponent<LayoutElement>();
 		layout!.minHeight = window!.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
 	}
-	
-	// Stop textbox input from triggering actions, copied from the node editor
-	
-	private readonly System.Type[] actionMapsEnabledWhenNodeEditing = {
-		typeof(CMInput.ICameraActions), typeof(CMInput.IBeatmapObjectsActions), typeof(CMInput.INodeEditorActions),
-		typeof(CMInput.ISavingActions), typeof(CMInput.ITimelineActions)
-	};
-	
-	private System.Type[] ActionMapsDisabled => typeof(CMInput).GetNestedTypes()
-		.Where(x => x.IsInterface && !actionMapsEnabledWhenNodeEditing.Contains(x)).ToArray();
 }
 
 }

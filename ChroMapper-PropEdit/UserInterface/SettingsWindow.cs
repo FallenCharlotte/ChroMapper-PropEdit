@@ -24,6 +24,8 @@ public class SettingsController {
 	public Toggle? split_value;
 	public Toggle? color_hex;
 	public ScrollBox? scrollbox;
+	ArrayEditor? information_editor;
+	ArrayEditor? warnings_editor;
 	
 	public Dictionary<string, UIDropdown> requirements = new Dictionary<string, UIDropdown>();
 	public Dictionary<string, Toggle> forced = new Dictionary<string, Toggle>();
@@ -88,7 +90,7 @@ public class SettingsController {
 		}
 		
 		UI.AddField(panel, "");
-		UI.AddLabel(panel!.transform, "Map", "Map Settings", Vector2.zero);
+		UI.AddLabel(panel!.transform, "Map", "Settings Override", Vector2.zero);
 		{
 			var collapsible = UI.AddChild(panel, "Requirements").AddComponent<Collapsible>().Init("Requirements", true);
 			requirements_panel = collapsible.panel;
@@ -115,6 +117,9 @@ public class SettingsController {
 				}
 			}
 		}
+		
+		information_editor = UI.AddChild(panel, "Information").AddComponent<ArrayEditor>().Init(BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_information", "Information");
+		warnings_editor = UI.AddChild(panel, "Warnings").AddComponent<ArrayEditor>().Init(BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_warnings", "Warnings");
 		
 		{
 			var collapsible = UI.AddChild(panel, "Map Options").AddComponent<Collapsible>().Init("Map Options", true);
@@ -193,7 +198,6 @@ public class SettingsController {
 				AddDropdown("Force Zen Mode Walls", "_forceZenModeWalls", MapSettings.OptionBool);
 			}
 		}
-		
 		
 		Refresh();
 	}
@@ -291,6 +295,8 @@ public class SettingsController {
 		foreach (var r in requirements) {
 			r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map)));
 		}
+		information_editor?.Refresh();
+		warnings_editor?.Refresh();
 	}
 	
 	private void OnResize() {

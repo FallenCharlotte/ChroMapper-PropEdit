@@ -57,6 +57,10 @@
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\UnityEngine.UIModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.UnityWebRequestModule">
+      <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.InputSystem">
       <HintPath>$(ChroMapperDir)\ChroMapper_Data\Managed\Unity.InputSystem.dll</HintPath>
       <Private>False</Private>
@@ -94,6 +98,7 @@
     <Compile Include="Components\DragWindowController.cs" />
     <Compile Include="Components\ResizeWindowController.cs" />
     <Compile Include="Components\ScrollBox.cs" />
+    <Compile Include="Components\UpdateChecker.cs" />
     <Compile Include="Components\Window.cs" />
     <Compile Include="Enums\Events.cs" />
     <Compile Include="Enums\Map.cs" />

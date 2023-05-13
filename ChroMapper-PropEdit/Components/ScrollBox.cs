@@ -12,9 +12,17 @@ public class ScrollBox : MonoBehaviour {
 	
 	public Scrollbar? scrollbar;
 	
-	public ScrollBox Init(Transform parent) {
-		content = UI.AddChild(parent, "Scroll Content");
-		var target = content.AddComponent<RectTransform>();
+	public static ScrollBox Create(GameObject parent) {
+		return UI.AddChild(parent, "Scroll Box").AddComponent<ScrollBox>().Init();
+	}
+	
+	public ScrollBox Init() {
+		UI.AttachTransform(gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
+		
+		var scroll_area = UI.AddChild(gameObject, "Scroll Area");
+		UI.AttachTransform(scroll_area, new Vector2(0, -10), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
+		content = UI.AddChild(scroll_area, "Scroll Content");
+		var target = UI.AttachTransform(content!, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1));
 		
 		var mask = gameObject.AddComponent<RectMask2D>();
 		var scrollrect = gameObject.AddComponent<ScrollRect>();
@@ -24,7 +32,7 @@ public class ScrollBox : MonoBehaviour {
 		scrollrect.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
 		scrollrect.content = target;
 		
-		var scroller = UI.AddChild(gameObject.transform.parent, "Scroll Bar", typeof(Scrollbar));
+		var scroller = UI.AddChild(gameObject, "Scroll Bar", typeof(Scrollbar));
 		UI.AttachTransform(scroller, new Vector2(10, 0), new Vector2(-5.5f, 0), new Vector2(1, 0), new Vector2(1, 1));
 		scrollbar = scroller.GetComponent<Scrollbar>();
 		scrollbar.transition = Selectable.Transition.ColorTint;

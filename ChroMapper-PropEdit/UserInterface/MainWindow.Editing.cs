@@ -19,6 +19,9 @@ using Convert = System.Convert;
 namespace ChroMapper_PropEdit.UserInterface {
 
 public partial class MainWindow {
+	public readonly string CHROMA_NAME = "Chroma";
+	public readonly string NOODLE_NAME = "Noodle Extensions";
+	
 	public void UpdateSelection(bool real) { lock(this) {
 		foreach (Transform child in panel!.transform) {
 			GameObject.Destroy(child.gameObject);
@@ -30,7 +33,7 @@ public partial class MainWindow {
 			window!.SetTitle($"{SelectionController.SelectedObjects.Count} Items selected");
 			
 			if (editing.GroupBy(o => o.ObjectType).Count() > 1) {
-				UI.AddLabel(panel!.transform, "Unsupported", "Multi-Type Unsupported!", Vector2.zero);
+				UI.AddLabel(panel!, "Unsupported", "Multi-Type Unsupported!", Vector2.zero);
 				return;
 			}
 			
@@ -54,7 +57,7 @@ public partial class MainWindow {
 					}
 					AddLine("");
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
 						AddColor("Color", o.CustomKeyColor);
 						if (o is V2Note) {
@@ -68,7 +71,7 @@ public partial class MainWindow {
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						var collapsible = UI.AddChild(panel, "Noodle Extensions").AddComponent<Collapsible>().Init("Noodle Extensions", true);
+						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
@@ -116,14 +119,14 @@ public partial class MainWindow {
 					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
 						AddColor("Color", o.CustomKeyColor);
 						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						var collapsible = UI.AddChild(panel, "Noodle Extensions").AddComponent<Collapsible>().Init("Noodle Extensions", true);
+						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
@@ -161,14 +164,14 @@ public partial class MainWindow {
 					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
 						AddColor("Color", o.CustomKeyColor);
 						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						var collapsible = UI.AddChild(panel, "Noodle Extensions").AddComponent<Collapsible>().Init("Noodle Extensions", true);
+						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
@@ -209,14 +212,14 @@ public partial class MainWindow {
 					AddLine("");
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
 						AddColor("Color", o.CustomKeyColor);
 						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						var collapsible = UI.AddChild(panel, "Noodle Extensions").AddComponent<Collapsible>().Init("Noodle Extensions", true);
+						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
@@ -254,7 +257,7 @@ public partial class MainWindow {
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
 							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true);
 							AddColor("Color", o.CustomKeyColor);
@@ -280,7 +283,7 @@ public partial class MainWindow {
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
 							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false);
 							AddDropdown<int?>("Direction",     Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.LaserDirection, true);
@@ -292,7 +295,7 @@ public partial class MainWindow {
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
 						AddLine("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
 							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter));
 							if (o is V2Event) {
@@ -313,7 +316,7 @@ public partial class MainWindow {
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
 						AddLine("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							var collapsible = UI.AddChild(panel, "Chroma").AddComponent<Collapsible>().Init("Chroma", true);
+							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
 							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep));
 							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed));

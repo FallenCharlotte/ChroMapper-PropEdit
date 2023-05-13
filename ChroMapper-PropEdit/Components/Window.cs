@@ -16,14 +16,14 @@ public class Window : MonoBehaviour {
 	
 	public string? settings_key;
 	
-	public static Window Create(string name, string title, Transform parent, Vector2 size) {
+	public static Window Create(string name, string title, GameObject parent, Vector2 size) {
 		var obj = new GameObject($"{name} Window");
 		return obj.AddComponent<Window>().Init(name, title, parent, size);
 	}
 	
-	public Window Init(string name, string title, Transform parent, Vector2 size) {
+	public Window Init(string name, string title, GameObject parent, Vector2 size) {
 		var canvas = parent.GetComponent<Canvas>();
-		gameObject.transform.parent = parent;
+		transform.parent = parent.transform;
 		settings_key = $"{name}_window";
 		// Window Drag
 		gameObject.AddComponent<DragWindowController>().Init(canvas, PosSave);
@@ -52,7 +52,7 @@ public class Window : MonoBehaviour {
 			handle.AddComponent<ResizeWindowController>().Init(canvas, SizeSave, new Vector2(1, 1));
 		}
 		
-		this.title = UI.AddLabel(transform, "Title", title, pos: new Vector2(10, -20), size: new Vector2(-10, 30), font_size: 28, anchor_min: new Vector2(0, 1), anchor_max: new Vector2(1, 1), align: TextAlignmentOptions.Left);
+		this.title = UI.AddLabel(gameObject, "Title", title, pos: new Vector2(10, -20), size: new Vector2(-10, 30), font_size: 28, anchor_min: new Vector2(0, 1), anchor_max: new Vector2(1, 1), align: TextAlignmentOptions.Left);
 		
 		gameObject.SetActive(false);
 		

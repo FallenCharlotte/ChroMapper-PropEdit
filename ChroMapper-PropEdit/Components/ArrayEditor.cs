@@ -15,6 +15,10 @@ public class ArrayEditor : MonoBehaviour {
 		inputs = new List<UITextInput>();
 	}
 	
+	public static ArrayEditor Create(GameObject parent, JSONNode root, string path, string title) {
+		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(root, path, title);
+	}
+	
 	public ArrayEditor Init(JSONNode root, string path, string title) {
 		this.root = root;
 		this.path = path;

@@ -26,7 +26,6 @@ public class SettingsController {
 	public ScrollBox? scrollbox;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
-	//UITextInput? new_requirement;
 	
 	public List<string> custom_reqs = new List<string>();
 	public Dictionary<string, UIDropdown> requirements = new Dictionary<string, UIDropdown>();
@@ -35,9 +34,9 @@ public class SettingsController {
 	public HashSet<RequirementCheck>? requirementsAndSuggestions;
 	
 	public void Init(MapEditorUI mapEditorUI) {
-		var parent = mapEditorUI.MainUIGroup[5];
+		var parent = mapEditorUI.MainUIGroup[5].gameObject;
 		
-		window = Window.Create("Settings", "Settings", parent.transform, size: new Vector2(200, 80));
+		window = Window.Create("Settings", "Settings", parent, size: new Vector2(200, 80));
 		window.onShow += OnResize;
 		window.onResize += OnResize;
 		
@@ -54,59 +53,56 @@ public class SettingsController {
 			image.type = Image.Type.Sliced;
 			image.color = new Color(0.1f, 0.1f, 0.1f, 1);
 		}
-		var scroll_area = UI.AddChild(window_content, "Scroll Area");
-		UI.AttachTransform(scroll_area, new Vector2(0, -10), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
-		scrollbox = scroll_area.AddComponent<ScrollBox>().Init(scroll_area.transform);
+		scrollbox = ScrollBox.Create(window_content);
 		panel = scrollbox.content;
-		UI.AttachTransform(panel!, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1));
 		
 		
-		UI.AddLabel(panel!.transform, "PropEdit", "PropEdit Settings", Vector2.zero);
+		UI.AddLabel(panel!, "PropEdit", "PropEdit Settings", Vector2.zero);
 		{
-			var container = UI.AddField(panel, "Show Chroma");
+			var container = UI.AddField(panel!, "Show Chroma");
 			chroma_enable = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.ShowChromaKey, v);
 				Plugin.main?.UpdateSelection(false);
 			});
 		}
 		{
-			var container = UI.AddField(panel, "Show Noodle Extensions");
+			var container = UI.AddField(panel!, "Show Noodle Extensions");
 			noodle_enable = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.ShowNoodleKey, v);
 				Plugin.main?.UpdateSelection(false);
 			});
 		}
 		{
-			var container = UI.AddField(panel, "Split light values");
+			var container = UI.AddField(panel!, "Split light values");
 			split_value = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.SplitValue, v);
 				Plugin.main?.UpdateSelection(false);
 			});
 		}
 		{
-			var container = UI.AddField(panel, "Colors as Hex");
+			var container = UI.AddField(panel!, "Colors as Hex");
 			color_hex = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.ColorHex, v);
 				Plugin.main?.UpdateSelection(false);
 			});
 		}
 		
-		UI.AddField(panel, "");
-		UI.AddLabel(panel!.transform, "Map", "Map Settings", Vector2.zero);
+		UI.AddField(panel!, "");
+		UI.AddLabel(panel!, "Map", "Map Settings", Vector2.zero);
 		{
-			var collapsible = UI.AddChild(panel, "Requirements").AddComponent<Collapsible>().Init("Requirements", true);
+			var collapsible = Collapsible.Create(panel!, "Requirements", "Requirements", true);
 			requirements_panel = collapsible.panel;
 			
 			RefreshRequirements();
 		}
 		
-		information_editor = UI.AddChild(panel, "Information").AddComponent<ArrayEditor>().Init(BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_information", "Information");
-		warnings_editor = UI.AddChild(panel, "Warnings").AddComponent<ArrayEditor>().Init(BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_warnings", "Warnings");
+		information_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_information", "Information");
+		warnings_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_warnings", "Warnings");
 		
 		{
-			var collapsible = UI.AddChild(panel, "Settings Override").AddComponent<Collapsible>().Init("Map Options", true);
+			var collapsible = Collapsible.Create(panel!, "Settings Override", "Map Options", true);
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "_playerOptions").AddComponent<Collapsible>().Init("Player Options", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "_playerOptions", "Player Options", true);
 				prefix = "_playerOptions";
 				current_panel = c2.panel;
 				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool);
@@ -128,7 +124,7 @@ public class SettingsController {
 				AddDropdown("Expert+ Effects Filter", "_environmentEffectsFilterExpertPlusPreset", MapSettings.EffectsFilters);
 			}
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "_modifiers").AddComponent<Collapsible>().Init("Modifiers", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "_modifiers", "Modifiers", true);
 				prefix = "_modifiers";
 				current_panel = c2.panel;
 				AddDropdown("Energy Type", "_energyType", MapSettings.EnergyTypes);
@@ -148,19 +144,19 @@ public class SettingsController {
 				AddDropdown("Small Cubes", "_smallCubes", MapSettings.OptionBool);
 			}
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "_environments").AddComponent<Collapsible>().Init("Environments", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "_environments", "Environments", true);
 				prefix = "_environments";
 				current_panel = c2.panel;
 				AddDropdown("Override Environments", "_overrideEnvironments", MapSettings.OptionBool);
 			}
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "Colors").AddComponent<Collapsible>().Init("Colors", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "Colors", "Colors", true);
 				prefix = "_colors";
 				current_panel = c2.panel;
 				AddDropdown("Override Colors", "_overrideDefaultColors", MapSettings.OptionBool);
 			}
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "_graphics").AddComponent<Collapsible>().Init("Graphics", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "_graphics", "Graphics", true);
 				prefix = "_graphics";
 				current_panel = c2.panel;
 				AddParsed<int>("Mirror Quality", "_mirrorGraphicsSettings");
@@ -171,7 +167,7 @@ public class SettingsController {
 				AddParsed<int>("Max Shockwave Particles", "_maxShockwaveParticles");
 			}
 			{
-				var c2 = UI.AddChild(collapsible.panel!, "_chroma").AddComponent<Collapsible>().Init("Chroma", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "_chroma", "Chroma", true);
 				prefix = "_chroma";
 				current_panel = c2.panel;
 				AddDropdown("Disable Chroma Events", "_disableChromaEvents", MapSettings.OptionBool);

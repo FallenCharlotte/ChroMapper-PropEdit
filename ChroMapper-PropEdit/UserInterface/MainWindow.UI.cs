@@ -56,9 +56,9 @@ public partial class MainWindow {
 	}
 	
 	public void Init(MapEditorUI mapEditorUI) {
-		var parent = mapEditorUI.MainUIGroup[5];
+		var parent = mapEditorUI.MainUIGroup[5].gameObject;
 		
-		window = Window.Create("Main", "Prop Editor", parent.transform, new Vector2(220, 256));
+		window = Window.Create("Main", "Prop Editor", parent, new Vector2(220, 256));
 		window.onShow += Resize;
 		window.onResize += Resize;
 		
@@ -76,11 +76,8 @@ public partial class MainWindow {
 			image.color = new Color(0.1f, 0.1f, 0.1f, 1);
 		}
 		
-		var scroll_area = UI.AddChild(container, "Scroll Area");
-		UI.AttachTransform(scroll_area, new Vector2(0, -10), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
-		scrollbox = scroll_area.AddComponent<ScrollBox>().Init(scroll_area.transform);
+		scrollbox = ScrollBox.Create(container);
 		panel = scrollbox.content;
-		UI.AttachTransform(panel!, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 1), new Vector2(1, 1));
 		
 		UpdateSelection(true);
 		

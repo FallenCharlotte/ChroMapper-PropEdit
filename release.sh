@@ -40,7 +40,6 @@ jq ".$branch.latest = \"$ver\"" versions.json.old > versions.json
 git add versions.json
 rm versions.json.old
 git commit -m "v${short}"
-git push
 
 git checkout "$branch"
 

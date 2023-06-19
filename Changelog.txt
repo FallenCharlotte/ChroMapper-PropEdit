@@ -1,3 +1,7 @@
+v0.5.1
+	Fix scrolling after modification
+	V3 fake objects on animations branch
+
 v0.5
 	Add your own custom requirements/suggestions!
 	Yells at you when there's an update!

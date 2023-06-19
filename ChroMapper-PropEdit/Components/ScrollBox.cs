@@ -11,6 +11,7 @@ public class ScrollBox : MonoBehaviour {
 	public GameObject? content;
 	
 	public Scrollbar? scrollbar;
+	public float TargetScroll = 1f;
 	
 	public static ScrollBox Create(GameObject parent) {
 		return UI.AddChild(parent, "Scroll Box").AddComponent<ScrollBox>().Init();
@@ -85,12 +86,6 @@ public class ScrollBox : MonoBehaviour {
 		StartCoroutine(DirtyPanel(false));
 	}
 	
-	public void ScrollToTop() {
-		if (isActiveAndEnabled) {
-			StartCoroutine(scroll_to_top());
-		}
-	}
-	
 	// From CM's StrobeGeneratorControllerUI, leaving the original comment because it needs repeating
 	// Unity is a fantastic game engine with no flaws whatsoever.
 	// Just kidding. It's shit. This shouldn't be necessary. Why am I being forced to go this route so that Unity UI can update the way that it's supposed to god fucking damnit i have lost all hope in the unity engine by spending one hour of my life just to waste a frame (and get a flickering effect) by having to write this ienumerator god dufkcinhjslkajdfklwa
@@ -114,23 +109,14 @@ public class ScrollBox : MonoBehaviour {
 		* */
 		// This is a little less obtrusive
 		var target = GetComponentInParent<Window>();
-		float scroll = first ? 1 : scrollbar!.value;
+		float scroll = first ? 1 : TargetScroll;
+		Debug.Log($"DirtyPanel: {scroll}");
 		for (var i = 0; i < 5; ++i) {
 			target.GetComponent<RectTransform>().sizeDelta += new Vector2(0.25f, 0);
 			target.GetComponent<RectTransform>().sizeDelta += new Vector2(-0.25f, 0);
 			scrollbar!.value = scroll;
 			yield return new WaitForEndOfFrame();
 		}
-	}
-	
-	private IEnumerator scroll_to_top() {
-		for (int i = 0; i < 3; ++i) {
-			if (scrollbar != null) {
-				scrollbar.value = 1f;
-			}
-			yield return new WaitForEndOfFrame();
-		}
-		yield return null;
 	}
 }
 

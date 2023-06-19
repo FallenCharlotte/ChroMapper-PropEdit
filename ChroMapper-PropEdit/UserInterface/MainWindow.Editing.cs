@@ -23,6 +23,8 @@ public partial class MainWindow {
 	public readonly string NOODLE_NAME = "Noodle Extensions";
 	
 	public void UpdateSelection(bool real) { lock(this) {
+		scrollbox!.TargetScroll = real ? 1f : scrollbox!.scrollbar!.value;
+		
 		foreach (Transform child in panel!.transform) {
 			GameObject.Destroy(child.gameObject);
 		}
@@ -40,6 +42,7 @@ public partial class MainWindow {
 			var o = editing.First();
 			var type = o.ObjectType;
 			var v2 = (o is V2Object);
+			var animation_branch = (System.Type.GetType("Beatmap.Animations.ObjectAnimator, Main, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null") is System.Type);
 			
 			current_panel = panel;
 			
@@ -85,7 +88,10 @@ public partial class MainWindow {
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
 						}
 						else {
-							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
+							if (animation_branch) {
+								AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null);
+								AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
+							}
 							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false);
 							AddCheckbox("Disable Look", Data.CustomGetSet<bool?>("disableNoteLook"), false);
 							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool?>("disableBadCutDirection"), false);
@@ -179,12 +185,17 @@ public partial class MainWindow {
 						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true);
 						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true);
+						if (animation_branch) {
+							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null);
+							AddCheckbox(
+								v2 ? "Interactable" : "Uninteractable",
+								Data.CustomGetSet<bool?>(v2 ? "_interactable" : "uninteractable"),
+								v2);
+						}
 						if (v2) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true);
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
 						}
 						else {
-							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
 							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false);
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
 							AddTextbox("Link", Data.CustomGetSet<string>("link"));
@@ -227,8 +238,10 @@ public partial class MainWindow {
 						AddTextbox("Rotation", Data.CustomGetSetRaw(ob.CustomKeyWorldRotation), true);
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(ob.CustomKeyLocalRotation), true);
 						AddTextbox("Size", Data.CustomGetSetRaw(ob.CustomKeySize), true);
+						if (animation_branch) {
+							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null);
+						}
 						if (o is V2Obstacle) {
-							AddCheckbox("Fake", Data.CustomGetSet<bool?>("_fake"), false);
 							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true);
 						}
 						else {
@@ -404,9 +417,6 @@ public partial class MainWindow {
 		}
 		else {
 			window!.SetTitle("No items selected");
-		}
-		if (real) {
-			scrollbox!.ScrollToTop();
 		}
 	}}
 	

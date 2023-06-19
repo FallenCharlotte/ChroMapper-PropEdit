@@ -96,10 +96,10 @@ public partial class MainWindow {
 	}
 	
 	// CustomData node gets removed when value = default
-	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool _default) {
+	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool? _default) {
 		var container = AddLine(title);
 		var staged = editing!;
-		var value = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1) ?? _default;
+		var value = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1) ?? _default ?? false;
 		
 		return UI.AddCheckbox(container, value, (v) => {
 			if (v == _default) {

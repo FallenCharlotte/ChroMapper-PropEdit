@@ -12,6 +12,7 @@ done
 
 sed -i 's/AssemblyVersion(.*)/AssemblyVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
 sed -i 's/AssemblyFileVersion(.*)/AssemblyFileVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
+sed -i 's/"version": ".*",/"version": "v'$short'",/' $PROJECT/manifest.json
 
 mv "$CHANGELOG"{,.old}
 echo "v${short}" > "$CHANGELOG"
@@ -28,7 +29,7 @@ if [[ $_status != 0 ]]; then
 fi
 rm "$CHANGELOG".old
 
-git add $PROJECT/Properties/AssemblyInfo.cs "$CHANGELOG"
+git add $PROJECT/Properties/AssemblyInfo.cs $PROJECT/manifest.json "$CHANGELOG"
 git commit -m "v${short}"
 git tag "v${short}"
 msbuild

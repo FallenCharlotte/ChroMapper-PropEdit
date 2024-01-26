@@ -1,7 +1,17 @@
+// Static UI helper functions
+
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.UI;
+
+using ChroMapper_PropEdit.Enums;
+
+using Convert = System.Convert;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
@@ -12,13 +22,11 @@ public class UI {
 		return obj;
 	}
 	
-	public static GameObject AddLabel(Transform parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center) {
-		var entryLabel = new GameObject(title + " Label", typeof(TextMeshProUGUI));
-		var rectTransform = ((RectTransform)entryLabel.transform);
-		rectTransform.SetParent(parent);
+	public static GameObject AddLabel(GameObject parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center) {
+		var entryLabel = AddChild(parent, title + " Label");
+		AttachTransform(entryLabel, size ?? new Vector2(110, 24), pos, anchor_min ?? new Vector2(0.5f, 1), anchor_max ?? new Vector2(0.5f, 1));
 		
-		MoveTransform(rectTransform, size ?? new Vector2(110, 24), pos, anchor_min ?? new Vector2(0.5f, 1), anchor_max ?? new Vector2(0.5f, 1));
-		var textComponent = entryLabel.GetComponent<TextMeshProUGUI>();
+		var textComponent = entryLabel.AddComponent<TextMeshProUGUI>();
 		
 		textComponent.name = title;
 		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
@@ -28,6 +36,138 @@ public class UI {
 		
 		return entryLabel;
 	}
+	
+	// A container for an input element with a label
+	public static GameObject AddField(GameObject parent, string title, Vector2? size = null) {
+		var container = UI.AddChild(parent, title + " Container");
+		UI.AttachTransform(container, size ?? new Vector2(0, 20), pos: new Vector2(0, 0));
+		
+		var label = UI.AddChild(container, title + " Label", typeof(TextMeshProUGUI));
+		UI.AttachTransform(label, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
+		
+		var textComponent = label.GetComponent<TextMeshProUGUI>();
+		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
+		textComponent.alignment = TextAlignmentOptions.Left;
+		textComponent.enableAutoSizing = true;
+		textComponent.fontSizeMin = 8;
+		textComponent.fontSizeMax = 16;
+		textComponent.text = title;
+		
+		return container;
+	}
+	
+	public static UIButton AddButton(GameObject parent, string text, UnityAction on_press) {
+		var button = Object.Instantiate(PersistentUI.Instance.ButtonPrefab, parent.transform);
+		button.SetText(text);
+		button.Button.onClick.AddListener(on_press);
+		return button;
+	}
+	public static UIButton AddButton(GameObject parent, Sprite sprite, UnityAction on_press) {
+		var button = Object.Instantiate(PersistentUI.Instance.ButtonPrefab, parent.transform);
+		button.SetImage(sprite);
+		button.Button.onClick.AddListener(on_press);
+		return button;
+	}
+	
+#region Input Fields
+	
+	public static Toggle AddCheckbox(GameObject parent, bool value, UnityAction<bool> setter) {
+		var original = GameObject.Find("Strobe Generator").GetComponentInChildren<Toggle>(true);
+		var toggleObject = UnityEngine.Object.Instantiate(original, parent.transform);
+		var toggleComponent = toggleObject.GetComponent<Toggle>();
+		var colorBlock = toggleComponent.colors;
+		colorBlock.normalColor = Color.white;
+		toggleComponent.colors = colorBlock;
+		toggleComponent.isOn = value;
+		toggleComponent.onValueChanged.AddListener(setter);
+		return toggleComponent;
+	}
+	
+	public static UIDropdown AddDropdown<T>(GameObject parent, T? value, UnityAction<T?> setter, Map<T?> type, bool nullable = false) {
+		// Get values from selected items
+		var options = new List<string>();
+		int i = 0;
+		if (value == null) {
+			options.Add("--");
+		}
+		else {
+			i = type.dict.Keys.ToList().IndexOf((T)value);
+			if (nullable) {
+				options.Add("Unset");
+				i += 1;
+			}
+		}
+		options.AddRange(type.dict.Values.ToList());
+		
+		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, parent.transform);
+		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		dropdown.SetOptions(options);
+		dropdown.Dropdown.value = i;
+		dropdown.Dropdown.onValueChanged.AddListener((i) => {
+			T? value = type.Backward(options[i]);
+			setter(value);
+		});
+		
+		return dropdown;
+	}
+	
+	public static UITextInput AddParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
+		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, parent.transform);
+		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		input.InputField.text = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
+		input.InputField.onEndEdit.AddListener((s) => {
+			// No IParsable in mono ;_;
+			var methods = typeof(T).GetMethods();
+			System.Reflection.MethodInfo? parse = null;
+			foreach (var method in methods) {
+				if (method.Name == "TryParse") {
+					parse = method;
+					break;
+				}
+			}
+			if (parse == null) {
+				Debug.LogError("Tried to parse a non-parsable type!");
+				return;
+			}
+			object?[] parameters = new object?[]{s, null};
+			bool res = (bool)parse.Invoke(null, parameters);
+			setter(res ? (T)parameters[1]! : null);
+			
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+		});
+		input.InputField.onSelect.AddListener(delegate {
+			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
+				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
+			}
+		});
+		
+		return input;
+	}
+	
+	public static UITextInput AddTextbox(GameObject parent, string? value, UnityAction<string?> setter, bool tall = false) {
+		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, parent.transform);
+		input.InputField.pointSize = tall ? 12 : 14;
+		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		input.InputField.text = value ?? "";
+		input.InputField.onEndEdit.AddListener((string? s) => {
+			setter(s);
+			
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+		});
+		input.InputField.onSelect.AddListener(delegate {
+			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
+				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
+			}
+		});
+		
+		return input;
+	}
+	
+#endregion
 	
 	public static RectTransform AttachTransform(GameObject obj,    Vector2 size, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, Vector2? pivot = null) {
 		var rectTransform = obj.GetComponent<RectTransform>();
@@ -58,6 +198,16 @@ public class UI {
 		
 		return Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), new Vector2(0, 0), 100.0f);
 	}
+	
+	// Stop textbox input from triggering actions, copied from the node editor
+	
+	private static readonly System.Type[] actionMapsEnabledWhenNodeEditing = {
+		typeof(CMInput.ICameraActions), typeof(CMInput.IBeatmapObjectsActions), typeof(CMInput.INodeEditorActions),
+		typeof(CMInput.ISavingActions), typeof(CMInput.ITimelineActions)
+	};
+	
+	private static System.Type[] ActionMapsDisabled => typeof(CMInput).GetNestedTypes()
+		.Where(x => x.IsInterface && !actionMapsEnabledWhenNodeEditing.Contains(x)).ToArray();
 }
 
 }

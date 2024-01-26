@@ -1,0 +1,66 @@
+v0.5.1
+	Fix scrolling after modification
+	V3 fake objects on animations branch
+
+v0.5
+	Add your own custom requirements/suggestions!
+	Yells at you when there's an update!
+	Edit map information and warnings fields!
+
+v0.4.3
+	ChroMapper 0.8.580
+
+v0.4.2
+	Color format option
+
+v0.4.1
+	Click anywhere on a collapsible's label to toggle!
+	Add option for splitting light values!
+	No longer yeets values when selecting and unselecting an empty textbox!
+	Collapsibles remember their state!
+
+v0.4
+	Map Settings!
+	Collapsible categories!
+	Manual requirements override!
+
+v0.3.12.3
+	Fix keybind
+	Window resizing!
+
+v0.3.12.2
+	ChroMapper v0.8.578 update
+
+v0.3.12.1
+	Fix crash when selecting newly-placed objects 
+
+v0.3.12
+	Slider (arc and chain) noodles! 
+
+v0.3.11
+	A half-usable animations interface! Thank Mawntee for yelling at me!
+
+v0.3.10
+	Boost events, BPM changes, lane rotations, and custom events!
+
+v0.3.9
+	Arcs and chains!
+
+v0.3.8.1
+	Make scrolling faster
+
+v0.3.8
+	V3 wall stuff and other grid things!
+
+v0.3.7
+	Arrays! (JSON dump) Separate light color and action! (optional)
+
+v0.3.6
+	Easing and LerpType for transition events (V2 and V3)
+
+v0.3.5
+	V3 note angle offset
+
+v0.3.3
+	V2 Gradients
+

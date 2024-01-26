@@ -7,14 +7,19 @@ namespace ChroMapper_PropEdit {
 
 [Plugin("PropEdit")]
 public class Plugin {
-	public static MainWindow? main;
-	public static SettingsWindow? settings;
+	public static MainWindow? main = null;
+	public static SettingsWindow? settings = null;
 	
 	[Init]
 	private void Init() {
-		SceneManager.sceneLoaded += SceneLoaded;
-		main = new MainWindow();
-		settings = new SettingsWindow();
+		try {
+			SceneManager.sceneLoaded += SceneLoaded;
+			main = new MainWindow();
+			settings = new SettingsWindow();
+		}
+		catch (System.Exception e) {
+			Debug.LogException(e);
+		}
 	}
 	
 	private void SceneLoaded(Scene scene, LoadSceneMode mode) {

@@ -110,7 +110,6 @@ public class ScrollBox : MonoBehaviour {
 		// This is a little less obtrusive
 		var target = GetComponentInParent<Window>();
 		float scroll = first ? 1 : TargetScroll;
-		Debug.Log($"DirtyPanel: {scroll}");
 		for (var i = 0; i < 5; ++i) {
 			target.GetComponent<RectTransform>().sizeDelta += new Vector2(0.25f, 0);
 			target.GetComponent<RectTransform>().sizeDelta += new Vector2(-0.25f, 0);

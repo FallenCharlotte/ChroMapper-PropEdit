@@ -16,7 +16,7 @@ namespace ChroMapper_PropEdit.UserInterface {
 
 public partial class MainWindow {
 	public ExtensionButton main_button;
-	public InputAction keybind;
+	public InputAction? keybind;
 	public Window? window;
 	public GameObject? panel;
 	public GameObject? current_panel;
@@ -28,31 +28,38 @@ public partial class MainWindow {
 			UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
 			"Prop Edit",
 			ToggleWindow);
-		
-		var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
-			.Where(x => x.name == "Node Editor")
-			.FirstOrDefault();
-		map.Disable();
-		keybind = map.AddAction("Prop Editor", type: InputActionType.Button);
-		keybind.AddCompositeBinding("ButtonWithOneModifier")
-			.With("Modifier", "<Keyboard>/shift")
-			.With("Button", "<Keyboard>/n");
-		keybind.performed += (_) => {
-			if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
-				ToggleWindow();
-			}
-		};
-		keybind.Disable();
-		map.Enable();
+		try {
+			var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
+				.Where(x => x.name == "Node Editor")
+				.FirstOrDefault();
+			CMInputCallbackInstaller.InputInstance.Disable();
+			keybind = map.AddAction("Prop Editor", type: InputActionType.Button);
+			// Dynamic to support dev and stable with one build
+			((dynamic)keybind.AddCompositeBinding("ButtonWithOneModifier"))
+				.With("Modifier", "<Keyboard>/shift")
+				.With("Button", "<Keyboard>/n");
+			keybind.performed += (_) => {
+				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+					ToggleWindow();
+				}
+			};
+			keybind.Disable();
+			CMInputCallbackInstaller.InputInstance.Enable();
+		}
+		catch (System.Exception e) {
+			Debug.LogWarning("PropEdit couldn't register a keybind!");
+			Debug.LogException(e);
+		}
 	}
 	
 	public void ToggleWindow() {
+		if (window == null) return;
 		window!.Toggle();
 		UpdateSelection(window!.gameObject.activeSelf);
 	}
 	
 	public void Disable() {
-		keybind.Disable();
+		keybind?.Disable();
 	}
 	
 	public void Init(MapEditorUI mapEditorUI) {
@@ -86,7 +93,7 @@ public partial class MainWindow {
 		BeatmapActionContainer.ActionUndoEvent += (_) => UpdateSelection(false);
 		BeatmapActionContainer.ActionRedoEvent += (_) => UpdateSelection(false);
 		
-		keybind.Enable();
+		keybind?.Enable();
 	}
 	
 #region Form Fields

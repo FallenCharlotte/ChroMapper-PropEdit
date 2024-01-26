@@ -23,9 +23,6 @@ public class Plugin {
 	}
 	
 	private void SceneLoaded(Scene scene, LoadSceneMode mode) {
-		if (scene.buildIndex == 1) {
-			UI.AddChild(scene.GetRootGameObjects()[0], "PropEdit update check").AddComponent<ChroMapper_PropEdit.Components.UpdateChecker>();
-		}
 		if (scene.buildIndex == 3) {
 			// Map Edit
 			var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();

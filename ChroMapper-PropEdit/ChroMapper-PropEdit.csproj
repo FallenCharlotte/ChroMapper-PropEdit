@@ -98,7 +98,6 @@
     <Compile Include="Components\DragWindowController.cs" />
     <Compile Include="Components\ResizeWindowController.cs" />
     <Compile Include="Components\ScrollBox.cs" />
-    <Compile Include="Components\UpdateChecker.cs" />
     <Compile Include="Components\Window.cs" />
     <Compile Include="Enums\Events.cs" />
     <Compile Include="Enums\Map.cs" />
@@ -116,6 +115,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\Icon.png" />
     <EmbeddedResource Include="Resources\Settings.png" />
+    <EmbeddedResource Include="manifest.json" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

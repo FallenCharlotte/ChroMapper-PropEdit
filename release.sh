@@ -12,6 +12,7 @@ done
 
 sed -i 's/AssemblyVersion(.*)/AssemblyVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
 sed -i 's/AssemblyFileVersion(.*)/AssemblyFileVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
+sed -i 's/"version": ".*",/"version": "v'$verv0.5.1'",/' $PROJECT/manifest.json
 
 mv "$CHANGELOG"{,.old}
 echo "v${short}" > "$CHANGELOG"

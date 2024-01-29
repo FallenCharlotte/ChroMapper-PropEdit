@@ -44,14 +44,16 @@ public class Settings {
 	private JSONObject json;
 	
 	private Settings() {
-		if (File.Exists(SETTINGS_FILE)) {
-			using (var reader = new StreamReader(SETTINGS_FILE)) {
-				json = JSON.Parse(reader.ReadToEnd()).AsObject;
+		try {
+			if (File.Exists(SETTINGS_FILE)) {
+				using (var reader = new StreamReader(SETTINGS_FILE)) {
+					json = JSON.Parse(reader.ReadToEnd()).AsObject;
+					return;
+				}
 			}
 		}
-		else {
-			json = new JSONObject();
-		}
+		catch (System.Exception _) { }
+		json = new JSONObject();
 	}
 	
 	private void Save() {

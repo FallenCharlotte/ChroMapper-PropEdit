@@ -1,6 +1,7 @@
 using TMPro;
 using System;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using SimpleJSON;
 
@@ -8,7 +9,7 @@ using ChroMapper_PropEdit.UserInterface;
 
 namespace ChroMapper_PropEdit.Components {
 
-public class Window : MonoBehaviour {
+public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 	public event Action? onShow;
 	public event Action? onResize;
 	
@@ -65,6 +66,9 @@ public class Window : MonoBehaviour {
 			PosLoad();
 			onShow?.Invoke();
 		}
+		else {
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Window), ActionMapsDisabled);
+		}
 	}
 	
 	public void SetTitle(string text) {
@@ -97,6 +101,18 @@ public class Window : MonoBehaviour {
 		PosSave();
 		onResize?.Invoke();
 	}
+	
+	public void OnPointerEnter(PointerEventData _) {
+		CMInputCallbackInstaller.DisableActionMaps(typeof(Window), ActionMapsDisabled);
+	}
+	
+	public void OnPointerExit(PointerEventData _) {
+		CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Window), ActionMapsDisabled);
+	}
+	
+	private static System.Type[] ActionMapsDisabled = {
+		typeof(CMInput.ICameraActions), typeof(CMInput.IPlacementControllersActions)
+	};
 }
 
 }

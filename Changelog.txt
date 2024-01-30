@@ -1,3 +1,8 @@
+v0.6.1
+	Don't place blocks behind windows!
+	Drag windows correctly after a resize!
+	Don't die if the config file's gone weird!
+
 v0.6
 	Switch to UpdateChecker
 	Chromapper v0.10

@@ -33,14 +33,3 @@ git add $PROJECT/Properties/AssemblyInfo.cs $PROJECT/manifest.json "$CHANGELOG"
 git commit -m "v${short}"
 git tag "v${short}"
 msbuild
-
-branch="$(git rev-parse --abbrev-ref HEAD)"
-git checkout versions
-mv versions.json{,.old}
-jq ".$branch.latest = \"$ver\"" versions.json.old > versions.json
-git add versions.json
-rm versions.json.old
-git commit -m "v${short}"
-
-git checkout "$branch"
-

@@ -46,7 +46,7 @@ public partial class MainWindow {
 			
 			current_panel = panel;
 			
-			AddParsed("Beat", Data.GetSet<float>("JsonTime"));
+			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true);
 			
 			switch (type) {
 				case ObjectType.Note:

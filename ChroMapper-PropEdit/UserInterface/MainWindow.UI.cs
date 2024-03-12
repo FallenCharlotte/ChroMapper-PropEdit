@@ -128,14 +128,14 @@ public partial class MainWindow {
 		}, type, nullable);
 	}
 	
-	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set) where T : struct {
+	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, bool time = false) where T : struct {
 		var container = AddLine(title);
 		var staged = editing!;
 		var value = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
 		return UI.AddParsed<T>(container, value, (v) => {
 			if (!(v == null && value == null)) {
-				Data.UpdateObjects<T?>(staged, get_set.Item2, v);
+				Data.UpdateObjects<T?>(staged, get_set.Item2, v, time);
 			}
 		});
 	}

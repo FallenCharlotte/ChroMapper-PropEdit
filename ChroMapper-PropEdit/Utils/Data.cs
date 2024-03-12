@@ -221,20 +221,35 @@ public class Data {
 		return last;
 	}
 	
-	public static void UpdateObjects<T>(IEnumerable<BaseObject> editing, System.Action<BaseObject, T?> setter, T? value) {
+	public static void UpdateObjects<T>(IEnumerable<BaseObject> editing, System.Action<BaseObject, T?> setter, T? value, bool time = false) {
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
 		foreach (var o in editing!) {
-			var clone = BeatmapFactory.Clone(o);
+			var orig = BeatmapFactory.Clone(o);
 			
-			setter(o, value);
-			o.RefreshCustom();
+			if (time) {
+				// Based on SelectionController.MoveSelection
+				var collection = BeatmapObjectContainerCollection.GetCollectionForType(o.ObjectType);
+				
+				collection.DeleteObject(o, false, false, default, true, false);
+				
+				setter(o, value);
+				
+				collection.SpawnObject(o, false, true);
+			}
+			else {
+				setter(o, value);
+				o.RefreshCustom();
+			}
 			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, clone, $"Edited a {o.ObjectType} with Prop Edit.", true));
+			beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, orig, $"Edited a {o.ObjectType} with Prop Edit.", true));
 		}
 		
 		BeatmapActionContainer.AddAction(
 			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
 			true);
+		if (time) {
+			BeatmapObjectContainerCollection.RefreshAllPools();
+		}
 	}
 	
 	public static JSONNode? GetNode(JSONNode root, string name) {

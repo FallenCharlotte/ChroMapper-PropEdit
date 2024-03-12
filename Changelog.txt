@@ -1,3 +1,6 @@
+v0.6.2
+	Fix error when editing time!
+
 v0.6.1
 	Don't place blocks behind windows!
 	Drag windows correctly after a resize!

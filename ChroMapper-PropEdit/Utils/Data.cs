@@ -230,11 +230,27 @@ public class Data {
 				// Based on SelectionController.MoveSelection
 				var collection = BeatmapObjectContainerCollection.GetCollectionForType(o.ObjectType);
 				
-				collection.DeleteObject(o, false, false, default, true, false);
+				var stable = false;
+				
+				try {
+					((dynamic)collection).DeleteObject(o, false, false, "", true, false);
+				}
+				catch (System.Exception _) {
+					stable = true;
+					((dynamic)collection).LoadedObjects.Remove(o);
+				}
 				
 				setter(o, value);
 				
-				collection.SpawnObject(o, false, true);
+				if (!stable) {
+					collection.SpawnObject(o, false, true);
+				}
+				else {
+					((dynamic)collection).LoadedObjects.Add(o);
+					if (collection.LoadedContainers.TryGetValue(o, out var con)) {
+						con.UpdateGridPosition();
+					}
+				}
 			}
 			else {
 				setter(o, value);

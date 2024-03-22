@@ -46,13 +46,13 @@ public partial class MainWindow {
 			
 			current_panel = panel;
 			
-			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true);
+			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true, "A specific point in time, as determined by the BPM of the song, when this object should reach the player.");
 			
 			switch (type) {
 				case ObjectType.Note:
 					var note = (o as BaseNote)!;
-					AddParsed("X", Data.GetSet<int>("PosX"), false, "Position X");
-					AddParsed("Y", Data.GetSet<int>("PosY"));
+					AddParsed("X", Data.GetSet<int>("PosX"), false, "The horizontal row where the object should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane.");
+					AddParsed("Y", Data.GetSet<int>("PosY"), false, "The vertical column where the object should reside on the grid. The indices run from 0 to 2, with 0 being the bottom-most lane.");
 					AddDropdown<int?>("Type", Data.GetSet<int>("Type"), Notes.NoteTypes);
 					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
 					if (!v2) {

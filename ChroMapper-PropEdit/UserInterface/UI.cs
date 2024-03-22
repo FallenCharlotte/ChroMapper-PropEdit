@@ -25,8 +25,8 @@ public class UI {
 	public static GameObject AddLabel(GameObject parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center, string tooltip = "") {
 		var entryLabel = AddChild(parent, title + " Label");
 		AttachTransform(entryLabel, size ?? new Vector2(110, 24), pos, anchor_min ?? new Vector2(0.5f, 1), anchor_max ?? new Vector2(0.5f, 1));
-          
-        var textComponent = entryLabel.AddComponent<TextMeshProUGUI>();
+		
+		var textComponent = entryLabel.AddComponent<TextMeshProUGUI>();
 		
 		textComponent.name = title;
 		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
@@ -44,14 +44,26 @@ public class UI {
 		
 		var label = UI.AddChild(container, title + " Label", typeof(TextMeshProUGUI));
 		UI.AttachTransform(label, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
-            //main code that adds the tooltip to the label
-			if (tooltip != "") {
-                label.AddComponent<Tooltip>();
-                var tooltipComp = label.GetComponent<Tooltip>();
-                tooltipComp.TooltipOverride = tooltip;
-            }
-
-            var textComponent = label.GetComponent<TextMeshProUGUI>();
+		//main code that adds the tooltip to the label
+		if (tooltip != "") {
+			var LINE_WIDTH = 40;
+			var tooltip_wrapped = new System.Text.StringBuilder(tooltip);
+			var i = 0;
+			while (i + LINE_WIDTH < tooltip.Length) {
+				var search_len = System.Math.Min(LINE_WIDTH, tooltip.Length - i - 1);
+				var j = tooltip.LastIndexOf(" ", i + search_len, search_len);
+				if (j == -1) {
+					// Who tf has a 40-character word?
+					break;
+				}
+				tooltip_wrapped[j] = '\n';
+				i = j + 1;
+			}
+			var tooltipComp = label.AddComponent<Tooltip>();
+			tooltipComp.TooltipOverride = tooltip_wrapped.ToString();
+		}
+		
+		var textComponent = label.GetComponent<TextMeshProUGUI>();
 		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
 		textComponent.alignment = TextAlignmentOptions.Left;
 		textComponent.enableAutoSizing = true;
@@ -61,11 +73,11 @@ public class UI {
 		
 		return container;
 	}
-
+	
 	public static UIButton AddButton(GameObject parent, string text, UnityAction on_press) {
 		var button = Object.Instantiate(PersistentUI.Instance.ButtonPrefab, parent.transform);
 		button.SetText(text);
-		button.Button.onClick.AddListener(on_press);	
+		button.Button.onClick.AddListener(on_press);
 		return button;
 	}
 	public static UIButton AddButton(GameObject parent, Sprite sprite, UnityAction on_press) {

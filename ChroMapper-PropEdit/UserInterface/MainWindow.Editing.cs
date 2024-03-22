@@ -51,7 +51,7 @@ public partial class MainWindow {
 			switch (type) {
 				case ObjectType.Note:
 					var note = (o as BaseNote)!;
-					AddParsed("X", Data.GetSet<int>("PosX"));
+					AddParsed("X", Data.GetSet<int>("PosX"), false, "Position X");
 					AddParsed("Y", Data.GetSet<int>("PosY"));
 					AddDropdown<int?>("Type", Data.GetSet<int>("Type"), Notes.NoteTypes);
 					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
@@ -79,7 +79,7 @@ public partial class MainWindow {
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
 						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true);
-						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true);
+						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true, "updates the position");
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true);
 						if (o is V2Note) {
 							AddParsed("Exact Angle", Data.CustomGetSet<float?>("_cutDirection"));

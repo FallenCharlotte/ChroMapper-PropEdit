@@ -22,11 +22,11 @@ public class UI {
 		return obj;
 	}
 	
-	public static GameObject AddLabel(GameObject parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center) {
+	public static GameObject AddLabel(GameObject parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center, string tooltip = "") {
 		var entryLabel = AddChild(parent, title + " Label");
 		AttachTransform(entryLabel, size ?? new Vector2(110, 24), pos, anchor_min ?? new Vector2(0.5f, 1), anchor_max ?? new Vector2(0.5f, 1));
-		
-		var textComponent = entryLabel.AddComponent<TextMeshProUGUI>();
+          
+        var textComponent = entryLabel.AddComponent<TextMeshProUGUI>();
 		
 		textComponent.name = title;
 		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
@@ -38,14 +38,20 @@ public class UI {
 	}
 	
 	// A container for an input element with a label
-	public static GameObject AddField(GameObject parent, string title, Vector2? size = null) {
+	public static GameObject AddField(GameObject parent, string title, Vector2? size = null, string tooltip = "") {
 		var container = UI.AddChild(parent, title + " Container");
 		UI.AttachTransform(container, size ?? new Vector2(0, 20), pos: new Vector2(0, 0));
 		
 		var label = UI.AddChild(container, title + " Label", typeof(TextMeshProUGUI));
 		UI.AttachTransform(label, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
-		
-		var textComponent = label.GetComponent<TextMeshProUGUI>();
+            //main code that adds the tooltip to the label
+			if (tooltip != "") {
+                label.AddComponent<Tooltip>();
+                var tooltipComp = label.GetComponent<Tooltip>();
+                tooltipComp.TooltipOverride = tooltip;
+            }
+
+            var textComponent = label.GetComponent<TextMeshProUGUI>();
 		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
 		textComponent.alignment = TextAlignmentOptions.Left;
 		textComponent.enableAutoSizing = true;
@@ -55,11 +61,11 @@ public class UI {
 		
 		return container;
 	}
-	
+
 	public static UIButton AddButton(GameObject parent, string text, UnityAction on_press) {
 		var button = Object.Instantiate(PersistentUI.Instance.ButtonPrefab, parent.transform);
 		button.SetText(text);
-		button.Button.onClick.AddListener(on_press);
+		button.Button.onClick.AddListener(on_press);	
 		return button;
 	}
 	public static UIButton AddButton(GameObject parent, Sprite sprite, UnityAction on_press) {

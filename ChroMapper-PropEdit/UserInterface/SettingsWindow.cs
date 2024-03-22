@@ -105,7 +105,7 @@ public class SettingsWindow {
 				var c2 = Collapsible.Create(collapsible.panel!, "_playerOptions", "Player Options", true);
 				prefix = "_playerOptions";
 				current_panel = c2.panel;
-				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool);
+				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool, "leftz handes ok xgg");
 				AddParsed<float>("Player Height", "_playerHeight");
 				AddDropdown("Automatic Player Height", "_automaticPlayerHeight", MapSettings.OptionBool);
 				AddParsed<float>("Sfx Volume", "_sfxVolume");
@@ -180,9 +180,9 @@ public class SettingsWindow {
 		Refresh();
 	}
 	
-	private void AddDropdown<T>(string name, string path, Map<T?> options) {
+	private void AddDropdown<T>(string name, string path, Map<T?> options, string tooltip = "") {
 		path = $"_settings.{prefix}.{path}";
-		var container = UI.AddField(current_panel!, name);
+		var container = UI.AddField(current_panel!, name, null, tooltip);
 		var node = Data.GetNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path);
 		var value = (node == null)
 			? default(T)!
@@ -197,9 +197,10 @@ public class SettingsWindow {
 		}, options, true);
 	}
 	
-	private void AddParsed<T>(string name, string path) where T : struct {
+	
+	private void AddParsed<T>(string name, string path, string tooltip = "") where T : struct {
 		path = $"_settings.{prefix}.{path}";
-		var container = UI.AddField(current_panel!, name);
+		var container = UI.AddField(current_panel!, name, null, tooltip);
 		var node = Data.GetNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path);
 		T? value = (node == null)
 			? null
@@ -270,12 +271,12 @@ public class SettingsWindow {
 		}
 	}
 	
-	private void AddReqField(string name, bool force) {
-		var container = UI.AddField(requirements_panel!, name);
+	private void AddReqField(string name, bool force, string tooltip = "") {
+		var container = UI.AddField(requirements_panel!, name, null, tooltip);
 		requirements[name] = UI.AddDropdown(container, 0, (v) => {
 			SetForced(name, true);
 		}, MapSettings.RequirementStatus);
-		var container2 = UI.AddField(requirements_panel!, "Override");
+		var container2 = UI.AddField(requirements_panel!, "Override", null, tooltip);
 		forced[name] = UI.AddCheckbox(container2, force, (v) => {
 			// Can't un-force a custom requirement
 			if (!default_reqchecks.ContainsKey(name)) {

@@ -98,13 +98,13 @@ public partial class MainWindow {
 	
 #region Form Fields
 	
-	private GameObject AddLine(string title, Vector2? size = null) {
-		return UI.AddField(current_panel!, title, size);
+	private GameObject AddLine(string title, Vector2? size = null, string tooltip = "") {
+		return UI.AddField(current_panel!, title, size, tooltip);
 	}
 	
 	// CustomData node gets removed when value = default
-	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool? _default) {
-		var container = AddLine(title);
+	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool? _default, string tooltip = "") {
+		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
 		var value = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1) ?? _default ?? false;
 		
@@ -118,8 +118,8 @@ public partial class MainWindow {
 		});
 	}
 	
-	private UIDropdown AddDropdown<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, Map<T?> type, bool nullable = false) {
-		var container = AddLine(title);
+	private UIDropdown AddDropdown<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, Map<T?> type, bool nullable = false, string tooltip = "") {
+		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
 		var value = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
@@ -128,8 +128,8 @@ public partial class MainWindow {
 		}, type, nullable);
 	}
 	
-	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, bool time = false) where T : struct {
-		var container = AddLine(title);
+	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, bool time = false, string tooltip = "") where T : struct {
+		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
 		var value = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
@@ -140,8 +140,8 @@ public partial class MainWindow {
 		});
 	}
 	
-	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, bool tall = false) {
-		var container = AddLine(title, tall ? (new Vector2(0, 22)) : null);
+	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, bool tall = false, string tooltip = "") {
+		var container = AddLine(title, tall ? (new Vector2(0, 22)) : null, tooltip);
 		var staged = editing!;
 		var value = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
 		

@@ -141,7 +141,7 @@ public partial class MainWindow {
 						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, "Allows to set the global rotation [x,y,z]/[yaw, pitch, roll] of the arc. [0,0,0] is always the rotation, that faces the player");
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, "Allows to set the local rotation [x,y,z]/[yaw, pitch, roll] of the arc. This won't affect the direction it spawns from or the path it takes");
 						if (v2) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, "If deactivated, the arc cannot be interacted with");
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, "If deactivated, the arc cannot be interacted with. ");
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, "Allows you to change how the arc spawns. [flip line index, flip jump] Flip line index is the initial x the arc will spawn at and flip jump is how high (or low) the arc will jump up (or down) when flipping to its true position. Base game behaviour will set one arc's flip jump to -1 and the other to 1."); //not sure if this works
 						}
 						else {
@@ -172,7 +172,7 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
-						AddColor("Color", o.CustomKeyColor);
+						AddColor("Color", o.CustomKeyColor, "Changes the color and opacity of the note. Is displayed in hex numbers");
 						current_panel = panel;
 					}
 					
@@ -205,46 +205,46 @@ public partial class MainWindow {
 				}	break;
 				case ObjectType.Obstacle:
 					var ob = (o as BaseObstacle)!;
-					AddParsed("Duration", Data.GetSet<float>("Duration"));
+					AddParsed("Duration", Data.GetSet<float>("Duration"), false, "A value (in beats) that determines how long the obstacle extends for.");
 					if (o is V2Obstacle) {
-						AddParsed("X", Data.GetSet<int>("PosX"));
-						AddParsed("Width", Data.GetSet<int>("Width"));
-						AddDropdown<int?>("Height", Data.GetSet<int>("Type"), Obstacles.WallHeights);
+						AddParsed("X", Data.GetSet<int>("PosX"), false, "The horizontal row where the obstacle should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane");
+						AddParsed("Width", Data.GetSet<int>("Width"), false, "An integer value which represents how many columns the obstacle should take up on the grid.");
+						AddDropdown<int?>("Height", Data.GetSet<int>("Type"), Obstacles.WallHeights, false, "An integer value which represents how many rows the obstacle should take up on the grid. The range of acceptable values runs from 1 to 5.");
 					}
 					else {
-						AddParsed("X (Left)", Data.GetSet<int>("PosX"));
-						AddParsed("Y (Bottom)", Data.GetSet<int>("PosY"));
-						AddParsed("Width", Data.GetSet<int>("Width"));
-						AddParsed("Height", Data.GetSet<int>("Height"));
+						AddParsed("X (Left)", Data.GetSet<int>("PosX"), false, "The horizontal row where the obstacle should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane");
+						AddParsed("Y (Bottom)", Data.GetSet<int>("PosY"), false, "The vertical column where the obstacle should reside on the grid. The indices run from 0 to 2, with 0 being the bottom-most lane");
+						AddParsed("Width", Data.GetSet<int>("Width"), false, "An integer value which represents how many columns the obstacle should take up on the grid.");
+						AddParsed("Height", Data.GetSet<int>("Height"), false, "An integer value which represents how many rows the obstacle should take up on the grid. The range of acceptable values runs from 1 to 5.");
 					}
 					AddLine("");
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
-						AddColor("Color", o.CustomKeyColor);
+						AddColor("Color", o.CustomKeyColor, "Changes the color and opacity of the note. Is displayed in hex numbers");
 						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
-						AddTextbox("Position", Data.CustomGetSetRaw(ob.CustomKeyCoordinate), true);
-						AddTextbox("Rotation", Data.CustomGetSetRaw(ob.CustomKeyWorldRotation), true);
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(ob.CustomKeyLocalRotation), true);
-						AddTextbox("Size", Data.CustomGetSetRaw(ob.CustomKeySize), true);
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, "Changes the note jump speed (NJS) of the obstacle");
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, "Changes the jump distance (JD) of the obstacle");
+						AddTextbox("Position", Data.CustomGetSetRaw(ob.CustomKeyCoordinate), true, "Allows to set the coordinates [x,y,z] of an obstacle. Keep in mind, that the center [0,0,0] is different from vanilla coordinates");
+						AddTextbox("Rotation", Data.CustomGetSetRaw(ob.CustomKeyWorldRotation), true, "Allows to set the global rotation [x,y,z]/[yaw, pitch, roll] of the obstacle. [0,0,0] is always the rotation, that faces the player.");
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(ob.CustomKeyLocalRotation), true, "Allows to set the local rotation [x,y,z]/[yaw, pitch, roll] of the obstacle. This won't affect the direction it spawns from or the path it takes.");
+						AddTextbox("Size", Data.CustomGetSetRaw(ob.CustomKeySize), true, "The width, height and length of a wall[w, h, l]. [1, 1, 1] will be perfectly square. Each number is fully optional.");
 						if (animation_branch) {
-							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null);
+							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, "If activated, the obstacle will not count towards your score or combo, meaning, if you go into it, it won't have any effect");
 						}
 						if (o is V2Obstacle) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true);
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, "If deactivated, the obstacle cannot be interacted with.");
 						}
 						else {
-							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
+							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, "If activated, the obstacle cannot be interacted with."); // not sure if this means that it will screw up your score
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, "Groups the obstacle together with different objects, that have the same track name/string");
 						AddAnimation(o is V2Obstacle);
 						current_panel = panel;
 					}
@@ -257,31 +257,31 @@ public partial class MainWindow {
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
 						if (Settings.Get(Settings.SplitValue, true)!.AsBool) {
-							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors);
-							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions);
+							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors, false, "Changes the vanilla color of the event. Allows to be set to the saber colors, white and off");
+							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions, false, "Determines how the event should behave");
 						}
 						else {
-							AddDropdown<int?>("Value", Data.GetSet<int>("Value"), Events.LightValues);
+							AddDropdown<int?>("Value", Data.GetSet<int>("Value"), Events.LightValues, false, "Changes the color and behaviour of the event");
 						}
-						AddParsed("Brightness", Data.GetSet<float>("FloatValue"));
+						AddParsed("Brightness", Data.GetSet<float>("FloatValue"), false, "Used to control the brightness of the event. A value of 0 will turn the light off.");
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
-							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true);
-							AddColor("Color", o.CustomKeyColor);
+							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true, "Causes the event to only affect the specified ID. Can be an array.");
+							AddColor("Color", o.CustomKeyColor, "Changes the color and opacity of the event. Is displayed in Hex colors");
 							if (events.Where(e => e.IsTransition).Count() == editing.Count()) {
-								AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true);
-								AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true);
+								AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true, "The easing effect that the event should use. Check out \"easings.net\" for visualization examples");
+								AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true, "Determines, in what way the color should transition. RGB transitions the color, by changing every value. HSV transitions the color, by primarly changing its hue"); //Unsure
 							}
 							if (o is V2Event e) {
-								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false);
+								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false, "If activated, allows to set a color gradient");
 								if (e.CustomLightGradient != null) {
-									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"));
-									AddColor("Start Color", $"{e.CustomKeyLightGradient}._startColor");
-									AddColor("End Color", $"{e.CustomKeyLightGradient}._endColor");
-									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false);
+									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"), false, "A value (in beats) that determines how long the gradient extends for.");
+									AddColor("Start Color", $"{e.CustomKeyLightGradient}._startColor", "Changes the color and opacity of the start gradient. Is displayed in Hex colors");
+									AddColor("End Color", $"{e.CustomKeyLightGradient}._endColor",  "Changes the color and opacity of the end gradient. Is displayed in Hex colors");
+									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false, "The easing effect that the event should use. Check out \"easings.net\" for visualization examples");
 								}
 							}
 							current_panel = panel;
@@ -289,7 +289,7 @@ public partial class MainWindow {
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
-						AddParsed("Speed", Data.GetSet<int>("Value"));
+						AddParsed("Speed", Data.GetSet<int>("Value"), false, "The ");
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {

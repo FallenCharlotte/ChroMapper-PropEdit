@@ -46,29 +46,29 @@ public partial class MainWindow {
 			
 			current_panel = panel;
 			
-			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true, "A specific point in time, as determined by the BPM of the song, when this object should reach the player.");
+			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true, "A specific point in time, as determined by the BPM of the song, when this object should reach the player");
 			
 			switch (type) {
 				case ObjectType.Note:
 					var note = (o as BaseNote)!;
-					AddParsed("X", Data.GetSet<int>("PosX"), false, "The horizontal row where the object should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane.");
-					AddParsed("Y", Data.GetSet<int>("PosY"), false, "The vertical column where the object should reside on the grid. The indices run from 0 to 2, with 0 being the bottom-most lane.");
-					AddDropdown<int?>("Type", Data.GetSet<int>("Type"), Notes.NoteTypes);
-					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
+					AddParsed("X", Data.GetSet<int>("PosX"), false, "The horizontal row where the note should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane");
+					AddParsed("Y", Data.GetSet<int>("PosY"), false, "The vertical column where the note should reside on the grid. The indices run from 0 to 2, with 0 being the bottom-most lane");
+					AddDropdown<int?>("Type", Data.GetSet<int>("Type"), Notes.NoteTypes, false, "Indicates which saber should be able to successfully cut the note. Allows to change to a bomb");
+					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, "Indicates the direction the player should swing to successfully cut the note");
 					if (!v2) {
-						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"));
+						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"), false, "A value (in degrees) which applies a counter-clockwise rotational offset to the note's cut direction.");
 					}
 					AddLine("");
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
-						AddColor("Color", o.CustomKeyColor);
+						AddColor("Color", o.CustomKeyColor, "Changes the color and opacity of the note. Is displayed in Hex colors");
 						if (o is V2Note) {
-							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false);
+							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false, "Disables the light effect, that occurs when the note spawns");
 						}
 						else {
-							AddCheckbox("Spawn Effect", Data.CustomGetSet<bool?>("spawnEffect"), true);
-							AddCheckbox("Disable Debris", Data.CustomGetSet<bool?>("disableDebris"), false);
+							AddCheckbox("Spawn Effect", Data.CustomGetSet<bool?>("spawnEffect"), true, "Toggles the light spawn effect, that occurs when the note spawns");
+							AddCheckbox("Disable Debris", Data.CustomGetSet<bool?>("disableDebris"), false, "Disables the debris that occurs when cutting through the note");
 						}
 						current_panel = panel;
 					}
@@ -76,31 +76,31 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
-						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true);
-						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true, "updates the position");
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true);
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, "Changes the note jump speed (NJS) of the note");
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, "Changes the jump distance (JD) of the note");
+						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true, "Allows to set the coordinates [x,y,z] of a note. Keep in mind, that the center [0,0,0] is different from vanilla coordinates");
+						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true, "Allows to set the global rotation [x,y,z]/[yaw, pitch, roll] of a note. [0,0,0] is always the rotation, that faces the player");
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true, "Allows to set the local rotation [x,y,z]/[yaw, pitch, roll] of a note. This won't affect the direction it spawns from or the path it takes");
 						if (o is V2Note) {
-							AddParsed("Exact Angle", Data.CustomGetSet<float?>("_cutDirection"));
-							AddCheckbox("Fake", Data.CustomGetSet<bool?>("_fake"), false);
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true);
-							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
+							AddParsed("Exact Angle", Data.CustomGetSet<float?>("_cutDirection"), false, "A value (in degrees) which applies a counter-clockwise rotational offset to the note's cut direction.");
+							AddCheckbox("Fake", Data.CustomGetSet<bool?>("_fake"), false, "If activated, the note will not count towards your score or combo, meaning, if you miss it, it won't have any effect");
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, "If deactivated, the note cannot be interacted with / cut through");
+							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, "Allows you to change how the note spawns. [flip line index, flip jump] Flip line index is the initial x the note will spawn at and flip jump is how high (or low) the note will jump up (or down) when flipping to its true position. Base game behaviour will set one note's flip jump to -1 and the other to 1.");
 						}
 						else {
 							if (animation_branch) {
-								AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null);
-								AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
+								AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, "If activated, the note will not count towards your score or combo, meaning, if you miss it, it won't have any effect");
+								AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, "If activated, the note cannot be interacted with / cut through.");
 							}
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false);
-							AddCheckbox("Disable Look", Data.CustomGetSet<bool?>("disableNoteLook"), false);
-							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool?>("disableBadCutDirection"), false);
-							AddCheckbox("No Badcut Speed", Data.CustomGetSet<bool?>("disableBadCutSpeed"), false);
-							AddCheckbox("No Badcut Color", Data.CustomGetSet<bool?>("disableBadCutSaberType"), false);
-							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
-							AddTextbox("Link", Data.CustomGetSet<string>("link"));
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, "If disabled, the note will no longer do their animation where they float up"); //subject to change
+							AddCheckbox("Disable Look", Data.CustomGetSet<bool?>("disableNoteLook"), false, "If disabled, the note will no longer try to face the player as it comes closer to them");
+							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool?>("disableBadCutDirection"), false, "If activated, the note cannot be badcut from a wrong direction, meaning it will go straight through");
+							AddCheckbox("No Badcut Speed", Data.CustomGetSet<bool?>("disableBadCutSpeed"), false, "If activated, the note cannot be badcut with insufficient/slow speed, meaning it will go straight through"); //unsure
+							AddCheckbox("No Badcut Color", Data.CustomGetSet<bool?>("disableBadCutSaberType"), false, "If activated, the note cannot be badcut with the wrong saber, meaning it will go straight through");
+							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, "Allows you to change how the note spawns. [flip line index, flip jump] Flip line index is the initial x the note will spawn at and flip jump is how high (or low) the note will jump up (or down) when flipping to its true position. Base game behaviour will set one note's flip jump to -1 and the other to 1.");
+							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, "When cut, all notes that share the same link string will also be cut");
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, "Groups the note together with different objects, that have the same track name/string"); //prob. needs more info
 						AddAnimation(v2);
 						current_panel = panel;
 					}
@@ -110,16 +110,16 @@ public partial class MainWindow {
 					AddLine("Wow, a custom note! How did you do this?");
 					break;
 				case ObjectType.Arc: {
-					AddParsed("Head X", Data.GetSet<int>("PosX"));
-					AddParsed("Head Y", Data.GetSet<int>("PosY"));
-					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
-					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
-					AddParsed("Head Multiplier", Data.GetSet<float>("HeadControlPointLengthMultiplier"));
-					AddParsed("Tail Beat", Data.GetSet<float>("TailJsonTime"));
-					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
-					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
-					AddDropdown<int?>("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections);
-					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"));
+					AddParsed("Head X", Data.GetSet<int>("PosX"), false, "The horizontal row where the head arc should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane");
+					AddParsed("Head Y", Data.GetSet<int>("PosY"), false, "The vertical column where the head arc should reside on the grid. The indices run from 0 to 2, with 0 being the bottom-most lane");
+					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors, false, "Indicates which saber this arc should attach to.");
+                    AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, "Indicates the direction the head should curve from relative to the note it's attached to.");
+					AddParsed("Head Multiplier", Data.GetSet<float>("HeadControlPointLengthMultiplier"), false, "A value that controls the magnitude of the curve approaching the head respectively. \n If the Cut Direction is set to \"Any\"(8), this value is ignored.");
+					AddParsed("Tail Beat", Data.GetSet<float>("TailJsonTime"), false, "A specific point in time, as determined by the BPM of the song, when this tail should reach the player"); 
+					AddParsed("Tail X", Data.GetSet<int>("TailPosX"), false, "The horizontal row where the tail arc should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane");
+					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"), false, "The vertical column where the tail arc should reside on the grid. The indices run from 0 to 2, with 0 being the bottom-most lane");
+					AddDropdown<int?>("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections, false, "Indicates the direction the tail should curve from relative to the note it's attached to.");
+					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"), false, "A value that controls the magnitude of the curve approaching the tail respectively.\n If the Cut Direction is set to \"Any\"(8), this value is ignored.");
 					AddLine("");
 					
 					var s = (o as BaseSlider)!;
@@ -127,44 +127,44 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
-						AddColor("Color", o.CustomKeyColor);
+						AddColor("Color", o.CustomKeyColor, "Changes the color and opacity of the note. Is displayed in hex numbers");
 						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
-						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true);
-						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true);
-						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true);
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true);
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, "Changes the note jump speed (NJS) of the arc");
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, "Changes the jump distance (JD) of the arc");
+						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, "Allows to set the coordinates [x,y,z] of the head arc. Keep in mind, that the center [0,0,0] is different from vanilla coordinates");
+						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true, "Allows to set the coordinates [x,y,z] of the tail arc. Keep in mind, that the center [0,0,0] is different from vanilla coordinates");
+						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, "Allows to set the global rotation [x,y,z]/[yaw, pitch, roll] of the arc. [0,0,0] is always the rotation, that faces the player");
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, "Allows to set the local rotation [x,y,z]/[yaw, pitch, roll] of the arc. This won't affect the direction it spawns from or the path it takes");
 						if (v2) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true);
-							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, "If deactivated, the arc cannot be interacted with");
+							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, "Allows you to change how the arc spawns. [flip line index, flip jump] Flip line index is the initial x the arc will spawn at and flip jump is how high (or low) the arc will jump up (or down) when flipping to its true position. Base game behaviour will set one arc's flip jump to -1 and the other to 1."); //not sure if this works
 						}
 						else {
 							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false);
-							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
-							AddTextbox("Link", Data.CustomGetSet<string>("link"));
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, "If disabled, the arc will no longer do their animation where they float up");
+							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, "Allows you to change how the arc spawns. [flip line index, flip jump] Flip line index is the initial x the arc will spawn at and flip jump is how high (or low) the arc will jump up (or down) when flipping to its true position. Base game behaviour will set one arc's flip jump to -1 and the other to 1.");
+							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, "When cut, all arcs that share the same link string will also be cut");
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, "Groups the arc together with different objects, that have the same track name/string.");
 						AddAnimation(v2);
 						current_panel = panel;
 					}
 					
 				}	break;
 				case ObjectType.Chain: {
-					AddParsed("Head X", Data.GetSet<int>("PosX"));
-					AddParsed("Head Y", Data.GetSet<int>("PosY"));
-					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors);
-					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections);
-					AddParsed("Slices", Data.GetSet<int>("SliceCount"));
-					AddParsed("Squish", Data.GetSet<float>("Squish"));
-					AddParsed("Tail X", Data.GetSet<int>("TailPosX"));
-					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"));
+					AddParsed("Head X", Data.GetSet<int>("PosX"), false, "The horizontal row where the head should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane");
+					AddParsed("Head Y", Data.GetSet<int>("PosY"), false, "The vertical column where the head should reside on the grid. The indices run from 0 to 2, with 0 being the bottom-most lane");
+					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors, false, "Indicates which saber should be able to successfully cut the chain");
+					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, "Indicates the direction the player should swing to successfully cut the head of the chain");
+					AddParsed("Slices", Data.GetSet<int>("SliceCount"), false, "An integer value which represents the number of segments in the chain. The head counts as a segment");
+					AddParsed("Squish", Data.GetSet<float>("Squish"), false, "An integer value which represents the proportion of how much of the path from Head (x, y) to Tail(tx, ty) is used by the chain. This does not alter the shape of the path.");
+					AddParsed("Tail X", Data.GetSet<int>("TailPosX"), false, "The horizontal row where the tail should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane");
+					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"), false, "The vertical column where the tail should reside on the grid. The indices run from 0 to 2, with 0 being the bottom-most lane");
 					AddLine("");
 					
 					var s = (o as BaseSlider)!;
@@ -181,26 +181,23 @@ public partial class MainWindow {
 						current_panel = collapsible.panel;
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"));
-						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true);
-						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true);
-						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true);
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true);
+						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, "Allows to set the coordinates [x,y,z] of the head chain. Keep in mind, that the center [0,0,0] is different from vanilla coordinates");
+						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true, "Allows to set the coordinates [x,y,z] of the tail chain. Keep in mind, that the center [0,0,0] is different from vanilla coordinates");
+						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, "Allows to set the global rotation [x,y,z]/[yaw, pitch, roll] of the chain. [0,0,0] is always the rotation, that faces the player");
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, "Allows to set the local rotation [x,y,z]/[yaw, pitch, roll] of the  chain. This won't affect the direction it spawns from or the path it takes");
 						if (animation_branch) {
-							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null);
-							AddCheckbox(
-								v2 ? "Interactable" : "Uninteractable",
-								Data.CustomGetSet<bool?>(v2 ? "_interactable" : "uninteractable"),
-								v2);
+							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, "If activated, the chain will not count towards your score or combo, meaning, if you miss it, it won't have any effect");
+							AddCheckbox(v2 ? "Interactable" : "Uninteractable", Data.CustomGetSet<bool?>(v2 ? "_interactable" : "uninteractable"), v2, $"If {(v2 ? "deactivated" : "activated")}, the chain will not count towards your score or combo, meaning, if you miss it, it won't have any effect");
 						}
 						if (v2) {
-							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true);
+							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, "Allows you to change how the chain spawns. [flip line index, flip jump] Flip line index is the initial x the chain will spawn at and flip jump is how high (or low) the chain will jump up (or down) when flipping to its true position. Base game behaviour will set one chain's flip jump to -1 and the other to 1.");
 						}
 						else {
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false);
-							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true);
-							AddTextbox("Link", Data.CustomGetSet<string>("link"));
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, "If disabled, the chain will no longer do their animation where they float up");
+							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, "Allows you to change how the chain spawns. [flip line index, flip jump] Flip line index is the initial x the chain will spawn at and flip jump is how high (or low) the chain will jump up (or down) when flipping to its true position. Base game behaviour will set one chain's flip jump to -1 and the other to 1.");
+							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, "When cut, all chains that share the same link string will also be cut");
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true);
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, "Groups the chain together with different objects, that have the same track name/string");
 						AddAnimation(v2);
 						current_panel = panel;
 					}
@@ -433,12 +430,12 @@ public partial class MainWindow {
 		}
 	}
 	
-	private void AddColor(string label, string key) {
+	private void AddColor(string label, string key, string tooltip = "") {
 		if (Settings.Get(Settings.ColorHex, true)) {
-			AddTextbox(label, Data.CustomGetSetColor(key));
+			AddTextbox(label, Data.CustomGetSetColor(key), false, tooltip);
 		}
 		else {
-			AddTextbox(label, Data.CustomGetSetRaw(key), true);
+			AddTextbox(label, Data.CustomGetSetRaw(key), true, tooltip);
 		}
 	}
 }

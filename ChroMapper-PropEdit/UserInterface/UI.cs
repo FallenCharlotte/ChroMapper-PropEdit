@@ -22,7 +22,12 @@ public class UI {
 		return obj;
 	}
 	
-	public static GameObject AddLabel(GameObject parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center, string tooltip = "") {
+	// You're welcome, PaulMapper
+	public static GameObject AddLabel(GameObject parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center) {
+		return AddLabel(parent, title, text, pos, anchor_min, anchor_max, font_size, size, align, "");
+	}
+	
+	public static GameObject AddLabel(GameObject parent, string title, string text, Vector2 pos, Vector2? anchor_min, Vector2? anchor_max, int font_size, Vector2? size, TextAlignmentOptions align, string tooltip) {
 		var entryLabel = AddChild(parent, title + " Label");
 		AttachTransform(entryLabel, size ?? new Vector2(110, 24), pos, anchor_min ?? new Vector2(0.5f, 1), anchor_max ?? new Vector2(0.5f, 1));
 		
@@ -37,8 +42,12 @@ public class UI {
 		return entryLabel;
 	}
 	
+	public static GameObject AddField(GameObject parent, string title, Vector2? size = null) {
+		return AddField(parent, title, size, "");
+	}
+	
 	// A container for an input element with a label
-	public static GameObject AddField(GameObject parent, string title, Vector2? size = null, string tooltip = "") {
+	public static GameObject AddField(GameObject parent, string title, Vector2? size, string tooltip) {
 		var container = UI.AddChild(parent, title + " Container");
 		UI.AttachTransform(container, size ?? new Vector2(0, 20), pos: new Vector2(0, 0));
 		

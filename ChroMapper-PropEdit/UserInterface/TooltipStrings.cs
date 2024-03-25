@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static SwingsPerSecond;
 using TMPro;
+using UnityEngine;
 
 namespace ChroMapper_PropEdit.UserInterface {
 	public class DictionaryFormatter : IFormatProvider, ICustomFormatter {
@@ -41,8 +42,12 @@ namespace ChroMapper_PropEdit.UserInterface {
 			{ "E", "Event" },
 			{ "CE", "CustomEvent" },
 			{ "BC", "BpmChange" },
-			{ "Obj", "Object"}
-		}
+			{ "Obj", "Object"},
+			{ "G", "Gradient"},
+			{ "SG", "Start Gradient"},
+			{ "EG", "End Gradient"},
+		};
+
 		public enum Tooltip {
 			Beat,
 			X,
@@ -78,10 +83,22 @@ namespace ChroMapper_PropEdit.UserInterface {
 			Width,
 			Height,
 			Size,
+			EventColor,
+			EventAction,
+			LegacyEventType,
+			Brightness,
+			LightID,
+			Easing,
+			LerpType,
+			V2Gradient,
+			V2Duration,
+		
+
+			
+
 		}
 
 		private Dictionary<Tooltip, string> name = new Dictionary<Tooltip, string>() {
-			
 			//Generic Values
 			{ Tooltip.Beat, "A specific point in time, as determined by the BPM of the song, when this {0} should reach the player"},
 			{ Tooltip.X, "The horizontal row where the {0} should reside on the grid. The indices run from 0 to 3, with 0 being the left-most lane" },
@@ -127,7 +144,17 @@ namespace ChroMapper_PropEdit.UserInterface {
 			{ Tooltip.Duration, "A value (in beats) that determines how long the {0} extends for." },
 			{ Tooltip.Width, "An integer value which represents how many columns the obstacle should take up on the grid."},
 			{ Tooltip.Height, "An integer value which represents how many rows the obstacle should take up on the grid. The range of acceptable values runs from 1 to 5."},
-			{ Tooltip.Size, "The width, height and length of a wall[w, h, l]. [1, 1, 1] will be perfectly square. Each number is fully optional."}
+			{ Tooltip.Size, "The width, height and length of a wall[w, h, l]. [1, 1, 1] will be perfectly square. Each number is fully optional."},
+			
+			//Events
+			{ Tooltip.EventColor, "Changes the vanilla color of the {0}. Allows to be set to the saber colors, white and off"},
+			{ Tooltip.EventAction, "Determines how the {0} should behave"},
+			{ Tooltip.LegacyEventType, "Changes the color and behaviour of the {0}"},
+			{ Tooltip.Brightness, "Used to control the brightness of the {0}. A value of 0 will turn the light off."},
+			{ Tooltip.LightID, "Causes the {0} to only affect the specified ID. Can be an array."},
+			{ Tooltip.Easing, "The easing effect that the {0} should use. Check out \"easings.net\" for visualization examples"},
+			{ Tooltip.LerpType, "Determines, in what way the color should transition. RGB: changing every value. HSV: primarly changing its hue"},
+			{ Tooltip.V2Gradient, "If activated, allows to set a color gradient"},
 
 			};
 		public string GetTooltip(string BSobject, Tooltip property) {

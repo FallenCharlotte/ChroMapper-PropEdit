@@ -262,31 +262,31 @@ public partial class MainWindow {
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
 						if (Settings.Get(Settings.SplitValue, true)!.AsBool) {
-							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors, false, "Changes the vanilla color of the event. Allows to be set to the saber colors, white and off");
-							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions, false, "Determines how the event should behave");
+							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.EventColor));
+							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.EventAction));
 						}
 						else {
-							AddDropdown<int?>("Value", Data.GetSet<int>("Value"), Events.LightValues, false, "Changes the color and behaviour of the event");
+							AddDropdown<int?>("Value", Data.GetSet<int>("Value"), Events.LightValues, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LegacyEventType));
 						}
-						AddParsed("Brightness", Data.GetSet<float>("FloatValue"), false, "Used to control the brightness of the event. A value of 0 will turn the light off.");
+						AddParsed("Brightness", Data.GetSet<float>("FloatValue"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.Brightness));
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
-							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true, "Causes the event to only affect the specified ID. Can be an array.");
-							AddColor("Color", o.CustomKeyColor, "Changes the color and opacity of the event. Is displayed in Hex colors");
+							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LightID));
+							AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip("E", TooltipStrings.Tooltip.Color));
 							if (events.Where(e => e.IsTransition).Count() == editing.Count()) {
-								AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true, "The easing effect that the event should use. Check out \"easings.net\" for visualization examples");
-								AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true, "Determines, in what way the color should transition. RGB transitions the color, by changing every value. HSV transitions the color, by primarly changing its hue"); //Unsure
+								AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.Easing));
+								AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LerpType)); //Unsure
 							}
 							if (o is V2Event e) {
-								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false, "If activated, allows to set a color gradient");
+								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.V2Gradient));
 								if (e.CustomLightGradient != null) {
-									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"), false, "A value (in beats) that determines how long the gradient extends for.");
-									AddColor("Start Color", $"{e.CustomKeyLightGradient}._startColor", "Changes the color and opacity of the start gradient. Is displayed in Hex colors");
-									AddColor("End Color", $"{e.CustomKeyLightGradient}._endColor",  "Changes the color and opacity of the end gradient. Is displayed in Hex colors");
-									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false, "The easing effect that the event should use. Check out \"easings.net\" for visualization examples");
+									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"), false, tooltip.GetTooltip("G", TooltipStrings.Tooltip.Duration));
+									AddColor("Start Color", $"{e.CustomKeyLightGradient}._startColor", tooltip.GetTooltip("SG", TooltipStrings.Tooltip.Color));
+									AddColor("End Color", $"{e.CustomKeyLightGradient}._endColor", tooltip.GetTooltip("EG", TooltipStrings.Tooltip.Color));
+									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.Easing));
 								}
 							}
 							current_panel = panel;

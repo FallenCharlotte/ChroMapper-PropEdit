@@ -294,15 +294,15 @@ public partial class MainWindow {
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
-						AddParsed("Speed", Data.GetSet<int>("Value"), false, "The ");
+						AddParsed("Speed", Data.GetSet<int>("Value"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LaserSpeed));
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
-							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false);
-							AddDropdown<int?>("Direction",     Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.LaserDirection, true);
-							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeyPreciseSpeed));
+							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LockRotation));
+							AddDropdown<int?>("Direction",     Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.LaserDirection, true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LaserDirection));
+							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeyPreciseSpeed), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.PreciseSpeed));
 							current_panel = panel;
 						}
 					}
@@ -312,17 +312,17 @@ public partial class MainWindow {
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
-							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter));
+							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingFilter));
 							if (o is V2Event) {
-								AddCheckbox("Reset", Data.CustomGetSet<bool?>("_reset"), false);
+								AddCheckbox("Reset", Data.CustomGetSet<bool?>("_reset"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingV2Reset));
 							}
-							AddParsed("Rotation",    Data.CustomGetSet<float?>(f.CustomKeyLaneRotation));
-							AddParsed("Step",        Data.CustomGetSet<float?>(f.CustomKeyStep));
-							AddParsed("Propagation", Data.CustomGetSet<float?>(f.CustomKeyProp));
-							AddParsed("Speed",       Data.CustomGetSet<float?>(f.CustomKeySpeed));
-							AddDropdown<int?>("Direction", Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.RingDirection, true);
+							AddParsed("Rotation",    Data.CustomGetSet<float?>(f.CustomKeyLaneRotation), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingRotation));
+							AddParsed("Step",        Data.CustomGetSet<float?>(f.CustomKeyStep), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingStep));
+							AddParsed("Propagation", Data.CustomGetSet<float?>(f.CustomKeyProp), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingPropagation));
+							AddParsed("Speed",       Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingSpeed));
+							AddDropdown<int?>("Direction", Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.RingDirection, true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingDirection));
 							if (o is V2Event) {
-								AddCheckbox("Counter Spin", Data.CustomGetSet<bool?>("_counterSpin"), false);
+								AddCheckbox("Counter Spin", Data.CustomGetSet<bool?>("_counterSpin"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingV2CounterSpin));
 							}
 							current_panel = panel;
 						}
@@ -333,18 +333,18 @@ public partial class MainWindow {
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
-							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep));
-							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed));
+							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingZoomStep));
+							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingZoomSpeed));
 							current_panel = panel;
 						}
 					}
 					// Boost Color
 					if (events.Where(e => e.IsColorBoostEvent()).Count() == editing.Count()) {
-						AddDropdown<int?>("Color Set", Data.GetSet<int>("Value"), Events.BoostSets);
+						AddDropdown<int?>("Color Set", Data.GetSet<int>("Value"), Events.BoostSets, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.BoostColorSet));
 					}
 					// Lane Rotations
 					if (events.Where(e => e.IsLaneRotationEvent()).Count() == editing.Count()) {
-						AddDropdown<int?>("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions);
+						AddDropdown<int?>("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LaneRotation));
 					}
 				}	break;
 				case ObjectType.CustomEvent: {
@@ -413,7 +413,7 @@ public partial class MainWindow {
 					
 				}	break;
 				case ObjectType.BpmChange:
-					AddParsed("BPM", Data.GetSet<float>("Bpm"));
+					AddParsed("BPM", Data.GetSet<float>("Bpm"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.BPMChange));
 					break;
 			}
 		}

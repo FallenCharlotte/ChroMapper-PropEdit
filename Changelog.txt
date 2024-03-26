@@ -1,3 +1,6 @@
+v0.6.4
+	Fix definite position
+
 v0.6.3
 	Fix beat+fake on stable
 

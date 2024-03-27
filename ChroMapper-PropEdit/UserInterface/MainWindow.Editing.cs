@@ -151,7 +151,7 @@ public partial class MainWindow {
 							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Flip)); //not sure if this works
 						}
 						else {
-							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
+							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Uninteractable));
 							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip("A", TooltipStrings.Tooltip.DisableGravity));
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Flip));
 							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Link));

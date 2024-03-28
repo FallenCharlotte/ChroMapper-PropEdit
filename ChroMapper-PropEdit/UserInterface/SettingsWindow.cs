@@ -26,6 +26,7 @@ public class SettingsWindow {
 	public ScrollBox? scrollbox;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
+	TooltipStrings? tooltip;
 	
 	public List<string> custom_reqs = new List<string>();
 	public Dictionary<string, UIDropdown> requirements = new Dictionary<string, UIDropdown>();
@@ -230,7 +231,8 @@ public class SettingsWindow {
 		forced = new Dictionary<string, Toggle>();
 		
 		foreach (var rc in default_reqchecks) {
-			AddReqField(rc.Key, false);
+				Debug.Log(rc);
+			AddReqField(rc.Key, false, rc.Value.Name);
 		}
 		
 		foreach (var req_status in req_statuses) {
@@ -251,8 +253,9 @@ public class SettingsWindow {
 		}
 		
 		foreach (var reqcheck in requirementsAndSuggestions!) {
+				Debug.Log($"Override{reqcheck}");
 			if (!default_reqchecks.ContainsKey(reqcheck.Name)) {
-				AddReqField(reqcheck.Name, true);
+				AddReqField(reqcheck.Name, true, reqcheck.Name);
 			}
 		}
 		{
@@ -271,12 +274,12 @@ public class SettingsWindow {
 		}
 	}
 	
-	private void AddReqField(string name, bool force, string tooltip = "") {
-		var container = UI.AddField(requirements_panel!, name, null, tooltip);
+	private void AddReqField(string name, bool force, string reqcheck = "") {
+		var container = UI.AddField(requirements_panel!, name, null, tooltip.GetTooltip(PropertyType.Object, $"{reqcheck}"));
 		requirements[name] = UI.AddDropdown(container, 0, (v) => {
 			SetForced(name, true);
 		}, MapSettings.RequirementStatus);
-		var container2 = UI.AddField(requirements_panel!, "Override", null, tooltip);
+		var container2 = UI.AddField(requirements_panel!, "Override", null, tooltip.GetTooltip(PropertyType.Object, $"Override{reqcheck}"));
 		forced[name] = UI.AddCheckbox(container2, force, (v) => {
 			// Can't un-force a custom requirement
 			if (!default_reqchecks.ContainsKey(name)) {
@@ -313,6 +316,7 @@ public class SettingsWindow {
 	public SettingsWindow() {
 		// Break into ChroMapper's house and grab the requirement check list via reflection
 		var req_type = typeof(RequirementCheck);
+		tooltip = new TooltipStrings();
 		var ras = req_type.GetField("requirementsAndSuggestions", BindingFlags.Static | BindingFlags.NonPublic);
 		requirementsAndSuggestions = (HashSet<RequirementCheck>)ras.GetValue(null);
 		foreach (var rc in requirementsAndSuggestions) {

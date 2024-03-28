@@ -134,9 +134,44 @@ namespace ChroMapper_PropEdit.UserInterface {
 			AnimateComponentTubeBloomPrePassLight,
 			AnimateComponentTubeBloomPrePassLightColorAlphaMultiplier,
 			AnimateComponentTubeBloomPrePassLightBloomFogIntensityMultiplier,
+
+			//Settings
+			ChromaReq,
+			LegacyChromaReq,
+			MappingExtensionsReq,
+			NoodleExtensionsReq,
+			CinemaReq,
+			SoundExtensionsReq,
+
+			OverrideChromaReq,
+			OverrideLegacyChromaReq,
+			OverrideMappingExtensionsReq,
+			OverrideNoodleExtensionsReq,
+			OverrideCinemaReq,
+			OverrideSoundExtensionsReq,
+
+
+
+
 		}
 		
 		private Dictionary<Tooltip, string> name = new Dictionary<Tooltip, string>() {
+
+			//Settings
+			{Tooltip.ChromaReq, "TestChroma" },
+			{Tooltip.LegacyChromaReq, "TestChromaLegacy" },
+			{Tooltip.MappingExtensionsReq, "TestME" },
+			{Tooltip.NoodleExtensionsReq, "TestNE" },
+			{Tooltip.CinemaReq, "TestCinema" },
+			{Tooltip.SoundExtensionsReq, "TestSoundExtensions" },
+
+			{Tooltip.OverrideChromaReq, "OverrideTestChroma" },
+			{Tooltip.OverrideLegacyChromaReq, "OverrideTestChromaLegacy" },
+			{Tooltip.OverrideMappingExtensionsReq, "OverrideTestME" },
+			{Tooltip.OverrideNoodleExtensionsReq, "OverrideTestNE" },
+			{Tooltip.OverrideCinemaReq, "OverrideTestCinema" },
+			{Tooltip.OverrideSoundExtensionsReq, "OverrideTestSoundExtensions" },
+
 			// Generic Values
 			{ Tooltip.Beat, "The time, as determined by the BPM of the song, when this {0} should reach the player." },
 			{ Tooltip.BeatEvent, "The point in time, as determined by the BPM of the song, when this {0} should activate." },
@@ -261,6 +296,8 @@ namespace ChroMapper_PropEdit.UserInterface {
 			// AnimateComponent
 			{ Tooltip.AnimateComponentBloomFogEnvironment, "Animates fog properties." },
 			{ Tooltip.AnimateComponentTubeBloomPrePassLight, "Animates tube bloom properties." },
+
+
 			/*
 			{ Tooltip.AnimateComponentTubeBloomPrePassLightColorAlphaMultiplier, "Changes the multiplier for the color ." }, //Unsure
 			{ Tooltip.AnimateComponentTubeBloomPrePassLightBloomFogIntensityMultiplier, "Changes the multiplier for the fog intensity" },

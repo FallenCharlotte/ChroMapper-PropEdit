@@ -25,8 +25,7 @@ public partial class MainWindow {
 	public readonly string CHROMA_NAME = "Chroma";
 	public readonly string NOODLE_NAME = "Noodle Extensions";
 		public TooltipStrings tooltip = new TooltipStrings();
-
-
+		
 		public void UpdateSelection(bool real) { lock(this) {
 		scrollbox!.TargetScroll = real ? 1f : scrollbox!.scrollbar!.value;
 		
@@ -47,33 +46,34 @@ public partial class MainWindow {
 			var o = editing.First();
 			var type = o.ObjectType;
 			var v2 = (o is V2Object);
-			var animation_branch = (System.Type.GetType("Beatmap.Animations.ObjectAnimator, Main, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null") is System.Type);
 			
 			current_panel = panel;
 			
-			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true, tooltip.GetTooltip("Obj", TooltipStrings.Tooltip.Beat));
+			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true, (o is BaseGrid)
+				? tooltip.GetTooltip(PropertyType.Object, TooltipStrings.Tooltip.Beat)
+				: tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BeatEvent));
 			
 			switch (type) {
 				case ObjectType.Note:
 					var note = (o as BaseNote)!;
-					AddParsed("X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.X));
-					AddParsed("Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Y));
-					AddDropdown<int?>("Type", Data.GetSet<int>("Type"), Notes.NoteTypes, false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Type));
-					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.CutDirection));
+					AddParsed("X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.X));
+					AddParsed("Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Y));
+					AddDropdown<int?>("Type", Data.GetSet<int>("Type"), Notes.NoteTypes, false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Type));
+					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.CutDirection));
 					if (!v2) {
-						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.AngleOffset));
+						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.AngleOffset));
 					}
 					AddLine("");
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
-						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Color));
+						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Color));
 						if (o is V2Note) {
-							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.DisableSpawnEffect));
+							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableSpawnEffect));
 						}
 						else {
-							AddCheckbox("Spawn Effect", Data.CustomGetSet<bool?>("spawnEffect"), true, tooltip.GetTooltip("N", TooltipStrings.Tooltip.SpawnEffect));
-							AddCheckbox("Disable Debris", Data.CustomGetSet<bool?>("disableDebris"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.DisableSpawnEffect));
+							AddCheckbox("Spawn Effect", Data.CustomGetSet<bool?>("spawnEffect"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnEffect));
+							AddCheckbox("Disable Debris", Data.CustomGetSet<bool?>("disableDebris"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableDebris));
 						}
 						current_panel = panel;
 					}
@@ -81,32 +81,30 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false,tooltip.GetTooltip("N", TooltipStrings.Tooltip.NJS));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.SpawnOffset));
-						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Rotation));
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true, tooltip.GetTooltip("N", TooltipStrings.Tooltip.LocalRotation));
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false,tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NJS));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnOffset));
+						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Coordinates));
+						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Rotation));
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.LocalRotation));
 						if (o is V2Note) {
-							AddParsed("Exact Angle", Data.CustomGetSet<float?>("_cutDirection"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.CutDirection));
-							AddCheckbox("Fake", Data.CustomGetSet<bool?>("_fake"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Fake));
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Interactable));
-							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Flip));
+							AddParsed("Exact Angle", Data.CustomGetSet<float?>("_cutDirection"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.CutDirection));
+							AddCheckbox("Fake", Data.CustomGetSet<bool?>("_fake"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Fake));
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Interactable));
+							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Flip));
 						}
 						else {
-							if (animation_branch) {
-								AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Fake));
-								AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Uninteractable));
-							}
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Beat)); //subject to change
-							AddCheckbox("Disable Look", Data.CustomGetSet<bool?>("disableNoteLook"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.DisableLook));
-							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool?>("disableBadCutDirection"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.NoBadcutDirection));
-							AddCheckbox("No Badcut Speed", Data.CustomGetSet<bool?>("disableBadCutSpeed"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.NoBadcutSpeed)); //unsure
-							AddCheckbox("No Badcut Color", Data.CustomGetSet<bool?>("disableBadCutSaberType"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.NoBadcutColor));
-							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Flip));
-							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip("N", TooltipStrings.Tooltip.Link));
+							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Fake));
+							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Uninteractable));
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableGravity));
+							AddCheckbox("Disable Look", Data.CustomGetSet<bool?>("disableNoteLook"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableLook));
+							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool?>("disableBadCutDirection"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NoBadcutDirection));
+							AddCheckbox("No Badcut Speed", Data.CustomGetSet<bool?>("disableBadCutSpeed"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NoBadcutSpeed));
+							AddCheckbox("No Badcut Color", Data.CustomGetSet<bool?>("disableBadCutSaberType"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NoBadcutColor));
+							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Flip));
+							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Link));
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true,tooltip.GetTooltip("N", TooltipStrings.Tooltip.Track)); //prob. needs more info
-						AddAnimation(v2);
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true,tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Track)); //prob. needs more info
+						AddAnimation(PropertyType.Note, v2);
 						current_panel = panel;
 					}
 					
@@ -114,18 +112,17 @@ public partial class MainWindow {
 				case ObjectType.CustomNote:
 					AddLine("Wow, a custom note! How did you do this?");
 					break;
-
 				case ObjectType.Arc: {
-					AddParsed("Head X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip("AH", TooltipStrings.Tooltip.X));
-					AddParsed("Head Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip("AH", TooltipStrings.Tooltip.Y));
-					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors, false,tooltip.GetTooltip("A", TooltipStrings.Tooltip.Type));
-					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip("AH", TooltipStrings.Tooltip.CutDirection));
-					AddParsed("Head Multiplier", Data.GetSet<float>("HeadControlPointLengthMultiplier"), false, tooltip.GetTooltip("AH", TooltipStrings.Tooltip.Multiplier));
-					AddParsed("Tail Beat", Data.GetSet<float>("TailJsonTime"), false, tooltip.GetTooltip("AT", TooltipStrings.Tooltip.Beat)); 
-					AddParsed("Tail X", Data.GetSet<int>("TailPosX"), false, tooltip.GetTooltip("AT", TooltipStrings.Tooltip.X));
-					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"), false, tooltip.GetTooltip("AT", TooltipStrings.Tooltip.Y));
-					AddDropdown<int?>("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections, false, tooltip.GetTooltip("AT", TooltipStrings.Tooltip.CutDirection));
-					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"), false, tooltip.GetTooltip("AT", TooltipStrings.Tooltip.Multiplier));
+					AddParsed("Head X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.X));
+					AddParsed("Head Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Y));
+					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors, false,tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Type));
+					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.CutDirection));
+					AddParsed("Head Multiplier", Data.GetSet<float>("HeadControlPointLengthMultiplier"), false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Multiplier));
+					AddParsed("Tail Beat", Data.GetSet<float>("TailJsonTime"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Beat)); 
+					AddParsed("Tail X", Data.GetSet<int>("TailPosX"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.X));
+					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Y));
+					AddDropdown<int?>("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.CutDirection));
+					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Multiplier));
 					AddLine("");
 					
 					var s = (o as BaseSlider)!;
@@ -133,44 +130,44 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
-						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Color));
+						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Color));
 						current_panel = panel;
 					}
 					
-								if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
+					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
-									AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip("A", TooltipStrings.Tooltip.NJS));
-									AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip("A", TooltipStrings.Tooltip.SpawnOffset));
-									AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip("AH", TooltipStrings.Tooltip.Coordinates));
-									AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip("AT", TooltipStrings.Tooltip.Coordinates));
-									AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Rotation));
-									AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip("A", TooltipStrings.Tooltip.LocalRotation));
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.NJS));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.SpawnOffset));
+						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Coordinates));
+						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Coordinates));
+						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Rotation));
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.LocalRotation));
 						if (v2) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Interactable));
-							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Flip)); //not sure if this works
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Interactable));
+							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Flip)); //not sure if this works
 						}
 						else {
-							//AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false);
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip("A", TooltipStrings.Tooltip.DisableGravity));
-							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Flip));
-							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Link));
+							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Uninteractable));
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.DisableGravity));
+							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Flip));
+							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Link));
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip("A", TooltipStrings.Tooltip.Track));
-						AddAnimation(v2);
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Track));
+						AddAnimation(PropertyType.Arc, v2);
 						current_panel = panel;
 					}
 					
 				}	break;
 				case ObjectType.Chain: {
-					AddParsed("Head X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip("CH", TooltipStrings.Tooltip.X));
-					AddParsed("Head Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip("CH", TooltipStrings.Tooltip.Y));
-					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors, false, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Color));
-					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip("C", TooltipStrings.Tooltip.CutDirection));
-					AddParsed("Slices", Data.GetSet<int>("SliceCount"), false, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Slices));
-					AddParsed("Squish", Data.GetSet<float>("Squish"), false, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Squish));
-					AddParsed("Tail X", Data.GetSet<int>("TailPosX"), false, tooltip.GetTooltip("CT", TooltipStrings.Tooltip.X));
-					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"), false, tooltip.GetTooltip("CT", TooltipStrings.Tooltip.Y));
+					AddParsed("Head X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.X));
+					AddParsed("Head Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.Y));
+					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors, false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Color));
+					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.CutDirection));
+					AddParsed("Slices", Data.GetSet<int>("SliceCount"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Slices));
+					AddParsed("Squish", Data.GetSet<float>("Squish"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Squish));
+					AddParsed("Tail X", Data.GetSet<int>("TailPosX"), false, tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.X));
+					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"), false, tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.Y));
 					AddLine("");
 					
 					var s = (o as BaseSlider)!;
@@ -178,80 +175,76 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
-						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Color));
+						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Color));
 						current_panel = panel;
 					}
-
+					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip("C", TooltipStrings.Tooltip.NJS));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip("C", TooltipStrings.Tooltip.SpawnOffset));
-						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip("CH", TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip("CT", TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Rotation));
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip("C", TooltipStrings.Tooltip.LocalRotation));
-									if (animation_branch) {
-							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Fake));
-							AddCheckbox(v2 ? "Interactable" : "Uninteractable", Data.CustomGetSet<bool?>(v2 ? "_interactable" : "uninteractable"), v2, tooltip.GetTooltip("C", (v2 ? TooltipStrings.Tooltip.Interactable : TooltipStrings.Tooltip.Uninteractable)));
-						}
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.NJS));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.SpawnOffset));
+						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.Coordinates));
+						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.Coordinates));
+						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Rotation));
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.LocalRotation));
+						AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Fake));
+						AddCheckbox(v2 ? "Interactable" : "Uninteractable", Data.CustomGetSet<bool?>(v2 ? "_interactable" : "uninteractable"), v2, tooltip.GetTooltip(PropertyType.Chain, (v2 ? TooltipStrings.Tooltip.Interactable : TooltipStrings.Tooltip.Uninteractable)));
 						if (v2) {
-							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Flip));
+							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
 						}
 						else {
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Flip));
-							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Flip));
-							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Link));
+							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
+							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
+							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Link));
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip("C", TooltipStrings.Tooltip.Track));
-						AddAnimation(v2);
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Track));
+						AddAnimation(PropertyType.Chain, v2);
 						current_panel = panel;
 					}
 					
 				}	break;
 				case ObjectType.Obstacle:
 					var ob = (o as BaseObstacle)!;
-					AddParsed("Duration", Data.GetSet<float>("Duration"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Duration));
+					AddParsed("Duration", Data.GetSet<float>("Duration"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Duration));
 					if (o is V2Obstacle) {
-						AddParsed("X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.X));
-						AddParsed("Width", Data.GetSet<int>("Width"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Width));
-						AddDropdown<int?>("Height", Data.GetSet<int>("Type"), Obstacles.WallHeights, false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Width));
+						AddParsed("X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.X));
+						AddParsed("Width", Data.GetSet<int>("Width"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
+						AddDropdown<int?>("Height", Data.GetSet<int>("Type"), Obstacles.WallHeights, false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
 					}
 					else {
-						AddParsed("X (Left)", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.X));
-						AddParsed("Y (Bottom)", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Y));
-						AddParsed("Width", Data.GetSet<int>("Width"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Width));
-						AddParsed("Height", Data.GetSet<int>("Height"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Height));
+						AddParsed("X (Left)", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.X));
+						AddParsed("Y (Bottom)", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Y));
+						AddParsed("Width", Data.GetSet<int>("Width"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
+						AddParsed("Height", Data.GetSet<int>("Height"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Height));
 					}
 					AddLine("");
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
-						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Color));
+						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Color));
 						current_panel = panel;
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.NJS));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.SpawnOffset));
-						AddTextbox("Coordinates", Data.CustomGetSetRaw(ob.CustomKeyCoordinate), true, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Rotation", Data.CustomGetSetRaw(ob.CustomKeyWorldRotation), true, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Rotation));
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(ob.CustomKeyLocalRotation), true, tooltip.GetTooltip("O", TooltipStrings.Tooltip.LocalRotation));
-						AddTextbox("Size", Data.CustomGetSetRaw(ob.CustomKeySize), true, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Size));
-						if (animation_branch) {
-							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Fake));
-						}
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.NJS));
+						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.SpawnOffset));
+						AddTextbox("Coordinates", Data.CustomGetSetRaw(ob.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Coordinates));
+						AddTextbox("Rotation", Data.CustomGetSetRaw(ob.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Rotation));
+						AddTextbox("Local Rotation", Data.CustomGetSetRaw(ob.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.LocalRotation));
+						AddTextbox("Size", Data.CustomGetSetRaw(ob.CustomKeySize), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Size));
+						AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Fake));
 						if (o is V2Obstacle) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Interactable));
+							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Interactable));
 						}
 						else {
-							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Uninteractable)); // not sure if this means that it will screw up your score
+							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Uninteractable)); // not sure if this means that it will screw up your score
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip("O", TooltipStrings.Tooltip.Track));
-						AddAnimation(o is V2Obstacle);
+						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Track));
+						AddAnimation(PropertyType.Obstacle, o is V2Obstacle);
 						current_panel = panel;
 					}
 					
@@ -263,31 +256,31 @@ public partial class MainWindow {
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
 						if (Settings.Get(Settings.SplitValue, true)!.AsBool) {
-							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.EventColor));
-							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.EventAction));
+							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventColor));
+							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventAction));
 						}
 						else {
-							AddDropdown<int?>("Value", Data.GetSet<int>("Value"), Events.LightValues, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LegacyEventType));
+							AddDropdown<int?>("Value", Data.GetSet<int>("Value"), Events.LightValues, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LegacyEventType));
 						}
-						AddParsed("Brightness", Data.GetSet<float>("FloatValue"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.Brightness));
+						AddParsed("Brightness", Data.GetSet<float>("FloatValue"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Brightness));
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
-							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LightID));
-							AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip("E", TooltipStrings.Tooltip.Color));
+							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LightID));
+							AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Color));
 							if (events.Where(e => e.IsTransition).Count() == editing.Count()) {
-								AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.Easing));
-								AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LerpType)); //Unsure
+								AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Easing));
+								AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LerpType)); //Unsure
 							}
 							if (o is V2Event e) {
-								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.V2Gradient));
+								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.V2Gradient));
 								if (e.CustomLightGradient != null) {
-									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"), false, tooltip.GetTooltip("G", TooltipStrings.Tooltip.Duration));
-									AddColor("Start Color", $"{e.CustomKeyLightGradient}._startColor", tooltip.GetTooltip("SG", TooltipStrings.Tooltip.Color));
-									AddColor("End Color", $"{e.CustomKeyLightGradient}._endColor", tooltip.GetTooltip("EG", TooltipStrings.Tooltip.Color));
-									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.Easing));
+									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"), false, tooltip.GetTooltip(PropertyType.Gradient, TooltipStrings.Tooltip.Duration));
+									AddColor("Start Color", $"{e.CustomKeyLightGradient}._startColor", tooltip.GetTooltip(PropertyType.GradientStart, TooltipStrings.Tooltip.Color));
+									AddColor("End Color", $"{e.CustomKeyLightGradient}._endColor", tooltip.GetTooltip(PropertyType.GradientEnd, TooltipStrings.Tooltip.Color));
+									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Easing));
 								}
 							}
 							current_panel = panel;
@@ -295,15 +288,15 @@ public partial class MainWindow {
 					}
 					// Laser Speeds
 					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
-						AddParsed("Speed", Data.GetSet<int>("Value"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LaserSpeed));
+						AddParsed("Speed", Data.GetSet<int>("Value"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserSpeed));
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
-							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LockRotation));
-							AddDropdown<int?>("Direction",     Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.LaserDirection, true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LaserDirection));
-							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeyPreciseSpeed), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.PreciseSpeed));
+							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LockRotation));
+							AddDropdown<int?>("Direction",     Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.LaserDirection, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserDirection));
+							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeyPreciseSpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.PreciseSpeed));
 							current_panel = panel;
 						}
 					}
@@ -313,17 +306,17 @@ public partial class MainWindow {
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
-							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingFilter));
+							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingFilter));
 							if (o is V2Event) {
-								AddCheckbox("Reset", Data.CustomGetSet<bool?>("_reset"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingV2Reset));
+								AddCheckbox("Reset", Data.CustomGetSet<bool?>("_reset"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2Reset));
 							}
-							AddParsed("Rotation",    Data.CustomGetSet<float?>(f.CustomKeyLaneRotation), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingRotation));
-							AddParsed("Step",        Data.CustomGetSet<float?>(f.CustomKeyStep), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingStep));
-							AddParsed("Propagation", Data.CustomGetSet<float?>(f.CustomKeyProp), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingPropagation));
-							AddParsed("Speed",       Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingSpeed));
-							AddDropdown<int?>("Direction", Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.RingDirection, true, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingDirection));
+							AddParsed("Rotation",    Data.CustomGetSet<float?>(f.CustomKeyLaneRotation), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingRotation));
+							AddParsed("Step",        Data.CustomGetSet<float?>(f.CustomKeyStep), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingStep));
+							AddParsed("Propagation", Data.CustomGetSet<float?>(f.CustomKeyProp), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingPropagation));
+							AddParsed("Speed",       Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));
+							AddDropdown<int?>("Direction", Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.RingDirection, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingDirection));
 							if (o is V2Event) {
-								AddCheckbox("Counter Spin", Data.CustomGetSet<bool?>("_counterSpin"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingV2CounterSpin));
+								AddCheckbox("Counter Spin", Data.CustomGetSet<bool?>("_counterSpin"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2CounterSpin));
 							}
 							current_panel = panel;
 						}
@@ -334,18 +327,18 @@ public partial class MainWindow {
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
-							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingZoomStep));
-							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.RingZoomSpeed));
+							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingZoomStep));
+							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));
 							current_panel = panel;
 						}
 					}
 					// Boost Color
 					if (events.Where(e => e.IsColorBoostEvent()).Count() == editing.Count()) {
-						AddDropdown<int?>("Color Set", Data.GetSet<int>("Value"), Events.BoostSets, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.BoostColorSet));
+						AddDropdown<int?>("Color Set", Data.GetSet<int>("Value"), Events.BoostSets, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BoostColorSet));
 					}
 					// Lane Rotations
 					if (events.Where(e => e.IsLaneRotationEvent()).Count() == editing.Count()) {
-						AddDropdown<int?>("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions, false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.LaneRotation));
+						AddDropdown<int?>("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaneRotation));
 					}
 				}	break;
 				case ObjectType.CustomEvent: {
@@ -353,75 +346,75 @@ public partial class MainWindow {
 					var f = events.First();
 					
 					if (events.Where(e => e.Type == "AnimateTrack").Count() == editing.Count()) {
-						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.Track));
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackEasing));
+						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackRepeat));
+							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
 						AddLine("");
-						AddTextbox("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.Color));
+						AddTextbox("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
 						foreach (var property in Events.NoodleProperties) {
-							AddTextbox(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AnimateTrackDissolve, property.Key, "AnimateTrack"));
+							AddTextbox(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), true, tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
-						AddTextbox("Time", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_time" : "time"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AnimateTrackTime));
+						AddTextbox("Time", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_time" : "time"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateTime));
 					}
 
 					if (events.Where(e => e.Type == "AssignPathAnimation").Count() == editing.Count()) {
-						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.Track));
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackEasing));
+						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackRepeat));
+							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
 						AddLine("");
-						AddTextbox("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.Color));
+						AddTextbox("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
 						foreach (var property in Events.NoodleProperties) {
-							AddTextbox(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.Track, property.Key, "AnimateTrack"));
+							AddTextbox(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), true, tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
-						AddTextbox("Definite Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_definitePosition" : "definitePosition"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+						AddTextbox("Definite Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_definitePosition" : "definitePosition"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
 					}
 
 					if (events.Where(e => e.Type == "AssignTrackParent").Count() == editing.Count()) {
-						AddTextbox("Parent", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_parentTrack" : "parentTrack"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AssignTrackParentParent));
-						AddTextbox("Children", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_childrenTracks" : "childrenTracks"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AssignTrackChildren));
-						AddCheckbox("Keep Position", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", v2 ? "_worldPositionStays" : "worldPositionStays"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AssignTrackKeepPosition));
+						AddTextbox("Parent", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_parentTrack" : "parentTrack"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackParentParent));
+						AddTextbox("Children", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_childrenTracks" : "childrenTracks"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackChildren));
+						AddCheckbox("Keep Position", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", v2 ? "_worldPositionStays" : "worldPositionStays"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackKeepPosition));
 					}
 
 					if (events.Where(e => e.Type == "AssignPlayerToTrack").Count() == editing.Count()) {
-						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AssignPlayerToTrackTrack));
-						AddTextbox("Target", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_target" : "target"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AssignPlayerToTrackTarget));
+						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTrack));
+						AddTextbox("Target", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_target" : "target"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTarget));
 					}
 
 					if (events.Where(e => e.Type == "AssignFogTrack").Count() == editing.Count()) {
-						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.Track));
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackEasing));
+						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackRepeat));
+							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
 						
-						AddParsed("Attenuation", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_attenuation"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.V2AssignFogTrackAttenuation));
-						AddParsed("Offset", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_offset"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.V2AssignFogTrackOffset));
-						AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_startY"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.V2AssignFogTrackStartY));
-						AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_height"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.V2AssignFogTrackHeight));
+						AddParsed("Attenuation", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_attenuation"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackAttenuation));
+						AddParsed("Offset", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_offset"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackOffset));
+						AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_startY"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackStartY));
+						AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_height"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackHeight));
 					}
 
 					if (events.Where(e => e.Type == "AnimateComponent").Count() == editing.Count()) {
-						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.Track));
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackEasing));
+						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.TrackRepeat));
+							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
 						//it seems these are only normal json inputs. might have to change the tooltip then.
-						AddTextbox("Environment Fog", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "BloomFogEnvironment"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AnimateComponentBloomFogEnvironment));
-						AddTextbox("Tube Bloom Light", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "TubeBloomPrePassLight"), false, tooltip.GetTooltip("CE", TooltipStrings.Tooltip.AnimateComponentTubeBloomPrePassLight));
+						AddTextbox("Environment Fog", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "BloomFogEnvironment"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentBloomFogEnvironment));
+						AddTextbox("Tube Bloom Light", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "TubeBloomPrePassLight"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentTubeBloomPrePassLight));
 					}
 					
 				}	break;
 				case ObjectType.BpmChange:
-					AddParsed("BPM", Data.GetSet<float>("Bpm"), false, tooltip.GetTooltip("E", TooltipStrings.Tooltip.BPMChange));
+					AddParsed("BPM", Data.GetSet<float>("Bpm"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BPMChange));
 					break;
 			}
 		}
@@ -430,15 +423,15 @@ public partial class MainWindow {
 		}
 	}}
 
-	private void AddAnimation(bool v2) {
+	private void AddAnimation(PropertyType type, bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
-		AddCheckbox("Animation", Data.GetSetAnimation(v2), false);
+		AddCheckbox("Animation", Data.GetSetAnimation(v2), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimatePath));
 		if (editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() == editing.Count()) {
-			AddCheckbox("  Color", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],"), false, tooltip.GetTooltip("Obj", TooltipStrings.Tooltip.Color));
-				foreach (var property in Events.NoodleProperties) {
-				AddCheckbox("  "+property.Key, Data.CustomGetSetNode(CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2]), false, tooltip.GetTooltip("Obj", TooltipStrings.Tooltip.AnimateTrackLocalRotation, property.Key, "AnimateTrack"));
+			AddCheckbox("  Color", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],"), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimateColor));
+			foreach (var property in Events.NoodleProperties) {
+				AddCheckbox("  "+property.Key, Data.CustomGetSetNode(CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2]), false, tooltip.GetTooltip(type, $"Animate{property.Key}"));
 			}
-			AddCheckbox("  Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), true, tooltip.GetTooltip("Obj", TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+			AddCheckbox("  Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), true, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
 			AddLine("");
 		}
 	}

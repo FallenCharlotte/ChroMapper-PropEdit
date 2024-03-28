@@ -105,7 +105,7 @@ public class SettingsWindow {
 				var c2 = Collapsible.Create(collapsible.panel!, "_playerOptions", "Player Options", true);
 				prefix = "_playerOptions";
 				current_panel = c2.panel;
-				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool, "leftz handes ok xgg");
+				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool);
 				AddParsed<float>("Player Height", "_playerHeight");
 				AddDropdown("Automatic Player Height", "_automaticPlayerHeight", MapSettings.OptionBool);
 				AddParsed<float>("Sfx Volume", "_sfxVolume");

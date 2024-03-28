@@ -60,7 +60,13 @@ public class UI {
 			var i = 0;
 			while (i + LINE_WIDTH < tooltip.Length) {
 				var search_len = System.Math.Min(LINE_WIDTH, tooltip.Length - i - 1);
-				var j = tooltip.LastIndexOf(" ", i + search_len, search_len);
+				// Reset count at premade newlines
+				var j = tooltip.IndexOf("\n", i, search_len);
+				if (j > 0) {
+					i = j + 1;
+					continue;
+				}
+				j = tooltip.LastIndexOf(" ", i + search_len, search_len);
 				if (j == -1) {
 					// Who tf has a 40-character word?
 					break;

@@ -10,8 +10,6 @@ using ChroMapper_PropEdit.Components;
 using ChroMapper_PropEdit.Enums;
 using ChroMapper_PropEdit.Utils;
 
-using Convert = System.Convert;
-
 namespace ChroMapper_PropEdit.UserInterface {
 
 public partial class MainWindow {

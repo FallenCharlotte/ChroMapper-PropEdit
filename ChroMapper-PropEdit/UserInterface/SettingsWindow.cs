@@ -90,14 +90,14 @@ public class SettingsWindow {
 		UI.AddField(panel!, "");
 		UI.AddLabel(panel!, "Map", "Map Settings", Vector2.zero);
 		{
-			var collapsible = Collapsible.Create(panel!, "Requirements", "Requirements", true);
+			var collapsible = Collapsible.Create(panel!, "Requirements", "Requirements", true, "Test");
 			requirements_panel = collapsible.panel;
 			
 			RefreshRequirements();
 		}
 		
-		information_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_information", "Information");
-		warnings_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_warnings", "Warnings");
+		information_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_information", "Information", "TeST2");
+		warnings_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_warnings", "Warnings", "Another Testr");
 		
 		{
 			var collapsible = Collapsible.Create(panel!, "Settings Override", "Map Options", true);

@@ -39,7 +39,9 @@ public partial class MainWindow {
 				.With("Modifier", "<Keyboard>/shift")
 				.With("Button", "<Keyboard>/n");
 			keybind.performed += (_) => {
-				if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) {
+				if (   (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+				    && !CMInputCallbackInstaller.IsActionMapDisabled(typeof(CMInput.INodeEditorActions))
+				    && !NodeEditorController.IsActive) {
 					ToggleWindow();
 				}
 			};

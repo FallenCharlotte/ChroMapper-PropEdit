@@ -52,7 +52,7 @@ public class Settings {
 				}
 			}
 		}
-		catch (System.Exception _) { }
+		catch (System.Exception) { }
 		json = new JSONObject();
 	}
 	

@@ -31,7 +31,7 @@ public class Settings {
 	
 	public readonly string SETTINGS_FILE = UnityEngine.Application.persistentDataPath + "/PropEdit.json";
 	
-	private static Settings? _instance;
+	private static Settings? _instance = null;
 	private static Settings Instance {
 		get {
 			if (_instance == null) {
@@ -47,7 +47,7 @@ public class Settings {
 		try {
 			if (File.Exists(SETTINGS_FILE)) {
 				using (var reader = new StreamReader(SETTINGS_FILE)) {
-					json = JSON.Parse(reader.ReadToEnd()).AsObject;
+					json = JSON.Parse(reader.ReadToEnd()).AsObject ?? new JSONObject();
 					return;
 				}
 			}

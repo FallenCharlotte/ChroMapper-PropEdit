@@ -136,6 +136,15 @@ namespace ChroMapper_PropEdit.UserInterface {
 			AnimateComponentTubeBloomPrePassLightBloomFogIntensityMultiplier,
 
 			//Settings
+
+			//Propedit Settings
+			ShowChroma,
+			ShowNoodleExtensions,
+			SplitLightValues,
+			ColorsAsHex,
+
+			//Requirements
+			Requirement,
 			ChromaReq,
 			LegacyChromaReq,
 			MappingExtensionsReq,
@@ -150,27 +159,76 @@ namespace ChroMapper_PropEdit.UserInterface {
 			OverrideCinemaReq,
 			OverrideSoundExtensionsReq,
 
+			//Misc
+			Information,
+			Warning,
+
+			//Map Options
+			MapOptions,
+
+			//Player Options
+			LeftHanded,
+			PlayerHeight,
+			AutomaticPlayerHeight,
+			SFXVolume,
+			ReduceDebris,
+			NoHud,
+			HideMissText,
+			AdvancedHud,
+			AutoRestart,
+			SaberTrailIntensity,
+			NoteJumpDurationType,
+			FixedNoteJumpDuration,
+			NoteJumpOffset,
+			HideNoteSpawnEffect,
+			AdaptiveSFX,
+			ExpertEffectsFilter,
+			ExpertPlusEffectsFilter,
+
+			//Modifiers
+			EnergyType,
+			NoFail,
+			InstantFail,
+			FailWhenSabersTouch,
+			EnabledOstacleTypes,
+			FastNotes,
+			StrictAngles,
+			DisappearingArrows,
+			GhostNotes,
+			NoBombs,
+			SongSpeed,
+			NoArrows,
+			ProMode,
+			ZenMode,
+			SmallCubes,
+
+			//Environments
+			OverrideEnvironments,
+
+			//Colors
+			OverrideColors,
+
+			//Graphics
+			MirrorQuality,
+			BloomPostProcess,
+			Smoke,
+			BurnMarkTrails,
+			ScreenDisplacement,
+			MaxShockwaveParticles,
+
+
+			//Chroma
+			DisableChromaEvents,
+			DisableEnvironmentEnhancements,
+			DisableNoteColoring,
+			ForceZenModeWalls,
+
 
 
 
 		}
-		
+
 		private Dictionary<Tooltip, string> name = new Dictionary<Tooltip, string>() {
-
-			//Settings
-			{Tooltip.ChromaReq, "TestChroma" },
-			{Tooltip.LegacyChromaReq, "TestChromaLegacy" },
-			{Tooltip.MappingExtensionsReq, "TestME" },
-			{Tooltip.NoodleExtensionsReq, "TestNE" },
-			{Tooltip.CinemaReq, "TestCinema" },
-			{Tooltip.SoundExtensionsReq, "TestSoundExtensions" },
-
-			{Tooltip.OverrideChromaReq, "OverrideTestChroma" },
-			{Tooltip.OverrideLegacyChromaReq, "OverrideTestChromaLegacy" },
-			{Tooltip.OverrideMappingExtensionsReq, "OverrideTestME" },
-			{Tooltip.OverrideNoodleExtensionsReq, "OverrideTestNE" },
-			{Tooltip.OverrideCinemaReq, "OverrideTestCinema" },
-			{Tooltip.OverrideSoundExtensionsReq, "OverrideTestSoundExtensions" },
 
 			// Generic Values
 			{ Tooltip.Beat, "The time, as determined by the BPM of the song, when this {0} should reach the player." },
@@ -302,8 +360,99 @@ namespace ChroMapper_PropEdit.UserInterface {
 			{ Tooltip.AnimateComponentTubeBloomPrePassLightColorAlphaMultiplier, "Changes the multiplier for the color ." }, //Unsure
 			{ Tooltip.AnimateComponentTubeBloomPrePassLightBloomFogIntensityMultiplier, "Changes the multiplier for the fog intensity" },
 			*/
+
+			//Settings
+
+			//Propedit Settings
+			{Tooltip.ShowChroma, "If activated, shows Chroma options in Propedit, when selecting an Object." },
+			{Tooltip.ShowNoodleExtensions, "If activated, shows Noodle Extensions options in Propedit, when selecting an Object." },
+			{Tooltip.SplitLightValues, "If activated, Splits the EventValue into Color and Action for an Event." },
+			{Tooltip.ColorsAsHex, "If Activated, displays the Chroma color in hexadecimal numbers." },
+
+			//Requirements
+			{Tooltip.Requirement, "Allows to change the requirements that the player needs to fulfill, in order to play the map. \n\"Required\" -> Players needs to have the mod installed, in order to play the map.\n\"Suggested\" -> Players can play the map without the mod, but it is recommended to him. \n\"None\" -> Players don't need the mod as the map doesn't contain any mod features.\n\nNOTE: Some values like Chroma are automatically set by CM, so only change them if you know what you're doing." },
+			{Tooltip.ChromaReq, "Changes the Chroma requirement." },
+			{Tooltip.LegacyChromaReq, "Changes the Legacy Chroma requirement." },
+			{Tooltip.MappingExtensionsReq, "Changes the Mapping Extensions requirement." },
+			{Tooltip.NoodleExtensionsReq, "Changes the Noodle Extensions requirement." },
+			{Tooltip.CinemaReq, "Changes the Cinema requirement." },
+			{Tooltip.SoundExtensionsReq, "Changes the Sound Extensions requirement." },
+
+			{Tooltip.OverrideChromaReq, "If enabled, overrides the Chroma requirement, set by CM, to your own." },
+			{Tooltip.OverrideLegacyChromaReq, "If enabled, overrides the Legacy Chroma requirement, set by CM, to your own." },
+			{Tooltip.OverrideMappingExtensionsReq, "If enabled, overrides the Mapping Extensions  requirement, set by CM, to your own." },
+			{Tooltip.OverrideNoodleExtensionsReq, "If enabled, overrides the Noodle Extensions, set by CM, to your own." },
+			{Tooltip.OverrideCinemaReq, "If enabled, overrides the Cinema requirement, set by CM, to your own." },
+			{Tooltip.OverrideSoundExtensionsReq, "If enabled, overrides the Sound Extensions requirement, set by CM, to your own." },
+			
+			//Misc
+			{Tooltip.Information, "Any general information you would like the player to be aware of before playing the map." },
+			{Tooltip.Warning, "Any warnings you would like the player to be aware of before playing the map." },
+
+
+			//Map Options
+			{ Tooltip.MapOptions, "A Map Option is an option that will show up as a suggestion to the player, when they start the map. These settings will only apply for the map, after that, it reverts back to the player-set options. It is HIGHLY recommended to only change the settings you NEED." },
+
+			//Player Options
+			{ Tooltip.LeftHanded, "Mirrors the map. Useful if your map contains text, as setting this to False, will suggest left handed players to disable this option." },
+			{ Tooltip.PlayerHeight, "Overrides the player height. Is set in centimeters." },
+			{ Tooltip.AutomaticPlayerHeight, "Sets the player height to be determined by the height of the headset." },
+			{ Tooltip.SFXVolume, "Overrides the soundeffects volume (i.e. Saber cutting)." },
+			{ Tooltip.ReduceDebris, "Reduces debris that occurs when cutting through a note." },
+			{ Tooltip.NoHud, "Disables the Hud. Useful if your map is more artistic/modchart related." },
+			{ Tooltip.HideMissText, "Hides the miss text, that occurs when missing a note." },
+			{ Tooltip.AdvancedHud, "In comparison to the normal HUD, the advanced HUD shows the duration of the Song, as well as the precentage score and Rank." },
+			{ Tooltip.AutoRestart, "Makes the map automatically restart on failure." },
+			{ Tooltip.SaberTrailIntensity, "Changes the trail intensity of the sabers." },
+			{ Tooltip.NoteJumpDurationType, "Changes the Note JD Type." },
+			{ Tooltip.FixedNoteJumpDuration, "Changes the fixed Note JD. Only works if Note JD Type is set to static." },
+			{ Tooltip.NoteJumpOffset, "Changes the Note Jump Offset." }, //not sure how to describe this
+			{ Tooltip.HideNoteSpawnEffect, "Hides the note spawn effect that occurs when a note spawns into the map." },
+			{ Tooltip.AdaptiveSFX, "Changes the Adaptive SFX." }, //note sure how to describe this
+			{ Tooltip.ExpertEffectsFilter, "Changes the environment effects for anything under Expert+." },
+			{ Tooltip.ExpertPlusEffectsFilter, "Changes the environment effects for Expert+." },
+
+			//Modifiers
+			{ Tooltip.EnergyType, "Changes the energy/life type.\n\"Battery\"-> 4 Lives mode.\n\"Bar\"-> Normal mode." },
+			{ Tooltip.NoFail, "The player can continue playing the level, even after they deplete all their energy." },
+			{ Tooltip.InstantFail, "Sets the map to one life mode." },
+			{ Tooltip.FailWhenSabersTouch, "Instantly fails player when sabers clash. Note: this option is hidden in the game." },
+			{ Tooltip.EnabledOstacleTypes, "Changes what kind of obstacles appear in the map.\n\"All\"-> All Obstacles appear.\n\"No Crouch\"-> Disables the crouching obstacles.\n\"No Obstacles\"-> Disables all obstacles." },
+			{ Tooltip.FastNotes, "Forces the NJS of the map to 20. Note: this option is hidden in the game." }, //unsure by how much it increases
+			{ Tooltip.StrictAngles, "Reduces the angle tolerance between note arrow and cut direction, meaning there is more room for error." }, //last part not fitting
+			{ Tooltip.DisappearingArrows, "Arrows on the notes disappear, before they reach the player." },
+			{ Tooltip.GhostNotes, "Notes are invisible and arrows disappear before they reach the player." },
+			{ Tooltip.NoBombs, "Disables the bombs." },
+			{ Tooltip.SongSpeed, "Changes the Song speed.\n\"Slower\"-> -15% Speed\n\"Normal\"-> 100% Speed (Default)\n\"Faster\"-> +20% Speed\n\"Super Fast\"-> +50% Speed" },
+			{ Tooltip.NoArrows, "All Notes can be cut in any direction." },
+			{ Tooltip.ProMode, "Hitboxes match the notes precisely." },
+			{ Tooltip.ZenMode, "Disables the notes, obstacles and bombs. " },
+			{ Tooltip.SmallCubes, "Notes are  50% of their size." },
+			
+			//Override stuff
+			{ Tooltip.OverrideEnvironments, "Allows the player to override the environment set by the map. Set to False, if you don't want players to use another environment." },
+			{ Tooltip.OverrideColors, "Allows the player to override the colors set by the map. Set to False, if you don't want players to use a different color scheme." },
+
+			//Graphics
+			{ Tooltip.MirrorQuality, "Changes the Mirror Quality. (0-3)." },
+			{ Tooltip.BloomPostProcess, "Changes the Bloom Post Process (0-1)." },
+			{ Tooltip.Smoke, "Adds a subtle smoke to the map (0-1)." },
+			{ Tooltip.BurnMarkTrails, "Hides burn trails left by sabers. Note: This option is hidden in the game." },
+			{ Tooltip.ScreenDisplacement, "Adds a small distortion effect, when a note is cut." },
+			{ Tooltip.MaxShockwaveParticles, "The amount of Shockwave particles, that occur when cutting through a note." },
+
+			//Chroma
+			{ Tooltip.DisableChromaEvents, "Disables any form of Chroma events." },
+			{ Tooltip.DisableEnvironmentEnhancements, "Disables Chromas's ability to manage the environment." },
+			{ Tooltip.DisableNoteColoring, "Disables the note coloring, set by chroma (Blame Mawntee)." }, //Actual option tooltip in BS lmao, not sure if to keep it in.
+			{ Tooltip.ForceZenModeWalls, "Forces Obstacles to be enabled in the Zen Mode modifier." },
+
 		};
-		
+
+		public string GetTooltip(Tooltip property) {
+			return string.Format(name[property]);
+		}
+
 		public string GetTooltip(PropertyType type, Tooltip property) {
 			return string.Format(name[property], objects[type]);
 		}

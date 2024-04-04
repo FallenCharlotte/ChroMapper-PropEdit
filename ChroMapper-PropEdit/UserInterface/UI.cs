@@ -54,7 +54,8 @@ public class UI {
 		var label = UI.AddChild(container, title + " Label", typeof(TextMeshProUGUI));
 		UI.AttachTransform(label, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
 		//main code that adds the tooltip to the label
-		if (tooltip != "") {
+		
+		if (tooltip != "" && Settings.Get(Settings.ShowTooltips, true)!.AsBool == true) {
 			var LINE_WIDTH = 40;
 			var tooltip_wrapped = new System.Text.StringBuilder(tooltip);
 			var i = 0;

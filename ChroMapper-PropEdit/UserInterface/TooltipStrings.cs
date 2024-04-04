@@ -142,6 +142,7 @@ namespace ChroMapper_PropEdit.UserInterface {
 			ShowNoodleExtensions,
 			SplitLightValues,
 			ColorsAsHex,
+			ShowTooltips,
 
 			//Requirements
 			Requirement,
@@ -367,7 +368,8 @@ namespace ChroMapper_PropEdit.UserInterface {
 			{Tooltip.ShowChroma, "If activated, shows Chroma options in Propedit, when selecting an Object." },
 			{Tooltip.ShowNoodleExtensions, "If activated, shows Noodle Extensions options in Propedit, when selecting an Object." },
 			{Tooltip.SplitLightValues, "If activated, Splits the EventValue into Color and Action for an Event." },
-			{Tooltip.ColorsAsHex, "If Activated, displays the Chroma color in hexadecimal numbers." },
+			{Tooltip.ColorsAsHex, "If activated, displays the Chroma color in hexadecimal numbers." },
+			{Tooltip.ShowTooltips, "If activated, displays a tooltip when hovering over a text. Try reopening the map, if it doesn't change for the settings window." },
 
 			//Requirements
 			{Tooltip.Requirement, "Allows to change the requirements that the player needs to fulfill, in order to play the map. \n\"Required\" -> Players needs to have the mod installed, in order to play the map.\n\"Suggested\" -> Players can play the map without the mod, but it is recommended to him. \n\"None\" -> Players don't need the mod as the map doesn't contain any mod features.\n\nNOTE: Some values like Chroma are automatically set by CM, so only change them if you know what you're doing." },

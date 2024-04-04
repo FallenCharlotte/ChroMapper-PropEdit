@@ -23,6 +23,7 @@ public class SettingsWindow {
 	public Toggle? noodle_enable;
 	public Toggle? split_value;
 	public Toggle? color_hex;
+	public Toggle? tooltip_enable;
 	public ScrollBox? scrollbox;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
@@ -85,6 +86,16 @@ public class SettingsWindow {
 			color_hex = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.ColorHex, v);
 				Plugin.main?.UpdateSelection(false);
+			});
+		}
+		{
+			var container = UI.AddField(panel!, "Show Tooltips", null, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowTooltips));
+			tooltip_enable = UI.AddCheckbox(container, false, (v) => {
+				Settings.Set(Settings.ShowTooltips, v);
+				Plugin.main?.UpdateSelection(false);
+				//Theres no "reinitialize everything function" for settings. i guess Init counts, but if i try that, it goes into an infinite loop. (and clears the json file)
+				//the only way settings would reload, is to reenter a map.
+				//is there a better way to this?
 			});
 		}
 		
@@ -327,6 +338,7 @@ public class SettingsWindow {
 		noodle_enable!.isOn = Settings.Get(Settings.ShowNoodleKey, true);
 		split_value!.isOn = Settings.Get(Settings.SplitValue, true);
 		color_hex!.isOn = Settings.Get(Settings.ColorHex, true);
+		tooltip_enable!.isOn = Settings.Get(Settings.ShowTooltips, true);
 		foreach (var r in requirements) {
 			r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map)));
 		}

@@ -10,8 +10,9 @@ public class Settings {
 	public static readonly string ShowNoodleKey = "Noodle";
 	public static readonly string SplitValue = "split_val";
 	public static readonly string ColorHex = "color_hex";
-	
-	public static JSONNode? Get(string name, JSONNode? d = null) {
+	public static readonly string ShowTooltips = "tooltips";
+
+		public static JSONNode? Get(string name, JSONNode? d = null) {
 		var o = Data.GetNode(Settings.Instance.json, name);
 		if (o == null && d != null) {
 			o = Settings.Set(name, d);

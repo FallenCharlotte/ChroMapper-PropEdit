@@ -14,10 +14,13 @@ public class Collapsible : MonoBehaviour
 	public GameObject? panel;
 	
 	public static Collapsible Create(GameObject parent, string name, string label, bool expanded) {
-		return UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded);
+		return Create(parent, name, label, expanded, "");
+	}
+	public static Collapsible Create(GameObject parent, string name, string label, bool expanded, string tooltip) {
+		return UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip);
 	}
 	
-	public Collapsible Init(string label, bool expanded) {
+	public Collapsible Init(string label, bool expanded, string tooltip = "") {
 		UI.AttachTransform(gameObject, new Vector2(0, 20), pos: new Vector2(0, 0));
 		{
 			var image = gameObject.AddComponent<Image>();
@@ -40,7 +43,7 @@ public class Collapsible : MonoBehaviour
 			csf.verticalFit = ContentSizeFitter.FitMode.MinSize;
 		}
 		
-		var header = UI.AddField(gameObject, label);
+		var header = UI.AddField(gameObject, label, null, tooltip);
 		// Invisible image to make it clickable... Unity is a truly magical engine
 		{
 			var image = header.AddComponent<Image>();

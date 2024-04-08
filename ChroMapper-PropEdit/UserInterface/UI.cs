@@ -22,7 +22,12 @@ public class UI {
 		return obj;
 	}
 	
+	// You're welcome, PaulMapper
 	public static GameObject AddLabel(GameObject parent, string title, string text, Vector2 pos, Vector2? anchor_min = null, Vector2? anchor_max = null, int font_size = 14, Vector2? size = null, TextAlignmentOptions align = TextAlignmentOptions.Center) {
+		return AddLabel(parent, title, text, pos, anchor_min, anchor_max, font_size, size, align, "");
+	}
+	
+	public static GameObject AddLabel(GameObject parent, string title, string text, Vector2 pos, Vector2? anchor_min, Vector2? anchor_max, int font_size, Vector2? size, TextAlignmentOptions align, string tooltip) {
 		var entryLabel = AddChild(parent, title + " Label");
 		AttachTransform(entryLabel, size ?? new Vector2(110, 24), pos, anchor_min ?? new Vector2(0.5f, 1), anchor_max ?? new Vector2(0.5f, 1));
 		
@@ -37,13 +42,42 @@ public class UI {
 		return entryLabel;
 	}
 	
-	// A container for an input element with a label
 	public static GameObject AddField(GameObject parent, string title, Vector2? size = null) {
+		return AddField(parent, title, size, "");
+	}
+	
+	// A container for an input element with a label
+	public static GameObject AddField(GameObject parent, string title, Vector2? size, string tooltip) {
 		var container = UI.AddChild(parent, title + " Container");
 		UI.AttachTransform(container, size ?? new Vector2(0, 20), pos: new Vector2(0, 0));
 		
 		var label = UI.AddChild(container, title + " Label", typeof(TextMeshProUGUI));
 		UI.AttachTransform(label, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
+		//main code that adds the tooltip to the label
+		
+		if (tooltip != "" && Settings.Get(Settings.ShowTooltips, true)!.AsBool == true) {
+			var LINE_WIDTH = 40;
+			var tooltip_wrapped = new System.Text.StringBuilder(tooltip);
+			var i = 0;
+			while (i + LINE_WIDTH < tooltip.Length) {
+				var search_len = System.Math.Min(LINE_WIDTH, tooltip.Length - i - 1);
+				// Reset count at premade newlines
+				var j = tooltip.IndexOf("\n", i, search_len);
+				if (j > 0) {
+					i = j + 1;
+					continue;
+				}
+				j = tooltip.LastIndexOf(" ", i + search_len, search_len);
+				if (j == -1) {
+					// Who tf has a 40-character word?
+					break;
+				}
+				tooltip_wrapped[j] = '\n';
+				i = j + 1;
+			}
+			var tooltipComp = label.AddComponent<Tooltip>();
+			tooltipComp.TooltipOverride = tooltip_wrapped.ToString();
+		}
 		
 		var textComponent = label.GetComponent<TextMeshProUGUI>();
 		textComponent.font = PersistentUI.Instance.ButtonPrefab.Text.font;
@@ -197,6 +231,17 @@ public class UI {
 		texture2D.LoadImage(data);
 		
 		return Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), new Vector2(0, 0), 100.0f);
+	}
+	
+	public static void RefreshTooltips(GameObject? root) {
+		if (root == null)
+			return;
+		
+		var show_tooltips = Settings.Get(Settings.ShowTooltips, true)!.AsBool;
+		
+		foreach (var t in root.GetComponentsInChildren<Tooltip>(show_tooltips)) {
+			t.enabled = show_tooltips;
+		}
 	}
 	
 	// Stop textbox input from triggering actions, copied from the node editor

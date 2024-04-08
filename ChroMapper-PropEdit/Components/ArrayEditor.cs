@@ -15,14 +15,14 @@ public class ArrayEditor : MonoBehaviour {
 		inputs = new List<UITextInput>();
 	}
 	
-	public static ArrayEditor Create(GameObject parent, JSONNode root, string path, string title) {
-		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(root, path, title);
+	public static ArrayEditor Create(GameObject parent, JSONNode root, string path, string title, string tooltip = "") {
+		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(root, path, title, tooltip);
 	}
 	
-	public ArrayEditor Init(JSONNode root, string path, string title) {
+	public ArrayEditor Init(JSONNode root, string path, string title, string tooltip = "") {
 		this.root = root;
 		this.path = path;
-		container = gameObject.AddComponent<Collapsible>().Init(title, true);
+		container = gameObject.AddComponent<Collapsible>().Init(title, true, tooltip);
 		return this;
 	}
 	

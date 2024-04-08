@@ -23,9 +23,11 @@ public class SettingsWindow {
 	public Toggle? noodle_enable;
 	public Toggle? split_value;
 	public Toggle? color_hex;
+	public Toggle? tooltip_enable;
 	public ScrollBox? scrollbox;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
+	TooltipStrings tooltip = TooltipStrings.Instance;
 	
 	public List<string> custom_reqs = new List<string>();
 	public Dictionary<string, UIDropdown> requirements = new Dictionary<string, UIDropdown>();
@@ -59,130 +61,140 @@ public class SettingsWindow {
 		
 		UI.AddLabel(panel!, "PropEdit", "PropEdit Settings", Vector2.zero);
 		{
-			var container = UI.AddField(panel!, "Show Chroma");
+			var container = UI.AddField(panel!, "Show Chroma", null, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowChroma));
 			chroma_enable = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.ShowChromaKey, v);
 				Plugin.main?.UpdateSelection(false);
 			});
 		}
 		{
-			var container = UI.AddField(panel!, "Show Noodle Extensions");
+			var container = UI.AddField(panel!, "Show Noodle Extensions", null, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowNoodleExtensions));
 			noodle_enable = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.ShowNoodleKey, v);
 				Plugin.main?.UpdateSelection(false);
 			});
 		}
 		{
-			var container = UI.AddField(panel!, "Split light values");
+			var container = UI.AddField(panel!, "Split light values", null, tooltip.GetTooltip(TooltipStrings.Tooltip.SplitLightValues));
 			split_value = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.SplitValue, v);
 				Plugin.main?.UpdateSelection(false);
 			});
 		}
 		{
-			var container = UI.AddField(panel!, "Colors as Hex");
+			var container = UI.AddField(panel!, "Colors as Hex", null, tooltip.GetTooltip(TooltipStrings.Tooltip.ColorsAsHex));
 			color_hex = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.ColorHex, v);
 				Plugin.main?.UpdateSelection(false);
+			});
+		}
+		{
+			var container = UI.AddField(panel!, "Show Tooltips", null, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowTooltips));
+			tooltip_enable = UI.AddCheckbox(container, false, (v) => {
+				Settings.Set(Settings.ShowTooltips, v);
+				Plugin.main?.UpdateSelection(false);
+				UI.RefreshTooltips(Plugin.main?.panel);
+				UI.RefreshTooltips(panel);
 			});
 		}
 		
 		UI.AddField(panel!, "");
 		UI.AddLabel(panel!, "Map", "Map Settings", Vector2.zero);
 		{
-			var collapsible = Collapsible.Create(panel!, "Requirements", "Requirements", true);
+			var collapsible = Collapsible.Create(panel!, "Requirements", "Requirements", true, tooltip.GetTooltip(TooltipStrings.Tooltip.Requirement));
 			requirements_panel = collapsible.panel;
 			
 			RefreshRequirements();
 		}
 		
-		information_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_information", "Information");
-		warnings_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_warnings", "Warnings");
+		information_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_information", "Information", tooltip.GetTooltip(TooltipStrings.Tooltip.Information));
+		warnings_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData(), "_warnings", "Warnings", tooltip.GetTooltip(TooltipStrings.Tooltip.Warning));
 		
 		{
-			var collapsible = Collapsible.Create(panel!, "Settings Override", "Map Options", true);
+			var collapsible = Collapsible.Create(panel!, "Settings Override", "Map Options", true, tooltip.GetTooltip(TooltipStrings.Tooltip.MapOptions));
 			{
 				var c2 = Collapsible.Create(collapsible.panel!, "_playerOptions", "Player Options", true);
 				prefix = "_playerOptions";
 				current_panel = c2.panel;
-				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool);
-				AddParsed<float>("Player Height", "_playerHeight");
-				AddDropdown("Automatic Player Height", "_automaticPlayerHeight", MapSettings.OptionBool);
-				AddParsed<float>("Sfx Volume", "_sfxVolume");
-				AddDropdown("Reduce Debris", "_reduceDebris", MapSettings.OptionBool);
-				AddDropdown("No Hud", "_noTextsAndHuds", MapSettings.OptionBool);
-				AddDropdown("Hide Miss Text", "_noFailEffects", MapSettings.OptionBool);
-				AddDropdown("Advanced Hud", "_advancedHud", MapSettings.OptionBool);
-				AddDropdown("Auto Restart", "_autoRestart", MapSettings.OptionBool);
-				AddParsed<float>("Saber Trail Intensity", "_saberTrailIntensity");
-				AddDropdown("Note Jump Duration Type", "_noteJumpDurationTypeSettings", MapSettings.JumpDurationTypes);
-				AddParsed<float>("Fixed Note Jump Duration", "_noteJumpFixedDuration");
-				AddParsed<float>("Note Jump Offset", "_noteJumpStartBeatOffset");
-				AddDropdown("Hide Note Spawn Effect", "_hideNoteSpawnEffect", MapSettings.OptionBool);
-				AddDropdown("Adaptive Sfx", "_adaptiveSfx", MapSettings.OptionBool);
-				AddDropdown("Expert- Effects Filter", "_environmentEffectsFilterDefaultPreset", MapSettings.EffectsFilters);
-				AddDropdown("Expert+ Effects Filter", "_environmentEffectsFilterExpertPlusPreset", MapSettings.EffectsFilters);
+				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.LeftHanded));
+				AddParsed<float>("Player Height", "_playerHeight", tooltip.GetTooltip(TooltipStrings.Tooltip.PlayerHeight));
+				AddDropdown("Automatic Player Height", "_automaticPlayerHeight", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.AutomaticPlayerHeight));
+				AddParsed<float>("Sfx Volume", "_sfxVolume", tooltip.GetTooltip(TooltipStrings.Tooltip.SFXVolume));
+				AddDropdown("Reduce Debris", "_reduceDebris", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.ReduceDebris));
+				AddDropdown("No Hud", "_noTextsAndHuds", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.NoHud));
+				AddDropdown("Hide Miss Text", "_noFailEffects", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.HideMissText));
+				AddDropdown("Advanced Hud", "_advancedHud", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.AdvancedHud));
+				AddDropdown("Auto Restart", "_autoRestart", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.AutoRestart));
+				AddParsed<float>("Saber Trail Intensity", "_saberTrailIntensity", tooltip.GetTooltip(TooltipStrings.Tooltip.SaberTrailIntensity));
+				AddDropdown("Note Jump Duration Type", "_noteJumpDurationTypeSettings", MapSettings.JumpDurationTypes, tooltip.GetTooltip(TooltipStrings.Tooltip.NoteJumpDurationType));
+				AddParsed<float>("Fixed Note Jump Duration", "_noteJumpFixedDuration", tooltip.GetTooltip(TooltipStrings.Tooltip.FixedNoteJumpDuration));
+				AddParsed<float>("Note Jump Offset", "_noteJumpStartBeatOffset", tooltip.GetTooltip(TooltipStrings.Tooltip.NoteJumpOffset));
+				AddDropdown("Hide Note Spawn Effect", "_hideNoteSpawnEffect", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.HideNoteSpawnEffect));
+				AddDropdown("Adaptive Sfx", "_adaptiveSfx", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.AdaptiveSFX));
+				AddDropdown("Expert- Effects Filter", "_environmentEffectsFilterDefaultPreset", MapSettings.EffectsFilters, tooltip.GetTooltip(TooltipStrings.Tooltip.ExpertEffectsFilter));
+				AddDropdown("Expert+ Effects Filter", "_environmentEffectsFilterExpertPlusPreset", MapSettings.EffectsFilters, tooltip.GetTooltip(TooltipStrings.Tooltip.ExpertPlusEffectsFilter));
 			}
 			{
 				var c2 = Collapsible.Create(collapsible.panel!, "_modifiers", "Modifiers", true);
 				prefix = "_modifiers";
 				current_panel = c2.panel;
-				AddDropdown("Energy Type", "_energyType", MapSettings.EnergyTypes);
-				AddDropdown("No Fail", "_noFailOn0Energy", MapSettings.OptionBool);
-				AddDropdown("Instant Fail", "_instaFail", MapSettings.OptionBool);
-				AddDropdown("Fail When Sabers Touch", "_failOnSaberClash", MapSettings.OptionBool);
-				AddDropdown("Enabled Obstacle Types", "_enabledObstacleType", MapSettings.ObstacleTypes);
-				AddDropdown("Fast Notes", "_fastNotes", MapSettings.OptionBool);
-				AddDropdown("Strict Angles", "_strictAngles", MapSettings.OptionBool);
-				AddDropdown("Disappearing Arrows", "_disappearingArrows", MapSettings.OptionBool);
-				AddDropdown("Ghost Notes", "_ghostNotes", MapSettings.OptionBool);
-				AddDropdown("No Bombs", "_noBombs", MapSettings.OptionBool);
-				AddDropdown("Song Speed", "_songSpeed", MapSettings.SongSpeeds);
-				AddDropdown("No Arrows", "_noArrows", MapSettings.OptionBool);
-				AddDropdown("Pro Mode", "_proMode", MapSettings.OptionBool);
-				AddDropdown("Zen Mode", "_zenMode", MapSettings.OptionBool);
-				AddDropdown("Small Cubes", "_smallCubes", MapSettings.OptionBool);
+				AddDropdown("Energy Type", "_energyType", MapSettings.EnergyTypes, tooltip.GetTooltip(TooltipStrings.Tooltip.EnergyType));
+				AddDropdown("No Fail", "_noFailOn0Energy", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.NoFail));
+				AddDropdown("Instant Fail", "_instaFail", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.InstantFail));
+				AddDropdown("Fail When Sabers Touch", "_failOnSaberClash", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.FailWhenSabersTouch));
+				AddDropdown("Enabled Obstacle Types", "_enabledObstacleType", MapSettings.ObstacleTypes, tooltip.GetTooltip(TooltipStrings.Tooltip.EnabledOstacleTypes));
+				AddDropdown("Fast Notes", "_fastNotes", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.FastNotes));
+				AddDropdown("Strict Angles", "_strictAngles", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.StrictAngles));
+				AddDropdown("Disappearing Arrows", "_disappearingArrows", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.DisappearingArrows));
+				AddDropdown("Ghost Notes", "_ghostNotes", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.GhostNotes));
+				AddDropdown("No Bombs", "_noBombs", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.NoBombs));
+				AddDropdown("Song Speed", "_songSpeed", MapSettings.SongSpeeds, tooltip.GetTooltip(TooltipStrings.Tooltip.SongSpeed));
+				AddDropdown("No Arrows", "_noArrows", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.NoArrows));
+				AddDropdown("Pro Mode", "_proMode", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.ProMode));
+				AddDropdown("Zen Mode", "_zenMode", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.ZenMode));
+				AddDropdown("Small Cubes", "_smallCubes", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.SmallCubes));
 			}
 			{
 				var c2 = Collapsible.Create(collapsible.panel!, "_environments", "Environments", true);
 				prefix = "_environments";
 				current_panel = c2.panel;
-				AddDropdown("Override Environments", "_overrideEnvironments", MapSettings.OptionBool);
+				AddDropdown("Override Environments", "_overrideEnvironments", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.OverrideEnvironments));
 			}
 			{
 				var c2 = Collapsible.Create(collapsible.panel!, "Colors", "Colors", true);
 				prefix = "_colors";
 				current_panel = c2.panel;
-				AddDropdown("Override Colors", "_overrideDefaultColors", MapSettings.OptionBool);
+				AddDropdown("Override Colors", "_overrideDefaultColors", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.OverrideColors));
 			}
 			{
 				var c2 = Collapsible.Create(collapsible.panel!, "_graphics", "Graphics", true);
 				prefix = "_graphics";
 				current_panel = c2.panel;
-				AddParsed<int>("Mirror Quality", "_mirrorGraphicsSettings");
-				AddParsed<int>("Bloom Post Process", "_mainEffectGraphicsSettings");
-				AddParsed<int>("Smoke", "_smokeGraphicsSettings");
-				AddDropdown("Burn Mark Trails", "_burnMarkTrailsEnabled", MapSettings.OptionBool);
-				AddDropdown("Screen Displacement", "_screenDisplacementEffectsEnabled", MapSettings.OptionBool);
-				AddParsed<int>("Max Shockwave Particles", "_maxShockwaveParticles");
+				AddParsed<int>("Mirror Quality", "_mirrorGraphicsSettings", tooltip.GetTooltip(TooltipStrings.Tooltip.MirrorQuality));
+				AddParsed<int>("Bloom Post Process", "_mainEffectGraphicsSettings", tooltip.GetTooltip(TooltipStrings.Tooltip.BloomPostProcess));
+				AddParsed<int>("Smoke", "_smokeGraphicsSettings", tooltip.GetTooltip(TooltipStrings.Tooltip.Smoke));
+				AddDropdown("Burn Mark Trails", "_burnMarkTrailsEnabled", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.BurnMarkTrails));
+				AddDropdown("Screen Displacement", "_screenDisplacementEffectsEnabled", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.Information));
+				AddParsed<int>("Max Shockwave Particles", "_maxShockwaveParticles", tooltip.GetTooltip(TooltipStrings.Tooltip.MaxShockwaveParticles));
 			}
 			{
 				var c2 = Collapsible.Create(collapsible.panel!, "_chroma", "Chroma", true);
 				prefix = "_chroma";
 				current_panel = c2.panel;
-				AddDropdown("Disable Chroma Events", "_disableChromaEvents", MapSettings.OptionBool);
-				AddDropdown("Disable Environment Enhancements", "_disableEnvironmentEnhancements", MapSettings.OptionBool);
-				AddDropdown("Disable Note Coloring", "_disableNoteColoring", MapSettings.OptionBool);
-				AddDropdown("Force Zen Mode Walls", "_forceZenModeWalls", MapSettings.OptionBool);
+				AddDropdown("Disable Chroma Events", "_disableChromaEvents", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.DisableChromaEvents));
+				AddDropdown("Disable Environment Enhancements", "_disableEnvironmentEnhancements", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.DisableEnvironmentEnhancements));
+				AddDropdown("Disable Note Coloring", "_disableNoteColoring", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.DisableNoteColoring));
+				AddDropdown("Force Zen Mode Walls", "_forceZenModeWalls", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.ForceZenModeWalls));
 			}
 		}
 		
 		Refresh();
+		UI.RefreshTooltips(panel);
 	}
 	
-	private void AddDropdown<T>(string name, string path, Map<T?> options) {
+	private void AddDropdown<T>(string name, string path, Map<T?> options, string tooltip = "") {
 		path = $"_settings.{prefix}.{path}";
-		var container = UI.AddField(current_panel!, name);
+		var container = UI.AddField(current_panel!, name, null, tooltip);
 		var node = Data.GetNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path);
 		var value = (node == null)
 			? default(T)!
@@ -197,9 +209,10 @@ public class SettingsWindow {
 		}, options, true);
 	}
 	
-	private void AddParsed<T>(string name, string path) where T : struct {
+	
+	private void AddParsed<T>(string name, string path, string tooltip = "") where T : struct {
 		path = $"_settings.{prefix}.{path}";
-		var container = UI.AddField(current_panel!, name);
+		var container = UI.AddField(current_panel!, name, null, tooltip);
 		var node = Data.GetNode(BeatSaberSongContainer.Instance.DifficultyData.CustomData, path);
 		T? value = (node == null)
 			? null
@@ -229,7 +242,7 @@ public class SettingsWindow {
 		forced = new Dictionary<string, Toggle>();
 		
 		foreach (var rc in default_reqchecks) {
-			AddReqField(rc.Key, false);
+			AddReqField(rc.Key, false, rc.Value.Name);
 		}
 		
 		foreach (var req_status in req_statuses) {
@@ -237,7 +250,7 @@ public class SettingsWindow {
 				foreach (var req in reqs.Children) {
 					var reqcheck = GetReqCheck(req);
 					if (reqcheck == null) {
-						RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value));
+						RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value, BeatSaberSongContainer.Instance.DifficultyData));
 					}
 					else {
 						if (reqcheck.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map) != req_status.Value) {
@@ -251,16 +264,17 @@ public class SettingsWindow {
 		
 		foreach (var reqcheck in requirementsAndSuggestions!) {
 			if (!default_reqchecks.ContainsKey(reqcheck.Name)) {
-				AddReqField(reqcheck.Name, true);
+				AddReqField(reqcheck.Name, true, reqcheck.Name);
 			}
 		}
+		
 		{
 			var input = UI.AddTextbox(requirements_panel!, "", (s) => {
 				if (s == null || s == "") {
 					return;
 				}
 				
-				RequirementCheck.RegisterRequirement(new CustomRequirement(s!, RequirementCheck.RequirementType.Requirement));
+				RequirementCheck.RegisterRequirement(new CustomRequirement(s!, RequirementCheck.RequirementType.Requirement, BeatSaberSongContainer.Instance.DifficultyData));
 				
 				RefreshRequirements();
 				Refresh();
@@ -270,19 +284,30 @@ public class SettingsWindow {
 		}
 	}
 	
-	private void AddReqField(string name, bool force) {
-		var container = UI.AddField(requirements_panel!, name);
+	private Dictionary<string, string> requirement_names = new Dictionary<string, string>() {
+		{ "ChromaReq", "Chroma" },
+		{ "LegacyChromaReq", "Legacy Chroma" },
+		{ "MappingExtensionsReq", "Mapping Extensions" },
+		{ "NoodleExtensionsReq", "Noodle Extensions" },
+		{ "CinemaReq", "Cinema" },
+		{ "SoundExtensionsReq", "Sound Extensions" },
+	};
+	
+	private void AddReqField(string name, bool force, string reqcheck = "") {
+		string tt_name = name;
+		if (requirement_names.ContainsKey(reqcheck)) {
+			tt_name = requirement_names[reqcheck];
+		}
+		var container = UI.AddField(requirements_panel!, tt_name, null, tooltip.GetTooltip(TooltipStrings.Tooltip.ModReq, tt_name));
 		requirements[name] = UI.AddDropdown(container, 0, (v) => {
 			SetForced(name, true);
 		}, MapSettings.RequirementStatus);
-		var container2 = UI.AddField(requirements_panel!, "Override");
-		forced[name] = UI.AddCheckbox(container2, force, (v) => {
-			// Can't un-force a custom requirement
-			if (!default_reqchecks.ContainsKey(name)) {
-				v = true;
-			}
-			SetForced(name, v);
-		});
+		if (default_reqchecks.ContainsKey(name)) {
+			var container2 = UI.AddField(requirements_panel!, "Override", null, tooltip.GetTooltip(TooltipStrings.Tooltip.OverrideModReq, tt_name));
+			forced[name] = UI.AddCheckbox(container2, force, (v) => {
+				SetForced(name, v);
+			});
+		}
 	}
 	
 	public void Disable() {
@@ -297,11 +322,13 @@ public class SettingsWindow {
 	}
 	
 	private void SetForced(string name, bool force) {
+		// TODO: Update instead of removing, currently unable to change multiple maps in the same set
 		requirementsAndSuggestions!.Remove(GetReqCheck(name)!);
 		RequirementCheck.RegisterRequirement(force
-			? (new CustomRequirement(name, (RequirementCheck.RequirementType)requirements[name].Dropdown.value))
+			? (new CustomRequirement(name, (RequirementCheck.RequirementType)requirements[name].Dropdown.value, BeatSaberSongContainer.Instance.DifficultyData))
 			: ((RequirementCheck)Activator.CreateInstance(default_reqchecks[name])));
-		forced[name].isOn = force;
+		if (forced.ContainsKey(name))
+			forced[name].isOn = force;
 		Refresh();
 	}
 	
@@ -324,6 +351,7 @@ public class SettingsWindow {
 		noodle_enable!.isOn = Settings.Get(Settings.ShowNoodleKey, true);
 		split_value!.isOn = Settings.Get(Settings.SplitValue, true);
 		color_hex!.isOn = Settings.Get(Settings.ColorHex, true);
+		tooltip_enable!.isOn = Settings.Get(Settings.ShowTooltips, true);
 		foreach (var r in requirements) {
 			r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map)));
 		}

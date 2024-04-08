@@ -233,6 +233,17 @@ public class UI {
 		return Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), new Vector2(0, 0), 100.0f);
 	}
 	
+	public static void RefreshTooltips(GameObject? root) {
+		if (root == null)
+			return;
+		
+		var show_tooltips = Settings.Get(Settings.ShowTooltips, true)!.AsBool;
+		
+		foreach (var t in root.GetComponentsInChildren<Tooltip>(show_tooltips)) {
+			t.enabled = show_tooltips;
+		}
+	}
+	
 	// Stop textbox input from triggering actions, copied from the node editor
 	
 	private static readonly System.Type[] actionMapsEnabledWhenNodeEditing = {

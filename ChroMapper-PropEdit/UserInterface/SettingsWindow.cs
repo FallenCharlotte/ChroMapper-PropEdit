@@ -27,7 +27,7 @@ public class SettingsWindow {
 	public ScrollBox? scrollbox;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
-	TooltipStrings? tooltip;
+	TooltipStrings tooltip = TooltipStrings.Instance;
 	
 	public List<string> custom_reqs = new List<string>();
 	public Dictionary<string, UIDropdown> requirements = new Dictionary<string, UIDropdown>();
@@ -93,9 +93,8 @@ public class SettingsWindow {
 			tooltip_enable = UI.AddCheckbox(container, false, (v) => {
 				Settings.Set(Settings.ShowTooltips, v);
 				Plugin.main?.UpdateSelection(false);
-				//Theres no "reinitialize everything function" for settings. i guess Init counts, but if i try that, it goes into an infinite loop. (and clears the json file)
-				//the only way settings would reload, is to reenter a map.
-				//is there a better way to this?
+				UI.RefreshTooltips(Plugin.main?.panel);
+				UI.RefreshTooltips(panel);
 			});
 		}
 		
@@ -190,6 +189,7 @@ public class SettingsWindow {
 		}
 		
 		Refresh();
+		UI.RefreshTooltips(panel);
 	}
 	
 	private void AddDropdown<T>(string name, string path, Map<T?> options, string tooltip = "") {
@@ -250,7 +250,7 @@ public class SettingsWindow {
 				foreach (var req in reqs.Children) {
 					var reqcheck = GetReqCheck(req);
 					if (reqcheck == null) {
-						RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value));
+						RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value, BeatSaberSongContainer.Instance.DifficultyData));
 					}
 					else {
 						if (reqcheck.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.DifficultyData, BeatSaberSongContainer.Instance.Map) != req_status.Value) {
@@ -267,13 +267,14 @@ public class SettingsWindow {
 				AddReqField(reqcheck.Name, true, reqcheck.Name);
 			}
 		}
+		
 		{
 			var input = UI.AddTextbox(requirements_panel!, "", (s) => {
 				if (s == null || s == "") {
 					return;
 				}
 				
-				RequirementCheck.RegisterRequirement(new CustomRequirement(s!, RequirementCheck.RequirementType.Requirement));
+				RequirementCheck.RegisterRequirement(new CustomRequirement(s!, RequirementCheck.RequirementType.Requirement, BeatSaberSongContainer.Instance.DifficultyData));
 				
 				RefreshRequirements();
 				Refresh();
@@ -283,19 +284,30 @@ public class SettingsWindow {
 		}
 	}
 	
+	private Dictionary<string, string> requirement_names = new Dictionary<string, string>() {
+		{ "ChromaReq", "Chroma" },
+		{ "LegacyChromaReq", "Legacy Chroma" },
+		{ "MappingExtensionsReq", "Mapping Extensions" },
+		{ "NoodleExtensionsReq", "Noodle Extensions" },
+		{ "CinemaReq", "Cinema" },
+		{ "SoundExtensionsReq", "Sound Extensions" },
+	};
+	
 	private void AddReqField(string name, bool force, string reqcheck = "") {
-		var container = UI.AddField(requirements_panel!, name, null, tooltip.GetTooltip(PropertyType.Object, $"{reqcheck}"));
+		string tt_name = name;
+		if (requirement_names.ContainsKey(reqcheck)) {
+			tt_name = requirement_names[reqcheck];
+		}
+		var container = UI.AddField(requirements_panel!, tt_name, null, tooltip.GetTooltip(TooltipStrings.Tooltip.ModReq, tt_name));
 		requirements[name] = UI.AddDropdown(container, 0, (v) => {
 			SetForced(name, true);
 		}, MapSettings.RequirementStatus);
-		var container2 = UI.AddField(requirements_panel!, "Override", null, tooltip.GetTooltip(PropertyType.Object, $"Override{reqcheck}"));
-		forced[name] = UI.AddCheckbox(container2, force, (v) => {
-			// Can't un-force a custom requirement
-			if (!default_reqchecks.ContainsKey(name)) {
-				v = true;
-			}
-			SetForced(name, v);
-		});
+		if (default_reqchecks.ContainsKey(name)) {
+			var container2 = UI.AddField(requirements_panel!, "Override", null, tooltip.GetTooltip(TooltipStrings.Tooltip.OverrideModReq, tt_name));
+			forced[name] = UI.AddCheckbox(container2, force, (v) => {
+				SetForced(name, v);
+			});
+		}
 	}
 	
 	public void Disable() {
@@ -310,11 +322,13 @@ public class SettingsWindow {
 	}
 	
 	private void SetForced(string name, bool force) {
+		// TODO: Update instead of removing, currently unable to change multiple maps in the same set
 		requirementsAndSuggestions!.Remove(GetReqCheck(name)!);
 		RequirementCheck.RegisterRequirement(force
-			? (new CustomRequirement(name, (RequirementCheck.RequirementType)requirements[name].Dropdown.value))
+			? (new CustomRequirement(name, (RequirementCheck.RequirementType)requirements[name].Dropdown.value, BeatSaberSongContainer.Instance.DifficultyData))
 			: ((RequirementCheck)Activator.CreateInstance(default_reqchecks[name])));
-		forced[name].isOn = force;
+		if (forced.ContainsKey(name))
+			forced[name].isOn = force;
 		Refresh();
 	}
 	
@@ -325,7 +339,6 @@ public class SettingsWindow {
 	public SettingsWindow() {
 		// Break into ChroMapper's house and grab the requirement check list via reflection
 		var req_type = typeof(RequirementCheck);
-		tooltip = new TooltipStrings();
 		var ras = req_type.GetField("requirementsAndSuggestions", BindingFlags.Static | BindingFlags.NonPublic);
 		requirementsAndSuggestions = (HashSet<RequirementCheck>)ras.GetValue(null);
 		foreach (var rc in requirementsAndSuggestions) {

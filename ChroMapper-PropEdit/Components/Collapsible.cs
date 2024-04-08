@@ -14,7 +14,7 @@ public class Collapsible : MonoBehaviour
 	public GameObject? panel;
 	
 	public static Collapsible Create(GameObject parent, string name, string label, bool expanded) {
-		return UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded);
+		return Create(parent, name, label, expanded, "");
 	}
 	public static Collapsible Create(GameObject parent, string name, string label, bool expanded, string tooltip) {
 		return UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip);

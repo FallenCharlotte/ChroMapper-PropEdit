@@ -24,9 +24,9 @@ namespace ChroMapper_PropEdit.UserInterface {
 public partial class MainWindow {
 	public readonly string CHROMA_NAME = "Chroma";
 	public readonly string NOODLE_NAME = "Noodle Extensions";
-		public TooltipStrings tooltip = new TooltipStrings();
-		
-		public void UpdateSelection(bool real) { lock(this) {
+	TooltipStrings tooltip = TooltipStrings.Instance;
+	
+	public void UpdateSelection(bool real) { lock(this) {
 		scrollbox!.TargetScroll = real ? 1f : scrollbox!.scrollbar!.value;
 		
 		foreach (Transform child in panel!.transform) {
@@ -359,7 +359,7 @@ public partial class MainWindow {
 						}
 						AddTextbox("Time", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_time" : "time"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateTime));
 					}
-
+					
 					if (events.Where(e => e.Type == "AssignPathAnimation").Count() == editing.Count()) {
 						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
@@ -374,18 +374,18 @@ public partial class MainWindow {
 						}
 						AddTextbox("Definite Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_definitePosition" : "definitePosition"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
 					}
-
+					
 					if (events.Where(e => e.Type == "AssignTrackParent").Count() == editing.Count()) {
 						AddTextbox("Parent", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_parentTrack" : "parentTrack"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackParentParent));
 						AddTextbox("Children", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_childrenTracks" : "childrenTracks"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackChildren));
 						AddCheckbox("Keep Position", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", v2 ? "_worldPositionStays" : "worldPositionStays"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackKeepPosition));
 					}
-
+					
 					if (events.Where(e => e.Type == "AssignPlayerToTrack").Count() == editing.Count()) {
 						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTrack));
 						AddTextbox("Target", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_target" : "target"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTarget));
 					}
-
+					
 					if (events.Where(e => e.Type == "AssignFogTrack").Count() == editing.Count()) {
 						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
@@ -399,7 +399,7 @@ public partial class MainWindow {
 						AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_startY"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackStartY));
 						AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_height"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackHeight));
 					}
-
+					
 					if (events.Where(e => e.Type == "AnimateComponent").Count() == editing.Count()) {
 						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
@@ -417,12 +417,13 @@ public partial class MainWindow {
 					AddParsed("BPM", Data.GetSet<float>("Bpm"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BPMChange));
 					break;
 			}
+			UI.RefreshTooltips(panel);
 		}
 		else {
 			window!.SetTitle("No items selected");
 		}
 	}}
-
+	
 	private void AddAnimation(PropertyType type, bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
 		AddCheckbox("Animation", Data.GetSetAnimation(v2), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimatePath));

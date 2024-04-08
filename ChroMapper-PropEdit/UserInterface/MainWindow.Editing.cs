@@ -432,7 +432,7 @@ public partial class MainWindow {
 			foreach (var property in Events.NoodleProperties) {
 				AddCheckbox("  "+property.Key, Data.CustomGetSetNode(CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2]), false, tooltip.GetTooltip(type, $"Animate{property.Key}"));
 			}
-			AddCheckbox("  Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), true, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+			AddCheckbox("  Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
 			AddLine("");
 		}
 	}

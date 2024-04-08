@@ -235,7 +235,7 @@ public class Data {
 				try {
 					((dynamic)collection).DeleteObject(o, false, false, "", true, false);
 				}
-				catch (System.Exception _) {
+				catch (System.Exception) {
 					stable = true;
 					((dynamic)collection).LoadedObjects.Remove(o);
 				}

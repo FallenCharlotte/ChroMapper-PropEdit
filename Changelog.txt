@@ -1,3 +1,11 @@
+v0.6.5
+	Fix collapsibles needing a double-click at first
+	Actually fix broken config files for real this time for sure
+	Fix keybind wackyness
+
+v0.6.4
+	Fix definite position
+
 v0.6.3
 	Fix beat+fake on stable
 

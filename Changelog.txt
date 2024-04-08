@@ -1,3 +1,6 @@
+v0.7
+	Tooltips! Thanks MitchSirco!
+
 v0.6.5
 	Fix collapsibles needing a double-click at first
 	Actually fix broken config files for real this time for sure

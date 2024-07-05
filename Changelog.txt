@@ -1,3 +1,6 @@
+v0.7.2
+	Missed one
+
 v0.7.1
 	Remove some old CM stable bits
 

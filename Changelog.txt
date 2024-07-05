@@ -1,3 +1,6 @@
+v0.7.1
+	Remove some old CM stable bits
+
 v0.7
 	Tooltips! Thanks MitchSirco!
 

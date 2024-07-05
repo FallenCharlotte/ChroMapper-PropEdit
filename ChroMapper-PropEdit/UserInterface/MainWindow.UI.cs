@@ -32,8 +32,7 @@ public partial class MainWindow {
 				.FirstOrDefault();
 			CMInputCallbackInstaller.InputInstance.Disable();
 			keybind = map.AddAction("Prop Editor", type: InputActionType.Button);
-			// Dynamic to support dev and stable with one build
-			((dynamic)keybind.AddCompositeBinding("ButtonWithOneModifier"))
+			keybind.AddCompositeBinding("ButtonWithOneModifier")
 				.With("Modifier", "<Keyboard>/shift")
 				.With("Button", "<Keyboard>/n");
 			keybind.performed += (_) => {

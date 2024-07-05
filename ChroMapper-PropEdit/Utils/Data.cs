@@ -142,11 +142,11 @@ public class Data {
 				e.CustomData?.Remove(e.CustomKeyLightGradient);
 			}
 			else if (e.CustomLightGradient == null) {
-				var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.Event);
+				var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.Event) as EventGridContainer;
 				
-				var next = (BaseEvent) collection.LoadedObjects
-					.Where(n => (((BaseEvent)n).Type == e.Type) && (n.JsonTime > e.JsonTime))
-					.FirstOrDefault();
+				var next = collection?.AllLightEvents[e.Type]
+					?.Where(n => (n.JsonTime > e.JsonTime))
+					?.FirstOrDefault();
 				
 				Color begin = GetColor(e);
 				Color end = (next != null) ? GetColor(next) : begin;

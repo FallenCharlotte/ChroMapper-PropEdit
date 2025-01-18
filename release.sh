@@ -2,8 +2,10 @@
 
 PROJECT="$(basename "$(pwd)")"
 CHANGELOG="Changelog.txt"
-ver=$1
-short=$1
+tag=$1
+ver="$(grep -Eo '(([0-9]+\.){0,3}[0-9]+)' <<< "$1")"
+# Short version with v: the base tag for the UpdateChecker manifest
+mver="v${ver}"
 
 while [ "$(echo "$ver" | tr -dc '.' | awk '{ print length; }')" -lt "3" ]
 do
@@ -12,10 +14,10 @@ done
 
 sed -i 's/AssemblyVersion(.*)/AssemblyVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
 sed -i 's/AssemblyFileVersion(.*)/AssemblyFileVersion("'$ver'")/' $PROJECT/Properties/AssemblyInfo.cs
-sed -i 's/"version": ".*",/"version": "v'$short'",/' $PROJECT/manifest.json
+sed -i 's/"version": ".*",/"version": "'$mver'",/' $PROJECT/manifest.json
 
 mv "$CHANGELOG"{,.old}
-echo "v${short}" > "$CHANGELOG"
+echo "${tag}" > "$CHANGELOG"
 git log $(git describe --tags --abbrev=0)..HEAD --pretty=format:'	%s' >> "$CHANGELOG"
 echo -e "\n" >> "$CHANGELOG"
 cat "$CHANGELOG".old >> "$CHANGELOG"
@@ -30,6 +32,12 @@ fi
 rm "$CHANGELOG".old
 
 git add $PROJECT/Properties/AssemblyInfo.cs $PROJECT/manifest.json "$CHANGELOG"
-git commit -m "v${short}"
-git tag "v${short}"
+git commit -m "${tag}"
+git tag "${tag}"
 msbuild
+
+echo "Check..."
+read || exit
+
+git push
+git push --tags

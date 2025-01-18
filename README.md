@@ -6,4 +6,4 @@ Open/close quickly with the keybind `Shift`+`n`, will probably break something i
 
 ## TODO
 
-https://github.com/users/MoistSac/projects/1
+https://github.com/users/FallenCharlotte/projects/1

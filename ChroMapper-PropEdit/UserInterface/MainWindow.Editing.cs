@@ -45,7 +45,7 @@ public partial class MainWindow {
 			
 			var o = editing.First();
 			var type = o.ObjectType;
-			var v2 = (o is V2Object);
+			var v2 = BeatSaberSongContainer.Instance.Map.Version[0] == '2';
 			
 			current_panel = panel;
 			
@@ -68,7 +68,7 @@ public partial class MainWindow {
 						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 						current_panel = collapsible.panel;
 						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Color));
-						if (o is V2Note) {
+						if (v2) {
 							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableSpawnEffect));
 						}
 						else {
@@ -86,7 +86,7 @@ public partial class MainWindow {
 						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Coordinates));
 						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Rotation));
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.LocalRotation));
-						if (o is V2Note) {
+						if (v2) {
 							AddParsed("Exact Angle", Data.CustomGetSet<float?>("_cutDirection"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.CutDirection));
 							AddCheckbox("Fake", Data.CustomGetSet<bool?>("_fake"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Fake));
 							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Interactable));
@@ -207,7 +207,7 @@ public partial class MainWindow {
 				case ObjectType.Obstacle:
 					var ob = (o as BaseObstacle)!;
 					AddParsed("Duration", Data.GetSet<float>("Duration"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Duration));
-					if (o is V2Obstacle) {
+					if (v2) {
 						AddParsed("X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.X));
 						AddParsed("Width", Data.GetSet<int>("Width"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
 						AddDropdown<int?>("Height", Data.GetSet<int>("Type"), Obstacles.WallHeights, false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
@@ -237,20 +237,20 @@ public partial class MainWindow {
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(ob.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.LocalRotation));
 						AddTextbox("Size", Data.CustomGetSetRaw(ob.CustomKeySize), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Size));
 						AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Fake));
-						if (o is V2Obstacle) {
+						if (v2) {
 							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Interactable));
 						}
 						else {
 							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Uninteractable)); // not sure if this means that it will screw up your score
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Track));
-						AddAnimation(PropertyType.Obstacle, o is V2Obstacle);
+						AddAnimation(PropertyType.Obstacle, v2);
 						current_panel = panel;
 					}
 					
 					break;
 				case ObjectType.Event: {
-					var env = BeatSaberSongContainer.Instance.Song.EnvironmentName;
+					var env = BeatSaberSongContainer.Instance.Info.EnvironmentName;
 					var events = editing.Select(o => (BaseEvent)o);
 					var f = events.First();
 					// Light
@@ -274,7 +274,7 @@ public partial class MainWindow {
 								AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Easing));
 								AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LerpType)); //Unsure
 							}
-							if (o is V2Event e) {
+							if (o is BaseEvent e && v2) {
 								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.V2Gradient));
 								if (e.CustomLightGradient != null) {
 									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"), false, tooltip.GetTooltip(PropertyType.Gradient, TooltipStrings.Tooltip.Duration));
@@ -307,7 +307,7 @@ public partial class MainWindow {
 							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
 							current_panel = collapsible.panel;
 							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingFilter));
-							if (o is V2Event) {
+							if (v2) {
 								AddCheckbox("Reset", Data.CustomGetSet<bool?>("_reset"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2Reset));
 							}
 							AddParsed("Rotation",    Data.CustomGetSet<float?>(f.CustomKeyLaneRotation), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingRotation));
@@ -315,7 +315,7 @@ public partial class MainWindow {
 							AddParsed("Propagation", Data.CustomGetSet<float?>(f.CustomKeyProp), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingPropagation));
 							AddParsed("Speed",       Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));
 							AddDropdown<int?>("Direction", Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.RingDirection, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingDirection));
-							if (o is V2Event) {
+							if (v2) {
 								AddCheckbox("Counter Spin", Data.CustomGetSet<bool?>("_counterSpin"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2CounterSpin));
 							}
 							current_panel = panel;

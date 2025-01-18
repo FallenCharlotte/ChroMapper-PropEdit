@@ -286,8 +286,8 @@ public class Data {
 	public static Color GetColor(BaseEvent e) {
 		return (e.CustomColor ?? (e.Value switch {
 			0 => Color.clear,
-			(>= 1) and (<= 4) => BeatSaberSongContainer.Instance.DifficultyData.EnvColorRight ?? BeatSaberSong.DefaultRightColor,
-			(>= 5) and (<= 8) => BeatSaberSongContainer.Instance.DifficultyData.EnvColorLeft ?? BeatSaberSong.DefaultLeftColor,
+			(>= 1) and (<= 4) => BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomEnvColorRight ?? LoadInitialMap.Platform.DefaultColors.BlueColor,
+			(>= 5) and (<= 8) => BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomEnvColorLeft ?? LoadInitialMap.Platform.DefaultColors.RedColor,
 			(>= 9) => Color.white,
 			_ => Color.clear,
 		}));

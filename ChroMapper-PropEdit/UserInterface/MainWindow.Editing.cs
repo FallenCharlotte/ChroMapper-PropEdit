@@ -420,34 +420,75 @@ public partial class MainWindow {
 							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
 						//it seems these are only normal json inputs. might have to change the tooltip then.
-						AddTextbox("Environment Fog", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "BloomFogEnvironment"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentBloomFogEnvironment));
-						AddTextbox("Tube Bloom Light", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "TubeBloomPrePassLight"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentTubeBloomPrePassLight));
+						AddTextbox("Environment Fog", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "BloomFogEnvironment"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentBloomFogEnvironment));
+						AddTextbox("Tube Bloom Light", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "TubeBloomPrePassLight"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentTubeBloomPrePassLight));
 						break;
 					
 					// Vivify
 					case "SetMaterialProperty":
-						break;
 					case "SetGlobalProperty":
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						// TODO: Grid? +/-?
 						break;
 					case "Blit":
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						AddTextbox("Asset", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "asset"), false);
+						AddParsed("Priority", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "priority"));
+						AddParsed("Pass", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "pass"));
+						AddTextbox("Order", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "order"), false); // TODO: Enum (BeforeMainEffect, AfterMainEffect*)
+						AddTextbox("Source Texture", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "source"), false);
+						AddTextbox("Destination Texture", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "destination"), false);
+						// TODO: Properties
 						break;
 					case "CreateCamera":
+						AddTextbox("Camera ID", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), false);
+						AddTextbox("Texture", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "texture"), false);
+						AddTextbox("Depth Texture", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "depthTexture"), false);
+						// TODO: Camera Properties
 						break;
 					case "CreateScreenTexture":
+						AddTextbox("Name", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), false);
+						AddParsed("X Ratio", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "xRatio"));
+						AddParsed("Y Ratio", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "yRatio"));
+						AddParsed("Width", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "width"));
+						AddParsed("Height", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "height"));
+						AddTextbox("Color Format", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "colorFormat"), false); // TODO: Enum
+						AddTextbox("Filter Mode", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "filterMode"), false); // TODO: Enum
 						break;
 					case "InstantiatePrefab":
+						AddTextbox("Asset", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "asset"), false);
+						AddTextbox("ID", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), false);
+						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "track"), false);
+						AddTextbox("Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "position"), true);
+						AddTextbox("Local Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "localPosition"), true);
+						AddTextbox("Rotation", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "rotation"), true);
+						AddTextbox("Local Rotation", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "localRotation"), true);
+						AddTextbox("Scale", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "scale"), true);
 						break;
 					case "DestroyObject":
+						AddTextbox("ID(s)", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), false);
 						break;
 					case "SetAnimatorProperty":
+						AddTextbox("ID", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), false);
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						// TODO: Animator Properties
 						break;
 					case "SetCameraProperty":
+						AddTextbox("Camera ID", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), false);
+						// TODO: Camera Properties
 						break;
 					case "AssignObjectPrefab":
+						AddTextbox("Load Mode", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "loadMode"), false); // TODO: Enum (Single, Additive)
+						AddTextbox("Object", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "object"), true);
 						break;
 					case "SetRenderingSettings":
+						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						// TODO: Render Settings
 						break;
-					
 					}
 				}	break;
 				case ObjectType.BpmChange:

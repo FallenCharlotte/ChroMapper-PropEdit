@@ -291,6 +291,7 @@ public class SettingsWindow {
 		{ "NoodleExtensionsReq", "Noodle Extensions" },
 		{ "CinemaReq", "Cinema" },
 		{ "SoundExtensionsReq", "Sound Extensions" },
+		{ "VivifyReq", "Vivify"},
 	};
 	
 	private void AddReqField(string name, bool force, string reqcheck = "") {
@@ -319,6 +320,7 @@ public class SettingsWindow {
 		RequirementCheck.RegisterRequirement(new NoodleExtensionsReq());
 		RequirementCheck.RegisterRequirement(new CinemaReq());
 		RequirementCheck.RegisterRequirement(new SoundExtensionsReq());
+		RequirementCheck.RegisterRequirement(new VivifyReq());
 	}
 	
 	private void SetForced(string name, bool force) {

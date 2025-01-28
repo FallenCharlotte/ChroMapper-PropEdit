@@ -31,6 +31,7 @@ public class Plugin {
 		}
 		else {
 			main?.Disable();
+			settings?.Disable();
 		}
 	}
 	

@@ -105,9 +105,13 @@ public class UI {
 	
 #region Input Fields
 	
+	public static Toggle? _baseToggle = null;
+	
 	public static Toggle AddCheckbox(GameObject parent, bool value, UnityAction<bool> setter) {
-		var original = GameObject.Find("Strobe Generator").GetComponentInChildren<Toggle>(true);
-		var toggleObject = UnityEngine.Object.Instantiate(original, parent.transform);
+		if (_baseToggle == null) {
+			_baseToggle = GameObject.Find("Strobe Generator").GetComponentInChildren<Toggle>(true);
+		}
+		var toggleObject = UnityEngine.Object.Instantiate(_baseToggle!, parent.transform);
 		var toggleComponent = toggleObject.GetComponent<Toggle>();
 		var colorBlock = toggleComponent.colors;
 		colorBlock.normalColor = Color.white;
@@ -122,7 +126,9 @@ public class UI {
 		var options = new List<string>();
 		int i = 0;
 		if (value == null) {
-			options.Add("--");
+			if (nullable) {
+				options.Add("--");
+			}
 		}
 		else {
 			i = type.dict.Keys.ToList().IndexOf((T)value);

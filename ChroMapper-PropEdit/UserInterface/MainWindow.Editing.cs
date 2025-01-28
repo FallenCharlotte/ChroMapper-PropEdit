@@ -446,7 +446,7 @@ public partial class MainWindow {
 						AddTextbox("Camera ID", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), false);
 						AddTextbox("Texture", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "texture"), false);
 						AddTextbox("Depth Texture", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "depthTexture"), false);
-						// TODO: Camera Properties
+						AddCameraProperties();
 						break;
 					case "CreateScreenTexture":
 						AddTextbox("Name", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), false);
@@ -478,7 +478,7 @@ public partial class MainWindow {
 						break;
 					case "SetCameraProperty":
 						AddTextbox("Camera ID", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), false);
-						// TODO: Camera Properties
+						AddCameraProperties();
 						break;
 					case "AssignObjectPrefab":
 						AddTextbox("Load Mode", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "loadMode"), false); // TODO: Enum (Single, Additive)
@@ -522,6 +522,17 @@ public partial class MainWindow {
 		else {
 			AddTextbox(label, Data.CustomGetSetRaw(key), true, tooltip);
 		}
+	}
+	
+	private void AddCameraProperties() {
+		AddTextbox("Depth Texture Mode", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.depthTextureMode"), true);
+		AddTextbox("Clear Flags", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.clearFlags"), false);
+		AddTextbox("Background Colors", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.backgroundColor"), true);
+		AddTextbox("Culling Track(s)", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.culling.track"), true);
+		AddCheckbox("Culling Whitelist", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.culling.whitelist"), false);
+		// Do these have defaults? Idk :3
+		AddDropdown("Bloom Pre Pass", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.bloomPrePass"), MapSettings.OptionBool, true);
+		AddDropdown("Main Bloom Effects", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.mainEffect"), MapSettings.OptionBool, true);
 	}
 }
 

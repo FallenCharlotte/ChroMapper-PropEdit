@@ -56,6 +56,14 @@ public static class Vivify {
 		{"Depth", "Depth"},
 		{"Nothing", "Nothing"},
 	};
+	
+	public enum PropertyType {
+		Texture,
+		Float,
+		Color,
+		Vector,
+		Keyword
+	};
 }
 
 }

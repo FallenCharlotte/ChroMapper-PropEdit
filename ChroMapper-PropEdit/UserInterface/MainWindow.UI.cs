@@ -93,6 +93,8 @@ public partial class MainWindow {
 		BeatmapActionContainer.ActionRedoEvent += (_) => UpdateSelection(false);
 		
 		keybind?.Enable();
+		
+		bundleInfo = new BundleInfo();
 	}
 	
 #region Form Fields

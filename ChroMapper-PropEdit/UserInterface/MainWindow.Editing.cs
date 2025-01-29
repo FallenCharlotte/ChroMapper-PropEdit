@@ -25,6 +25,7 @@ public partial class MainWindow {
 	public readonly string CHROMA_NAME = "Chroma";
 	public readonly string NOODLE_NAME = "Noodle Extensions";
 	TooltipStrings tooltip = TooltipStrings.Instance;
+	BundleInfo? bundleInfo = null;
 	
 	public void UpdateSelection(bool real) { lock(this) {
 		scrollbox!.TargetScroll = real ? 1f : scrollbox!.scrollbar!.value;
@@ -426,7 +427,7 @@ public partial class MainWindow {
 					
 					// Vivify
 					case "SetMaterialProperty":
-						AddTextbox("Asset", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset"), false);
+						AddMaterial();
 						goto case "SetGlobalProperty";
 					case "SetGlobalProperty":
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
@@ -434,7 +435,7 @@ public partial class MainWindow {
 						// TODO: Grid? +/-?
 						break;
 					case "Blit":
-						AddTextbox("Asset", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset"), false);
+						AddMaterial();
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						AddParsed("Priority", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "priority"));
@@ -442,6 +443,7 @@ public partial class MainWindow {
 						AddDropdown("Order", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "order"), Vivify.Orders, true);
 						AddTextbox("Source Texture", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "source"), false);
 						AddTextbox("Destination Texture", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "destination"), false);
+						AddMaterialProperties();
 						// TODO: Properties
 						break;
 					case "CreateCamera":
@@ -524,6 +526,29 @@ public partial class MainWindow {
 		}
 		else {
 			AddTextbox(label, Data.CustomGetSetRaw(key), true, tooltip);
+		}
+	}
+	
+	private void AddMaterial() {
+		if (bundleInfo?.Materials == null) {
+			AddTextbox("Material", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset"), false);
+		}
+		else {
+			AddDropdown("Material", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset"), bundleInfo.Materials, true);
+		}
+	}
+	
+	private void AddMaterialProperties() {
+		var (getter, _) = Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset");
+		var asset = Data.GetAllOrNothing(editing!, getter);
+		if (asset != null) {
+			var mat = bundleInfo?.Materials?.Forward(asset);
+			if (mat != null && (bundleInfo?.Properties?.ContainsKey(mat) ?? false)) {
+				AddLine("Properties:");
+				foreach (var prop in bundleInfo.Properties[mat]) {
+					AddTextbox(prop.Key, Data.PropertyGetSetRaw(prop.Key, prop.Value.ToString()), true);
+				}
+			}
 		}
 	}
 	

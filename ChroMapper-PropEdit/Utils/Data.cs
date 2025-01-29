@@ -6,6 +6,7 @@ using UnityEngine;
 using SimpleJSON;
 
 using Beatmap.Base;
+using Beatmap.Base.Customs;
 using Beatmap.Enums;
 using Beatmap.Helper;
 using Beatmap.Shared;
@@ -75,6 +76,28 @@ public class Data {
 		return (getter, setter);
 	}
 	
+	private static JSONNode? RawToJson(string raw) {
+		JSONNode n;
+		try {
+			n = JSON.Parse(raw);
+		}
+		catch (Exception) {
+			try {
+				n = JSON.Parse($"[{raw}]");
+			}
+			catch (Exception) {
+				try {
+					n = JSON.Parse($"\"{raw}\"");
+				}
+				catch (Exception) {
+					Debug.LogWarning($"Couldn't interpret \"{raw}\" as JSON");
+					return null;
+				}
+			}
+		}
+		return n;
+	}
+	
 	// Fine, I'll do arrays. JSON-array text input. Might make an options page that can split it out later:tm:
 	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) JSONGetSetRaw(System.Type type, string node_name, string field_name) {
 		var node = type.GetProperty(node_name);
@@ -96,25 +119,10 @@ public class Data {
 				RemoveNode(root, field_name);
 			}
 			else {
-				JSONNode n;
-				try {
-					n = JSON.Parse(v);
+				var n = RawToJson(v!);
+				if (n != null) {
+					SetNode(root, field_name, n);
 				}
-				catch (Exception) {
-					try {
-						n = JSON.Parse($"[{v}]");
-					}
-					catch (Exception) {
-						try {
-							n = JSON.Parse($"\"{v}\"");
-						}
-						catch (Exception) {
-							Debug.LogWarning($"Couldn't interpret \"{v}\" as JSON");
-							return;
-						}
-					}
-				}
-				SetNode(root, field_name, n);
 			}
 			node.SetMethod.Invoke(o, new object[] { root });
 		};
@@ -127,6 +135,53 @@ public class Data {
 	
 	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) CustomGetSetRaw(string field_name) {
 		return JSONGetSetRaw(typeof(BaseObject), "CustomData", field_name);
+	}
+	
+	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) PropertyGetSetRaw(string prop_name, string type) {
+		System.Func<BaseObject, string?> getter = (o) => {
+			var root = (o as BaseCustomEvent)!.Data ?? new SimpleJSON.JSONObject();
+			if (GetNode(root, "properties") is JSONArray props) {
+				foreach (var prop in props.Children) {
+					if ((string)prop.AsObject["id"] == prop_name) {
+						return prop.AsObject["value"].ToString();
+					}
+				}
+				return null;
+			}
+			else {
+				return null;
+			}
+		};
+		System.Action<BaseObject, string?> setter = (o, v) => {
+			var root = (o as BaseCustomEvent)!.Data ?? new SimpleJSON.JSONObject();
+			var props = GetNode(root, "properties")?.AsArray ?? new JSONArray();
+			JSONObject? _prop = null;
+			foreach (var prop in props.Children) {
+				if (prop.AsObject["id"] == prop_name) {
+					_prop = prop.AsObject;
+					break;
+				}
+			}
+			if (_prop == null) {
+				_prop = new JSONObject();
+				_prop["id"] = prop_name;
+				_prop["type"] = type;
+				props.Add(_prop);
+			}
+			if (string.IsNullOrEmpty(v)) {
+				props.Remove((JSONNode)_prop);
+			}
+			else {
+				var n = RawToJson(v!);
+				if (n != null) {
+					SetNode(_prop, "value", n);
+				}
+			}
+			root["properties"] = props;
+			(o as BaseCustomEvent)!.Data = root;
+			o.RefreshCustom();
+		};
+		return (getter, setter);
 	}
 	
 	// Create and delete gradient

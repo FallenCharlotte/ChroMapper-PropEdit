@@ -38,12 +38,10 @@ public class BundleInfo {
 				var it = prop.Value.GetEnumerator();
 				it.MoveNext();
 				var type_text = it.Current.Key;
-				Debug.Log(type_text);
 				Enum.TryParse(type_text, out Vivify.PropertyType type);
 				props.Add(prop.Key, type);
 			}
 			Properties.Add(mat.Key, props);
-			Debug.Log($"Material: {mat.Key} Properties: {props.Count}");
 		}
 	}
 }

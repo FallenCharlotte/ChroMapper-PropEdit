@@ -444,7 +444,6 @@ public partial class MainWindow {
 						AddTextbox("Source Texture", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "source"), false);
 						AddTextbox("Destination Texture", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "destination"), false);
 						AddMaterialProperties();
-						// TODO: Properties
 						break;
 					case "CreateCamera":
 						AddTextbox("Camera ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
@@ -492,7 +491,30 @@ public partial class MainWindow {
 					case "SetRenderingSettings":
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
-						// TODO: Render Settings
+						{
+							var collapsible = Collapsible.Create(panel, "Render Settings", "Render Settings", true);
+							current_panel = collapsible.panel;
+							foreach (var prop in Vivify.RenderSettings) {
+								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
+							}
+							current_panel = panel;
+						}
+						{
+							var collapsible = Collapsible.Create(panel, "Quality Settings", "Quality Settings", true);
+							current_panel = collapsible.panel;
+							foreach (var prop in Vivify.QualitySettings) {
+								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
+							}
+							current_panel = panel;
+						}
+						{
+							var collapsible = Collapsible.Create(panel, "XR Settings", "XR Settings", true);
+							current_panel = collapsible.panel;
+							foreach (var prop in Vivify.XRSettings) {
+								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
+							}
+							current_panel = panel;
+						}
 						break;
 					}
 				}	break;

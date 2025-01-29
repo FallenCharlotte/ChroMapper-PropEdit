@@ -260,20 +260,22 @@ public class Data {
 	}
 	
 #endregion
-	
-	public static T? GetAllOrNothing<T>(IEnumerable<BaseObject> editing, System.Func<BaseObject, T?> getter) {
+	// Value, Mixed?
+	public static (T?, bool) GetAllOrNothing<T>(IEnumerable<BaseObject> editing, System.Func<BaseObject, T?> getter) {
 		var it = editing.GetEnumerator();
 		it.MoveNext();
-		var last = getter(it.Current);
+		var first = getter(it.Current);
 		while (it.MoveNext()) {
 			T? v = getter(it.Current);
-			if (v == null || last == null || !(v!.Equals(last))) {
-				last = default!;
-				break;
+			if (v == null && first == null)
+				continue;
+			if (!(v?.Equals(first) ?? false)) {
+				first = default!;
+				return (first, true);
 			}
 		}
 		
-		return last;
+		return (first, false);
 	}
 	
 	public static void UpdateObjects<T>(IEnumerable<BaseObject> editing, System.Action<BaseObject, T?> setter, T? value, bool time = false) {

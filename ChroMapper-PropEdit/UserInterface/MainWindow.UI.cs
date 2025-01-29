@@ -107,9 +107,10 @@ public partial class MainWindow {
 	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool? _default, string tooltip = "") {
 		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
-		var value = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1) ?? _default ?? false;
+		var (value_or, _) = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1);
+		var value = value_or ?? _default ?? false;
 		
-		return UI.AddCheckbox(container, value, (v) => {
+		return UI.AddCheckbox(container, value!, (v) => {
 			if (v == _default) {
 				Data.UpdateObjects<bool?>(staged, get_set.Item2, null);
 			}
@@ -122,38 +123,47 @@ public partial class MainWindow {
 	private UIDropdown AddDropdown<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, Map<T?> type, bool nullable = false, string tooltip = "") {
 		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
-		var value = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
+		var (value, _) = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
 		return UI.AddDropdown(container, value, (v) => {
 			Data.UpdateObjects<T?>(staged, get_set.Item2, v);
 		}, type, nullable);
 	}
 	
+	private UITextInput SetMixed(UITextInput input, bool mixed) {
+		if (mixed) {
+			var placeholder = input.gameObject.GetComponentInChildren<TMPro.TMP_Text>();
+			placeholder.text = "Mixed";
+		}
+		
+		return input;
+	}
+	
 	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, bool time = false, string tooltip = "") where T : struct {
 		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
-		var value = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
+		var (value, mixed) = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
-		return UI.AddParsed<T>(container, value, (v) => {
+		return SetMixed(UI.AddParsed<T>(container, value, (v) => {
 			if (!(v == null && value == null)) {
 				Data.UpdateObjects<T?>(staged, get_set.Item2, v, time);
 			}
-		});
+		}), mixed);
 	}
 	
 	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, bool tall = false, string tooltip = "") {
 		var container = AddLine(title, tall ? (new Vector2(0, 22)) : null, tooltip);
 		var staged = editing!;
-		var value = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
+		var (value, mixed) = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
 		
-		return UI.AddTextbox(container, value, (v) => {
+		return SetMixed(UI.AddTextbox(container, value, (v) => {
 			if (v == "") {
 				v = null;
 			}
 			if (v != value) {
 				Data.UpdateObjects<string?>(staged, get_set.Item2, v);
 			}
-		}, tall);
+		}, tall), mixed);
 	}
 	
 #endregion

@@ -540,7 +540,7 @@ public partial class MainWindow {
 	
 	private void AddMaterialProperties() {
 		var (getter, _) = Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset");
-		var asset = Data.GetAllOrNothing(editing!, getter);
+		var (asset, _) = Data.GetAllOrNothing(editing!, getter);
 		if (asset != null) {
 			var mat = bundleInfo?.Materials?.Forward(asset);
 			if (mat != null && (bundleInfo?.Properties?.ContainsKey(mat) ?? false)) {

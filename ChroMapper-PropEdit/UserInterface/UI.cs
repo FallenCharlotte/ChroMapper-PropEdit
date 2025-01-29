@@ -129,6 +129,9 @@ public class UI {
 			if (nullable) {
 				options.Add("--");
 			}
+			else {
+				options.Add("Mixed");
+			}
 		}
 		else {
 			i = type.dict.Keys.ToList().IndexOf((T)value);

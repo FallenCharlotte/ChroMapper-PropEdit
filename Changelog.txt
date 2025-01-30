@@ -1,3 +1,7 @@
+v0.8-dev
+	Vivify Events!
+	Distinguish between empty and mixed (also fixes nonsense on mixed non-nullable dropdowns)!
+
 v0.7.2-dev
 	Cromper 12
 

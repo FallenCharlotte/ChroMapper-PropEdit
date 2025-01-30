@@ -18,7 +18,11 @@ public class BundleInfo {
 	public bool Exists { get { return _bundleInfo != null; } }
 	
 	public BundleInfo() {
+#if CHROMPER_11
+		var map_dir = BeatSaberSongContainer.Instance.Song.Directory;
+#else
 		var map_dir = BeatSaberSongContainer.Instance.Info.Directory;
+#endif
 		var bundle_file = Path.Combine(map_dir, "bundleinfo.json");
 		
 		if (!File.Exists(bundle_file)) {

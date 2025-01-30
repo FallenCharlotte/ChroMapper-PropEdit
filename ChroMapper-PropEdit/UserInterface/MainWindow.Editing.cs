@@ -253,7 +253,11 @@ public partial class MainWindow {
 					
 					break;
 				case ObjectType.Event: {
+#if CHROMPER_11
+					var env = BeatSaberSongContainer.Instance.Song.EnvironmentName;
+#else
 					var env = BeatSaberSongContainer.Instance.Info.EnvironmentName;
+#endif
 					var events = editing.Select(o => (BaseEvent)o);
 					var f = events.First();
 					// Light

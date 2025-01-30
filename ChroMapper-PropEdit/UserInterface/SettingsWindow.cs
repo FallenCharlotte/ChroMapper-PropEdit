@@ -35,6 +35,24 @@ public class SettingsWindow {
 	public Dictionary<string, Type> default_reqchecks = new Dictionary<string, Type>();
 	public HashSet<RequirementCheck>? requirementsAndSuggestions;
 	
+#if CHROMPER_11
+	private JSONNode GetGustomData() {
+		return BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData();
+	}
+	
+	private BeatSaberSong.DifficultyBeatmap DifficultyInfo() {
+		return BeatSaberSongContainer.Instance.DifficultyData;
+	}
+#else
+	private JSONNode GetGustomData() {
+		return BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData;
+	}
+	
+	private Beatmap.Info.InfoDifficulty DifficultyInfo() {
+		return BeatSaberSongContainer.Instance.MapDifficultyInfo;
+	}
+#endif
+	
 	public void Init(MapEditorUI mapEditorUI) {
 		var parent = mapEditorUI.MainUIGroup[5].gameObject;
 		
@@ -107,8 +125,8 @@ public class SettingsWindow {
 			RefreshRequirements();
 		}
 		
-		information_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData, "_information", "Information", tooltip.GetTooltip(TooltipStrings.Tooltip.Information));
-		warnings_editor = ArrayEditor.Create(panel!, BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData, "_warnings", "Warnings", tooltip.GetTooltip(TooltipStrings.Tooltip.Warning));
+		information_editor = ArrayEditor.Create(panel!, GetGustomData(), "_information", "Information", tooltip.GetTooltip(TooltipStrings.Tooltip.Information));
+		warnings_editor = ArrayEditor.Create(panel!, GetGustomData(), "_warnings", "Warnings", tooltip.GetTooltip(TooltipStrings.Tooltip.Warning));
 		
 		{
 			var collapsible = Collapsible.Create(panel!, "Settings Override", "Map Options", true, tooltip.GetTooltip(TooltipStrings.Tooltip.MapOptions));
@@ -195,16 +213,16 @@ public class SettingsWindow {
 	private void AddDropdown<T>(string name, string path, Map<T?> options, string tooltip = "") {
 		path = $"_settings.{prefix}.{path}";
 		var container = UI.AddField(current_panel!, name, null, tooltip);
-		var node = Data.GetNode(BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData, path);
+		var node = Data.GetNode(GetGustomData(), path);
 		var value = (node == null)
 			? default(T)!
 			: Data.CreateConvertFunc<JSONNode, T>()(node);
 		UI.AddDropdown<T>(container, value, (v) => {
 			if (v == null) {
-				Data.RemoveNode(BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData, path);
+				Data.RemoveNode(GetGustomData(), path);
 			}
 			else {
-				Data.SetNode(BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData, path, Data.CreateConvertFunc<T, SimpleJSON.JSONNode>()(v));
+				Data.SetNode(GetGustomData(), path, Data.CreateConvertFunc<T, SimpleJSON.JSONNode>()(v));
 			}
 		}, options, true);
 	}
@@ -213,16 +231,16 @@ public class SettingsWindow {
 	private void AddParsed<T>(string name, string path, string tooltip = "") where T : struct {
 		path = $"_settings.{prefix}.{path}";
 		var container = UI.AddField(current_panel!, name, null, tooltip);
-		var node = Data.GetNode(BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData, path);
+		var node = Data.GetNode(GetGustomData(), path);
 		T? value = (node == null)
 			? null
 			: Data.CreateConvertFunc<JSONNode, T>()(node);
 		UI.AddParsed<T>(container, value, (v) => {
 			if (v == null) {
-				Data.RemoveNode(BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData, path);
+				Data.RemoveNode(GetGustomData(), path);
 			}
 			else {
-				Data.SetNode(BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData, path, Data.CreateConvertFunc<T, SimpleJSON.JSONNode>()((T)v));
+				Data.SetNode(GetGustomData(), path, Data.CreateConvertFunc<T, SimpleJSON.JSONNode>()((T)v));
 			}
 		});
 	}
@@ -246,14 +264,14 @@ public class SettingsWindow {
 		}
 		
 		foreach (var req_status in req_statuses) {
-			if (BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData?[req_status.Key] is JSONArray reqs) {
+			if (GetGustomData()[req_status.Key] is JSONArray reqs) {
 				foreach (var req in reqs.Children) {
 					var reqcheck = GetReqCheck(req);
 					if (reqcheck == null) {
-						RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value, BeatSaberSongContainer.Instance.MapDifficultyInfo));
+						RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value, DifficultyInfo()));
 					}
 					else {
-						if (reqcheck.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.MapDifficultyInfo, BeatSaberSongContainer.Instance.Map) != req_status.Value) {
+						if (reqcheck.IsRequiredOrSuggested(DifficultyInfo(), BeatSaberSongContainer.Instance.Map) != req_status.Value) {
 							// Triggers forced
 							requirements[req].Dropdown.value = (int)req_status.Value;
 						}
@@ -274,7 +292,7 @@ public class SettingsWindow {
 					return;
 				}
 				
-				RequirementCheck.RegisterRequirement(new CustomRequirement(s!, RequirementCheck.RequirementType.Requirement, BeatSaberSongContainer.Instance.MapDifficultyInfo));
+				RequirementCheck.RegisterRequirement(new CustomRequirement(s!, RequirementCheck.RequirementType.Requirement, DifficultyInfo()));
 				
 				RefreshRequirements();
 				Refresh();
@@ -291,7 +309,9 @@ public class SettingsWindow {
 		{ "NoodleExtensionsReq", "Noodle Extensions" },
 		{ "CinemaReq", "Cinema" },
 		{ "SoundExtensionsReq", "Sound Extensions" },
+#if !CHROMPER_11
 		{ "VivifyReq", "Vivify"},
+#endif
 	};
 	
 	private void AddReqField(string name, bool force, string reqcheck = "") {
@@ -320,14 +340,16 @@ public class SettingsWindow {
 		RequirementCheck.RegisterRequirement(new NoodleExtensionsReq());
 		RequirementCheck.RegisterRequirement(new CinemaReq());
 		RequirementCheck.RegisterRequirement(new SoundExtensionsReq());
+#if !CHROMPER_11
 		RequirementCheck.RegisterRequirement(new VivifyReq());
+#endif
 	}
 	
 	private void SetForced(string name, bool force) {
 		// TODO: Update instead of removing, currently unable to change multiple maps in the same set
 		requirementsAndSuggestions!.Remove(GetReqCheck(name)!);
 		RequirementCheck.RegisterRequirement(force
-			? (new CustomRequirement(name, (RequirementCheck.RequirementType)requirements[name].Dropdown.value, BeatSaberSongContainer.Instance.MapDifficultyInfo))
+			? (new CustomRequirement(name, (RequirementCheck.RequirementType)requirements[name].Dropdown.value, DifficultyInfo()))
 			: ((RequirementCheck)Activator.CreateInstance(default_reqchecks[name])));
 		if (forced.ContainsKey(name))
 			forced[name].isOn = force;
@@ -355,7 +377,7 @@ public class SettingsWindow {
 		color_hex!.isOn = Settings.Get(Settings.ColorHex, true);
 		tooltip_enable!.isOn = Settings.Get(Settings.ShowTooltips, true);
 		foreach (var r in requirements) {
-			r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(BeatSaberSongContainer.Instance.MapDifficultyInfo, BeatSaberSongContainer.Instance.Map)));
+			r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(DifficultyInfo(), BeatSaberSongContainer.Instance.Map)));
 		}
 		information_editor?.Refresh();
 		warnings_editor?.Refresh();

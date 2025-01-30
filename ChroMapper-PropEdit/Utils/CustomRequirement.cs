@@ -2,7 +2,11 @@
 
 namespace ChroMapper_PropEdit.Utils {
 
+#if CHROMPER_11
+using InfoType = BeatSaberSong.DifficultyBeatmap;
+#else
 using InfoType = Beatmap.Info.InfoDifficulty;
+#endif
 
 public class CustomRequirement : RequirementCheck
 {

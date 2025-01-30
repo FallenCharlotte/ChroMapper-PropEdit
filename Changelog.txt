@@ -1,3 +1,7 @@
+v0.8.1
+	Fix InstantiatePrefab for real this time
+	Chromper 11 support
+
 v0.8-dev
 	Vivify Events!
 	Distinguish between empty and mixed (also fixes nonsense on mixed non-nullable dropdowns)!

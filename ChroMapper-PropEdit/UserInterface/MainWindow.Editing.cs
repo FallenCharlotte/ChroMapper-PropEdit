@@ -488,7 +488,7 @@ public partial class MainWindow {
 						break;
 					case "AssignObjectPrefab":
 						AddDropdown("Load Mode", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "loadMode"), Vivify.LoadModes, true);
-						AddTextbox("Object", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "object"), true);
+						AddObjectProperties();
 						break;
 					case "SetRenderingSettings":
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
@@ -562,6 +562,15 @@ public partial class MainWindow {
 		}
 	}
 	
+	private void AddPrefab(string title, string prop) {
+		if (bundleInfo?.Prefabs == null) {
+			AddTextbox(title, Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", prop), false);
+		}
+		else {
+			AddDropdown(title, Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", prop), bundleInfo.Prefabs, true);
+		}
+	}
+	
 	private void AddMaterialProperties() {
 		var (getter, _) = Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset");
 		var (asset, _) = Data.GetAllOrNothing(editing!, getter);
@@ -611,13 +620,55 @@ public partial class MainWindow {
 			UI.AttachTransform(container, new Vector2(0, 20), pos: new Vector2(0, 0));
 			current_panel = container;
 			var id_box = AddTextbox(null, Data.PropertyGetSetPart(prop.Key, "id"));
-			UI.MoveTransform((RectTransform)id_box.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
+			UI.LeftColumn(id_box.gameObject);
 			AddDropdown(null, Data.PropertyGetSetPart(prop.Key, "type"), Vivify.PropertyTypes, false);
 			current_panel = collapsible.panel;
 			var value_box = AddTextbox(null, Data.PropertyGetSetRaw(prop.Key, prop.Value.ToString()), true);
 			UI.MoveTransform((RectTransform)value_box.transform, new Vector2(0, 22), new Vector2(0, 0));
 		}
 		AddTextbox("Add Property", Data.PropertyGetSetPart(null, "id"));
+		current_panel = panel;
+	}
+	
+	private void AddObjectProperties() {
+		{
+			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("colorNotes") ?? false);
+			var collapsible = Collapsible.Create(panel!, "_Color Notes", "Color Notes", has_any || mixed);
+			current_panel = collapsible.panel;
+			AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "colorNotes.track"), true);
+			AddPrefab("Asset", "colorNotes.asset");
+			AddPrefab("Any Direction Asset", "colorNotes.anyDirectionAsset");
+			AddPrefab("Debris Asset", "colorNotes.debrisAsset");
+		}
+		{
+			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("burstSliders") ?? false);
+			var collapsible = Collapsible.Create(panel!, "_Burst Sliders", "Burst Sliders", has_any || mixed);
+			current_panel = collapsible.panel;
+			AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "burstSliders.track"), true);
+			AddPrefab("Asset", "burstSliders.asset");
+			AddPrefab("Debris Asset", "burstSliders.debrisAsset");
+		}
+		{
+			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("burstSliderElemeents") ?? false);
+			var collapsible = Collapsible.Create(panel!, "_Burst Slider Elements", "Burst Slider Elements", has_any || mixed);
+			current_panel = collapsible.panel;
+			AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "burstSliderElemeents.track"), true);
+			AddPrefab("Asset", "burstSliderElemeents.asset");
+			AddPrefab("Debris Asset",  "burstSliderElemeents.debrisAsset");
+		}
+		{
+			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("saber") ?? false);
+			var collapsible = Collapsible.Create(panel!, "_Sabers", "Sabers", has_any || mixed);
+			current_panel = collapsible.panel;
+			AddDropdown("Type", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "saber.type"), Vivify.SaberTypes, false);
+			AddPrefab("Asset", "saber.asset");
+			AddPrefab("Trail Asset", "saber.trailAsset");
+			AddTextbox("Trail Top Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "saber.trailTopPos"), true);
+			AddTextbox("Trail Bottom Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "saber.trailBottomPos"), true);
+			AddParsed("Trail Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "saber.trailDuration"));
+			AddParsed("Trail Sampling Frequency", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "saber.trailSamplingFrequency"));
+			AddParsed("Trail Granularity", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "saber.trailGranularity"));
+		}
 		current_panel = panel;
 	}
 }

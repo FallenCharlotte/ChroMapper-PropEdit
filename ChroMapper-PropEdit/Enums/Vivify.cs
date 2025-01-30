@@ -114,6 +114,12 @@ public static class Vivify {
 	public static readonly Dictionary<string, string> XRSettings = new Dictionary<string, string> {
 		{"xrSettings.useOcclusionMesh", "Use Occlusion Mesh"},
 	};
+	
+	public static readonly Map<string?> SaberTypes = new Map<string?> {
+		{"Left", "Left"},
+		{"Right", "Right"},
+		{"Both", "Both"},
+	};
 }
 
 }

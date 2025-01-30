@@ -12,6 +12,7 @@ namespace ChroMapper_PropEdit.Utils {
 public class BundleInfo {
 	public JSONObject? _bundleInfo = null;
 	public Map<string?>? Materials = null;
+	public Map<string?>? Prefabs = null;
 	public Dictionary<string, Dictionary<string, Vivify.PropertyType>>? Properties = null;
 	
 	public bool Exists { get { return _bundleInfo != null; } }
@@ -30,6 +31,7 @@ public class BundleInfo {
 		
 		Materials = new Map<string?>();
 		Properties = new Dictionary<string, Dictionary<string, Vivify.PropertyType>>();
+		Prefabs = new Map<string?>();
 		
 		foreach (var mat in _bundleInfo["materials"]) {
 			Materials.Add((string)mat.Value["path"], mat.Key);
@@ -42,6 +44,10 @@ public class BundleInfo {
 				props.Add(prop.Key, type);
 			}
 			Properties.Add(mat.Key, props);
+		}
+		
+		foreach (var fab in _bundleInfo["prefabs"]) {
+			Prefabs.Add((string)fab.Value, fab.Key);
 		}
 	}
 }

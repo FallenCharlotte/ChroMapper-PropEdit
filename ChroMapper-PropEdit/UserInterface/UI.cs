@@ -52,9 +52,9 @@ public class UI {
 		UI.AttachTransform(container, size ?? new Vector2(0, 20), pos: new Vector2(0, 0));
 		
 		var label = UI.AddChild(container, title + " Label", typeof(TextMeshProUGUI));
-		UI.AttachTransform(label, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
-		//main code that adds the tooltip to the label
+		UI.LeftColumn(label);
 		
+		//main code that adds the tooltip to the label
 		if (tooltip != "" && Settings.Get(Settings.ShowTooltips, true)!.AsBool == true) {
 			var LINE_WIDTH = 40;
 			var tooltip_wrapped = new System.Text.StringBuilder(tooltip);
@@ -229,6 +229,10 @@ public class UI {
 		trans.anchoredPosition = new Vector3(pos.x, pos.y, 0);
 		
 		return trans;
+	}
+	
+	public static void LeftColumn(GameObject obj) {
+		UI.AttachTransform(obj, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
 	}
 	
 	public static Sprite LoadSprite(string asset) {

@@ -113,7 +113,7 @@ public class SettingsWindow {
 		{
 			var collapsible = Collapsible.Create(panel!, "Settings Override", "Map Options", true, tooltip.GetTooltip(TooltipStrings.Tooltip.MapOptions));
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "_playerOptions", "Player Options", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "Player Options", "Player Options", true);
 				prefix = "_playerOptions";
 				current_panel = c2.panel;
 				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.LeftHanded));
@@ -135,7 +135,7 @@ public class SettingsWindow {
 				AddDropdown("Expert+ Effects Filter", "_environmentEffectsFilterExpertPlusPreset", MapSettings.EffectsFilters, tooltip.GetTooltip(TooltipStrings.Tooltip.ExpertPlusEffectsFilter));
 			}
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "_modifiers", "Modifiers", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "Modifiers", "Modifiers", true);
 				prefix = "_modifiers";
 				current_panel = c2.panel;
 				AddDropdown("Energy Type", "_energyType", MapSettings.EnergyTypes, tooltip.GetTooltip(TooltipStrings.Tooltip.EnergyType));
@@ -155,7 +155,7 @@ public class SettingsWindow {
 				AddDropdown("Small Cubes", "_smallCubes", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.SmallCubes));
 			}
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "_environments", "Environments", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "Environments", "Environments", true);
 				prefix = "_environments";
 				current_panel = c2.panel;
 				AddDropdown("Override Environments", "_overrideEnvironments", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.OverrideEnvironments));
@@ -167,7 +167,7 @@ public class SettingsWindow {
 				AddDropdown("Override Colors", "_overrideDefaultColors", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.OverrideColors));
 			}
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "_graphics", "Graphics", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "Graphics", "Graphics", true);
 				prefix = "_graphics";
 				current_panel = c2.panel;
 				AddParsed<int>("Mirror Quality", "_mirrorGraphicsSettings", tooltip.GetTooltip(TooltipStrings.Tooltip.MirrorQuality));
@@ -178,7 +178,7 @@ public class SettingsWindow {
 				AddParsed<int>("Max Shockwave Particles", "_maxShockwaveParticles", tooltip.GetTooltip(TooltipStrings.Tooltip.MaxShockwaveParticles));
 			}
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "_chroma", "Chroma", true);
+				var c2 = Collapsible.Create(collapsible.panel!, "Chroma", "Chroma", true);
 				prefix = "_chroma";
 				current_panel = c2.panel;
 				AddDropdown("Disable Chroma Events", "_disableChromaEvents", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.DisableChromaEvents));

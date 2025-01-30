@@ -12,6 +12,7 @@ public class Collapsible : MonoBehaviour
 {
 	public Toggle? expandToggle;
 	public GameObject? panel;
+	private string? settings_key;
 	
 	public static Collapsible Create(GameObject parent, string name, string label, bool expanded) {
 		return Create(parent, name, label, expanded, "");
@@ -21,6 +22,9 @@ public class Collapsible : MonoBehaviour
 	}
 	
 	public Collapsible Init(string label, bool expanded, string tooltip = "") {
+		if (!gameObject.name.StartsWith("_")) {
+			settings_key = $"ExpanderStates.{gameObject.name}";
+		}
 		UI.AttachTransform(gameObject, new Vector2(0, 20), pos: new Vector2(0, 0));
 		{
 			var image = gameObject.AddComponent<Image>();
@@ -58,7 +62,9 @@ public class Collapsible : MonoBehaviour
 			var _label = header.transform.GetChild(0).gameObject;
 			_label.GetComponent<RectTransform>().anchoredPosition += new Vector2(5, 0);
 		}
-		expanded = Settings.Get($"{gameObject.name}_expanded", expanded);
+		if (settings_key != null) {
+			expanded = Settings.Get(settings_key, expanded);
+		}
 		expandToggle = UI.AddCheckbox(header, expanded, SetExpanded);
 		Sprite[] sprites = (Sprite[])Resources.FindObjectsOfTypeAll(typeof(Sprite));
 		Sprite arrow = sprites.Single(s => s.name == "ArrowIcon");
@@ -111,7 +117,9 @@ public class Collapsible : MonoBehaviour
 		panel!.SetActive(expanded);
 		expandToggle!.transform.localEulerAngles = (expanded ? 1 : 0) * 180f * Vector3.forward;
 		SendMessageUpwards("DirtyPanel", false);
-		Settings.Set($"{gameObject.name}_expanded", expanded);
+		if (settings_key != null) {
+			Settings.Set(settings_key, expanded);
+		}
 	}
 }
 

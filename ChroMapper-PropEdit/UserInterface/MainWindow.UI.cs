@@ -120,8 +120,10 @@ public partial class MainWindow {
 		});
 	}
 	
-	private UIDropdown AddDropdown<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, Map<T?> type, bool nullable = false, string tooltip = "") {
-		var container = AddLine(title, null, tooltip);
+	private UIDropdown AddDropdown<T>(string? title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, Map<T?> type, bool nullable = false, string tooltip = "") {
+		var container = (title != null)
+			? AddLine(title, null, tooltip)
+			: current_panel!;
 		var staged = editing!;
 		var (value, _) = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
@@ -151,8 +153,10 @@ public partial class MainWindow {
 		}), mixed);
 	}
 	
-	private UITextInput AddTextbox(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, bool tall = false, string tooltip = "") {
-		var container = AddLine(title, tall ? (new Vector2(0, 22)) : null, tooltip);
+	private UITextInput AddTextbox(string? title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, bool tall = false, string tooltip = "") {
+		var container = (title != null)
+			? AddLine(title, tall ? (new Vector2(0, 22)) : null, tooltip)
+			: current_panel!;
 		var staged = editing!;
 		var (value, mixed) = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
 		

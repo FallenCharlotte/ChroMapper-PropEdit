@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,7 @@ using Beatmap.Enums;
 using Beatmap.V2;
 using Beatmap.V2.Customs;
 using Beatmap.V3;
+using SimpleJSON;
 
 using ChroMapper_PropEdit.Components;
 using ChroMapper_PropEdit.Enums;
@@ -432,7 +434,7 @@ public partial class MainWindow {
 					case "SetGlobalProperty":
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
-						// TODO: Grid? +/-?
+						AddCustomProperties();
 						break;
 					case "Blit":
 						AddMaterial();
@@ -478,7 +480,7 @@ public partial class MainWindow {
 						AddTextbox("ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
-						// TODO: Animator Properties
+						AddCustomProperties();
 						break;
 					case "SetCameraProperty":
 						AddTextbox("Camera ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
@@ -566,10 +568,12 @@ public partial class MainWindow {
 		if (asset != null) {
 			var mat = bundleInfo?.Materials?.Forward(asset);
 			if (mat != null && (bundleInfo?.Properties?.ContainsKey(mat) ?? false)) {
-				AddLine("Properties:");
+				var collapsible = Collapsible.Create(panel!, "Properties", "Properties", true);
+				current_panel = collapsible.panel;
 				foreach (var prop in bundleInfo.Properties[mat]) {
 					AddTextbox(prop.Key, Data.PropertyGetSetRaw(prop.Key, prop.Value.ToString()), true);
 				}
+				current_panel = panel;
 			}
 		}
 	}
@@ -583,6 +587,38 @@ public partial class MainWindow {
 		// Do these have defaults? Idk :3
 		AddDropdown("Bloom Pre Pass", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.bloomPrePass"), MapSettings.OptionBool, true);
 		AddDropdown("Main Bloom Effects", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.mainEffect"), MapSettings.OptionBool, true);
+	}
+	
+	private void AddCustomProperties() {
+		var all_props = new Dictionary<string, Vivify.PropertyType>();
+		foreach (var o in editing!) {
+			var root = (o as BaseCustomEvent)!.Data ?? new JSONObject();
+			if (Data.GetNode(root, "properties") is JSONArray props) {
+				foreach (var prop in props.Children) {
+					var id = (string)prop.AsObject["id"];
+					System.Enum.TryParse((string)prop.AsObject["type"], out Vivify.PropertyType type);
+					if (!all_props.ContainsKey(id)) {
+						all_props.Add(id, type);
+					}
+				}
+			}
+		}
+		
+		var collapsible = Collapsible.Create(panel!, "Properties", "Properties", true);
+		current_panel = collapsible.panel;
+		foreach (var prop in all_props) {
+			var container = UI.AddChild(current_panel!, prop + " Container");
+			UI.AttachTransform(container, new Vector2(0, 20), pos: new Vector2(0, 0));
+			current_panel = container;
+			var id_box = AddTextbox(null, Data.PropertyGetSetPart(prop.Key, "id"));
+			UI.MoveTransform((RectTransform)id_box.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
+			AddDropdown(null, Data.PropertyGetSetPart(prop.Key, "type"), Vivify.PropertyTypes, false);
+			current_panel = collapsible.panel;
+			var value_box = AddTextbox(null, Data.PropertyGetSetRaw(prop.Key, prop.Value.ToString()), true);
+			UI.MoveTransform((RectTransform)value_box.transform, new Vector2(0, 22), new Vector2(0, 0));
+		}
+		AddTextbox("Add Property", Data.PropertyGetSetPart(null, "id"));
+		current_panel = panel;
 	}
 }
 

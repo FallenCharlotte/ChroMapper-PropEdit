@@ -64,6 +64,13 @@ public static class Vivify {
 		Vector,
 		Keyword
 	};
+	public static readonly Map<string?> PropertyTypes = new Map<string?> {
+		{"Texture", "Texture"},
+		{"Float", "Float"},
+		{"Color", "Color"},
+		{"Vector", "Vector"},
+		{"Keyword", "Keyword"},
+	};
 	
 	// TODO: Point-definition-able types (beeeg project)
 	public static readonly Dictionary<string, string> RenderSettings = new Dictionary<string, string> {

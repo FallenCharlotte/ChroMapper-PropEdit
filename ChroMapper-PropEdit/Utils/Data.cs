@@ -76,28 +76,6 @@ public class Data {
 		return (getter, setter);
 	}
 	
-	private static JSONNode? RawToJson(string raw) {
-		JSONNode n;
-		try {
-			n = JSON.Parse(raw);
-		}
-		catch (Exception) {
-			try {
-				n = JSON.Parse($"[{raw}]");
-			}
-			catch (Exception) {
-				try {
-					n = JSON.Parse($"\"{raw}\"");
-				}
-				catch (Exception) {
-					Debug.LogWarning($"Couldn't interpret \"{raw}\" as JSON");
-					return null;
-				}
-			}
-		}
-		return n;
-	}
-	
 	// Fine, I'll do arrays. JSON-array text input. Might make an options page that can split it out later:tm:
 	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) JSONGetSetRaw(System.Type type, string node_name, string field_name) {
 		var node = type.GetProperty(node_name);
@@ -138,12 +116,23 @@ public class Data {
 	}
 	
 	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) PropertyGetSetRaw(string prop_name, string type) {
+		return PropertyGetSetPart(prop_name, "value", (JsonToRaw, RawToJson), type);
+	}
+	
+	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) PropertyGetSetPart(string? prop_name, string part) {
+		return PropertyGetSetPart(prop_name, part, (CreateConvertFunc<JSONNode, string?>(), CreateConvertFunc<string, JSONNode?>()));
+	}
+	
+	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) PropertyGetSetPart(string? prop_name, string part, (System.Func<JSONNode, string?>, System.Func<string, JSONNode?>) part_get_set, string? default_type = null) {
 		System.Func<BaseObject, string?> getter = (o) => {
+			if (prop_name == null) {
+				return null;
+			}
 			var root = (o as BaseCustomEvent)!.Data ?? new SimpleJSON.JSONObject();
 			if (GetNode(root, "properties") is JSONArray props) {
 				foreach (var prop in props.Children) {
 					if ((string)prop.AsObject["id"] == prop_name) {
-						return prop.AsObject["value"].ToString();
+						return part_get_set.Item1(prop.AsObject[part]);
 					}
 				}
 				return null;
@@ -155,6 +144,12 @@ public class Data {
 		System.Action<BaseObject, string?> setter = (o, v) => {
 			var root = (o as BaseCustomEvent)!.Data ?? new SimpleJSON.JSONObject();
 			var props = GetNode(root, "properties")?.AsArray ?? new JSONArray();
+			if (prop_name == null) {
+				prop_name = v;
+			}
+			if (prop_name == null) {
+				return;
+			}
 			JSONObject? _prop = null;
 			foreach (var prop in props.Children) {
 				if (prop.AsObject["id"] == prop_name) {
@@ -165,16 +160,18 @@ public class Data {
 			if (_prop == null) {
 				_prop = new JSONObject();
 				_prop["id"] = prop_name;
-				_prop["type"] = type;
+				if (default_type != null) {
+					_prop["type"] = default_type;
+				}
 				props.Add(_prop);
 			}
 			if (string.IsNullOrEmpty(v)) {
 				props.Remove((JSONNode)_prop);
 			}
 			else {
-				var n = RawToJson(v!);
+				var n = part_get_set.Item2(v!);
 				if (n != null) {
-					SetNode(_prop, "value", n);
+					SetNode(_prop, part, n);
 				}
 			}
 			root["properties"] = props;
@@ -358,6 +355,32 @@ public class Data {
 		var convert = Expression.Convert(source, typeof(TOutput));
 		var method = convert.Method;
 		return Expression.Lambda<System.Func<TInput, TOutput>>(convert, source).Compile();
+	}
+	
+	private static JSONNode? RawToJson(string raw) {
+		JSONNode n;
+		try {
+			n = JSON.Parse(raw);
+		}
+		catch (Exception) {
+			try {
+				n = JSON.Parse($"[{raw}]");
+			}
+			catch (Exception) {
+				try {
+					n = JSON.Parse($"\"{raw}\"");
+				}
+				catch (Exception) {
+					Debug.LogWarning($"Couldn't interpret \"{raw}\" as JSON");
+					return null;
+				}
+			}
+		}
+		return n;
+	}
+	
+	private static string? JsonToRaw(JSONNode node) {
+		return node.ToString();
 	}
 }
 

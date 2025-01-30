@@ -464,7 +464,7 @@ public partial class MainWindow {
 						break;
 					case "InstantiatePrefab":
 						AddTextbox("Asset", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset"), false);
-						AddTextbox("ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
+						AddPrefab("Prefab", "id");
 						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "track"), false);
 						AddTextbox("Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "position"), true);
 						AddTextbox("Local Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "localPosition"), true);
@@ -494,7 +494,8 @@ public partial class MainWindow {
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						{
-							var collapsible = Collapsible.Create(panel, "Render Settings", "Render Settings", true);
+							var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("renderSettings") ?? false);
+							var collapsible = Collapsible.Create(panel, "_Render Settings", "Render Settings", has_any || mixed);
 							current_panel = collapsible.panel;
 							foreach (var prop in Vivify.RenderSettings) {
 								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
@@ -502,7 +503,8 @@ public partial class MainWindow {
 							current_panel = panel;
 						}
 						{
-							var collapsible = Collapsible.Create(panel, "Quality Settings", "Quality Settings", true);
+							var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("qualitySettings") ?? false);
+							var collapsible = Collapsible.Create(panel, "_Quality Settings", "Quality Settings", has_any || mixed);
 							current_panel = collapsible.panel;
 							foreach (var prop in Vivify.QualitySettings) {
 								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
@@ -510,7 +512,8 @@ public partial class MainWindow {
 							current_panel = panel;
 						}
 						{
-							var collapsible = Collapsible.Create(panel, "XR Settings", "XR Settings", true);
+							var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("xrSettings") ?? false);
+							var collapsible = Collapsible.Create(panel, "_XR Settings", "XR Settings", has_any || mixed);
 							current_panel = collapsible.panel;
 							foreach (var prop in Vivify.XRSettings) {
 								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);

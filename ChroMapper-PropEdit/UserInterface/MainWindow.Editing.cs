@@ -467,8 +467,8 @@ public partial class MainWindow {
 						AddDropdown("Filter Mode", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "filterMode"), Vivify.FilterModes, true);
 						break;
 					case "InstantiatePrefab":
-						AddTextbox("Asset", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset"), false);
-						AddPrefab("Prefab", "id");
+						AddPrefab("Prefab", "asset", false);
+						AddTextbox("ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
 						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "track"), false);
 						AddTextbox("Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "position"), true);
 						AddTextbox("Local Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "localPosition"), true);
@@ -569,12 +569,12 @@ public partial class MainWindow {
 		}
 	}
 	
-	private void AddPrefab(string title, string prop) {
+	private void AddPrefab(string title, string prop, bool nullable = true) {
 		if (bundleInfo?.Prefabs == null) {
 			AddTextbox(title, Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", prop), false);
 		}
 		else {
-			AddDropdown(title, Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", prop), bundleInfo.Prefabs, true);
+			AddDropdown(title, Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", prop), bundleInfo.Prefabs, nullable);
 		}
 	}
 	

@@ -7,21 +7,32 @@ using SimpleJSON;
 
 namespace ChroMapper_PropEdit.Components {
 
+// TODO: More generic getter/setter, the raw toggle is jank and not flexible enough
+
 public class ArrayEditor : MonoBehaviour {
 	public JSONNode? root;
 	public string? path;
+	public bool raw = false;
+	
+	//public System.Func<string?>? Getter;
+	//public System.Action<string?>? Setter;
 	
 	public ArrayEditor() {
 		inputs = new List<UITextInput>();
 	}
 	
 	public static ArrayEditor Create(GameObject parent, JSONNode root, string path, string title, string tooltip = "") {
-		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(root, path, title, tooltip);
+		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(root, path, title, false, tooltip);
 	}
 	
-	public ArrayEditor Init(JSONNode root, string path, string title, string tooltip = "") {
+	public static ArrayEditor Create(GameObject parent, JSONNode root, string path, string title, bool raw) {
+		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(root, path, title, raw);
+	}
+	
+	public ArrayEditor Init(JSONNode root, string path, string title, bool raw = false, string tooltip = "") {
 		this.root = root;
 		this.path = path;
+		this.raw = raw;
 		container = gameObject.AddComponent<Collapsible>().Init(title, true, tooltip);
 		return this;
 	}
@@ -35,7 +46,7 @@ public class ArrayEditor : MonoBehaviour {
 		var node = Data.GetNode(root!, path!)?.AsArray ?? new JSONArray();
 		
 		foreach (var value in node) {
-			AddLine(value.Value as JSONString);
+			AddLine(raw ? value.Value.ToString() : value.Value as JSONString);
 		}
 		
 		AddLine("");
@@ -48,7 +59,7 @@ public class ArrayEditor : MonoBehaviour {
 		
 		foreach (var input in inputs) {
 			if (input.InputField.text != "") {
-				node.Add("", input.InputField.text);
+				node.Add("", raw ? Data.RawToJson(input.InputField.text) : input.InputField.text);
 			}
 		}
 		

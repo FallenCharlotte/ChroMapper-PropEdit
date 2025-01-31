@@ -362,7 +362,7 @@ public class Data {
 		return Expression.Lambda<System.Func<TInput, TOutput>>(convert, source).Compile();
 	}
 	
-	private static JSONNode? RawToJson(string raw) {
+	public static JSONNode? RawToJson(string raw) {
 		JSONNode n;
 		try {
 			n = JSON.Parse(raw);
@@ -384,7 +384,7 @@ public class Data {
 		return n;
 	}
 	
-	private static string? JsonToRaw(JSONNode node) {
+	public static string? JsonToRaw(JSONNode node) {
 		return node.ToString();
 	}
 }

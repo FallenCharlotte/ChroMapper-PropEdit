@@ -19,6 +19,7 @@ public class SettingsWindow {
 	public GameObject? requirements_panel;
 	public GameObject? settings_panel;
 	public GameObject? current_panel;
+	public GameObject? pointdefinitions_panel;
 	public Toggle? chroma_enable;
 	public Toggle? noodle_enable;
 	public Toggle? split_value;
@@ -206,6 +207,10 @@ public class SettingsWindow {
 			}
 		}
 		
+		if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
+			pointdefinitions_panel = Collapsible.Create(panel!, "Point Definitions", "Point Definitions", false).panel;
+		}
+		
 		Refresh();
 		UI.RefreshTooltips(panel);
 	}
@@ -381,6 +386,26 @@ public class SettingsWindow {
 		}
 		information_editor?.Refresh();
 		warnings_editor?.Refresh();
+		if (pointdefinitions_panel != null) {
+			foreach (Transform child in pointdefinitions_panel.transform) {
+				GameObject.Destroy(child.gameObject);
+			}
+			
+			var v2 = BeatSaberSongContainer.Instance.Map.Version[0] == '2';
+			var pds = BeatSaberSongContainer.Instance.Map.CustomData[v2 ? "_pointDefinitions" : "pointDefinitions"];
+			
+			foreach (var pd in pds) {
+				ArrayEditor.Create(pointdefinitions_panel, pds, pd.Key, pd.Key, true).Refresh();
+			}
+			
+			var new_input = UI.AddTextbox(pointdefinitions_panel, "", (v) => {
+				if (!string.IsNullOrEmpty(v)) {
+					Data.SetNode(pds, v!, new JSONArray());
+					Refresh();
+				}
+			});
+			UI.MoveTransform((RectTransform)new_input.transform, new Vector2(0, 20), new Vector2(0, 0));
+		}
 	}
 	
 	private void OnResize() {

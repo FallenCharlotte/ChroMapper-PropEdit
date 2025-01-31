@@ -109,14 +109,14 @@ public class Collapsible : MonoBehaviour
 	}
 	
 	public void Awake() {
-		SendMessageUpwards("DirtyPanel", true);
+		SendMessageUpwards("DirtyPanel");
 	}
 	
 	public void SetExpanded(bool expanded)
 	{
 		panel!.SetActive(expanded);
 		expandToggle!.transform.localEulerAngles = (expanded ? 1 : 0) * 180f * Vector3.forward;
-		SendMessageUpwards("DirtyPanel", false);
+		SendMessageUpwards("DirtyPanel");
 		if (settings_key != null) {
 			Settings.Set(settings_key, expanded);
 		}

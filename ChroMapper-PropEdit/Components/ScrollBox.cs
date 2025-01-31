@@ -11,7 +11,7 @@ public class ScrollBox : MonoBehaviour {
 	public GameObject? content;
 	
 	public Scrollbar? scrollbar;
-	public float TargetScroll = 1f;
+	public float? TargetScroll;
 	
 	public static ScrollBox Create(GameObject parent) {
 		return UI.AddChild(parent, "Scroll Box").AddComponent<ScrollBox>().Init();
@@ -83,7 +83,7 @@ public class ScrollBox : MonoBehaviour {
 	}
 	
 	public void Awake() {
-		StartCoroutine(DirtyPanel(false));
+		StartCoroutine(DirtyPanel());
 	}
 	
 	// From CM's StrobeGeneratorControllerUI, leaving the original comment because it needs repeating
@@ -91,32 +91,31 @@ public class ScrollBox : MonoBehaviour {
 	// Just kidding. It's shit. This shouldn't be necessary. Why am I being forced to go this route so that Unity UI can update the way that it's supposed to god fucking damnit i have lost all hope in the unity engine by spending one hour of my life just to waste a frame (and get a flickering effect) by having to write this ienumerator god dufkcinhjslkajdfklwa
 	[System.Diagnostics.CodeAnalysis.SuppressMessage("CodeQuality", "IDE0051:Remove unused private members",
 		Justification = "This is called indirectly via Unity Message.")]
-	private IEnumerator DirtyPanel(bool first)
+	private IEnumerator DirtyPanel()
 	{
-		/*
-		var layout = content!.GetComponent<VerticalLayoutGroup>();
-		if (first) {
-			yield return new WaitForEndOfFrame();
-			yield return new WaitForEndOfFrame();
-		}
-		layout.enabled = false;
-		yield return new WaitForEndOfFrame();
-		layout.enabled = true;
-		yield return new WaitForEndOfFrame();
-		scrollbar!.value = 1f;
-		yield return new WaitForEndOfFrame();
-		scrollbar!.value = 1f;
-		* */
-		// This is a little less obtrusive
+		// One at a time
+		if (dirty) yield break;
+		dirty = true;
+		// Wait some frames then wiggle
 		var target = GetComponentInParent<Window>();
-		float scroll = first ? 1 : TargetScroll;
+		float scroll = TargetScroll ?? scrollbar!.value;
+		
 		for (var i = 0; i < 5; ++i) {
-			target.GetComponent<RectTransform>().sizeDelta += new Vector2(0.25f, 0);
-			target.GetComponent<RectTransform>().sizeDelta += new Vector2(-0.25f, 0);
-			scrollbar!.value = scroll;
 			yield return new WaitForEndOfFrame();
 		}
+		
+		for (var i = 0; i < 8; ++i) {
+			if (i % 2 == 0) {
+				target.GetComponent<RectTransform>().sizeDelta += new Vector2(0.25f, 0);
+				target.GetComponent<RectTransform>().sizeDelta += new Vector2(-0.25f, 0);
+				scrollbar!.value = scroll;
+			}
+			yield return new WaitForEndOfFrame();
+		}
+		dirty = false;
 	}
+	
+	private bool dirty = false;
 }
 
 }

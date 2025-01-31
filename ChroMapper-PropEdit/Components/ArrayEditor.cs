@@ -40,7 +40,7 @@ public class ArrayEditor : MonoBehaviour {
 		
 		AddLine("");
 		
-		SendMessageUpwards("DirtyPanel", false);
+		SendMessageUpwards("DirtyPanel");
 	}
 	
 	public void Submit() {

@@ -84,7 +84,7 @@ public partial class MainWindow {
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
 						current_panel = collapsible.panel;
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false,tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NJS));
+						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NJS));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnOffset));
 						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Coordinates));
 						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Rotation));
@@ -387,7 +387,7 @@ public partial class MainWindow {
 						AddLine("");
 						AddTextbox("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
 						foreach (var property in Events.NoodleProperties) {
-							AddTextbox(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), true, tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
+							AddPointDefinition(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
 						AddTextbox("Definite Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_definitePosition" : "definitePosition"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
 						break;

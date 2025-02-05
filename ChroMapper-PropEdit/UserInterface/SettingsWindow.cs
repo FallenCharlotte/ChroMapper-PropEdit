@@ -395,7 +395,7 @@ public class SettingsWindow {
 			var pds = BeatSaberSongContainer.Instance.Map.CustomData[v2 ? "_pointDefinitions" : "pointDefinitions"];
 			
 			foreach (var pd in pds) {
-				ArrayEditor.Create(pointdefinitions_panel, pds, pd.Key, pd.Key, true).Refresh();
+				ArrayEditor.Create(pointdefinitions_panel, pd.Key, ArrayEditor.NodePathGetSet(pds, pd.Key, true)).Refresh();
 			}
 			
 			var new_input = UI.AddTextbox(pointdefinitions_panel, "", (v) => {

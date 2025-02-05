@@ -76,7 +76,7 @@ public class Data {
 		return (getter, setter);
 	}
 	
-	// Fine, I'll do arrays. JSON-array text input. Might make an options page that can split it out later:tm:
+	// We love raw JSON dumps :3
 	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) JSONGetSetRaw(System.Type type, string node_name, string field_name) {
 		var node = type.GetProperty(node_name);
 		if (node == null) {
@@ -257,6 +257,9 @@ public class Data {
 	}
 	
 #endregion
+	
+#region Editing many objects
+	
 	// Value, Mixed?
 	public static (T?, bool) GetAllOrNothing<T>(IEnumerable<BaseObject> editing, System.Func<BaseObject, T?> getter) {
 		var it = editing.GetEnumerator();
@@ -306,6 +309,10 @@ public class Data {
 		}
 	}
 	
+#endregion
+	
+#region JSON utils
+	
 	public static JSONNode? GetNode(JSONNode root, string name) {
 		string[] path = name.Split('.');
 		foreach (string node in path) {
@@ -337,6 +344,8 @@ public class Data {
 		root?.Remove(path[path.Length - 1]);
 	}
 	
+#endregion
+	
 	public static Color GetColor(BaseEvent e) {
 		return (e.CustomColor ?? (e.Value switch {
 			0 => Color.clear,
@@ -351,6 +360,8 @@ public class Data {
 			_ => Color.clear,
 		}));
 	}
+	
+#region Converters
 	
 	// https://stackoverflow.com/a/32037899
 	public static System.Func<TInput, TOutput> CreateConvertFunc<TInput, TOutput>()
@@ -387,6 +398,16 @@ public class Data {
 	public static string? JsonToRaw(JSONNode node) {
 		return node.ToString();
 	}
+	
+	public static JSONNode StringJson(string value) {
+		return new JSONString(value);
+	}
+	
+	public static string? JsonString(JSONNode node) {
+		return (string?)(node as JSONString);
+	}
+	
+#endregion
 }
 
 }

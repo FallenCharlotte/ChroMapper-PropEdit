@@ -21,7 +21,7 @@ public class Collapsible : MonoBehaviour
 		return UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip);
 	}
 	
-	public Collapsible Init(string label, bool expanded, string tooltip = "") {
+	public Collapsible Init(string label, bool expanded, string tooltip = "", bool background = true) {
 		if (!gameObject.name.StartsWith("_")) {
 			settings_key = $"ExpanderStates.{gameObject.name}";
 		}
@@ -79,6 +79,7 @@ public class Collapsible : MonoBehaviour
 		
 		panel = UI.AddChild(gameObject, "Panel");
 		UI.AttachTransform(panel, new Vector2(0, 50), pos: Vector2.zero);
+		if (background)
 		{
 			var image = panel.AddComponent<Image>();
 			image.sprite = PersistentUI.Instance.Sprites.Background;

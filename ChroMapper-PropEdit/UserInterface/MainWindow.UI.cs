@@ -3,6 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using SimpleJSON;
 
 using Beatmap.Base;
 
@@ -168,6 +169,51 @@ public partial class MainWindow {
 				Data.UpdateObjects<string?>(staged, get_set.Item2, v);
 			}
 		}, tall), mixed);
+	}
+	
+	private void AddPointDefinition(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, string tooltip = "") {
+		var container = AddLine(title, new Vector2(0, 22), tooltip);
+		var staged = editing!;
+		var (value, mixed) = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
+		
+		var textbox = SetMixed(UI.AddTextbox(container, value, (v) => {
+			if (v == "") {
+				v = null;
+			}
+			if (v != value) {
+				Data.UpdateObjects<string?>(staged, get_set.Item2, v);
+			}
+		}, true), mixed);
+		
+		System.Func<string[]> arr_get = () => {
+			var arr = (Data.RawToJson(value ?? "") as JSONArray) ?? new JSONArray();
+			var lines = new string[arr.Count];
+			for (var i = 0; i < arr.Count; ++i) {
+				lines[i] = arr[i].ToString();
+			}
+			return lines;
+		};
+		
+		System.Action<string[]> arr_set = (string[] values) => {
+			var node = new JSONArray();
+			
+			foreach (var value in values) {
+				if (value != "") {
+					node.Add("", Data.RawToJson(value));
+				}
+			}
+			
+			Data.UpdateObjects<string?>(staged, get_set.Item2, node.ToString());
+		};
+		
+		var array = ArrayEditor.Create(current_panel!, title, (arr_get, arr_set));
+		
+		if (!(value?.StartsWith("[") ?? false)) {
+			array.gameObject.SetActive(false);
+		}
+		else {
+			array.Refresh();
+		}
 	}
 	
 #endregion

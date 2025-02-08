@@ -19,26 +19,29 @@ public class Data {
 	
 #region Getter/setter factories
 	
-	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) GetSet<T>(string field_name) where T : struct {
-		System.Func<BaseObject, T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null) ?? null;
-		System.Action<BaseObject, T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {v}); };
+	public delegate T Getter<T>(BaseObject o);
+	public delegate void Setter<T>(BaseObject o, T v);
+	
+	public static (Getter<T?>, Setter<T?>) GetSet<T>(string field_name) where T : struct {
+		Getter<T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null) ?? null;
+		Setter<T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {v}); };
 		return (getter, setter);
 	}
-	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) GetSetTest<T>(string field_name) {
-		System.Func<BaseObject, T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null);
-		System.Action<BaseObject, T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {(T)v}); };
+	public static (Getter<T?>, Setter<T?>) GetSetTest<T>(string field_name) {
+		Getter<T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null);
+		Setter<T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {(T)v}); };
 		return (getter, setter);
 	}
 	
 	// Very cursed value split: subtract 1 then mask
-	public static (System.Func<BaseObject, int?>, System.Action<BaseObject, int?>) GetSetSplitValue(int mask) {
-		System.Func<BaseObject, int?> getter = (o) => {
+	public static (Getter<int?>, Setter<int?>) GetSetSplitValue(int mask) {
+		Getter<int?> getter = (o) => {
 			int i = ((BaseEvent)o).Value;
 			return (i == 0)
 				? 0b1111
 				: (i - 1) & mask & 0b1111;
 		};
-		System.Action<BaseObject, int?> setter = (o, v) => {
+		Setter<int?> setter = (o, v) => {
 			if (v is int value) {
 				int i = ((BaseEvent)o).Value;
 				// I'm sorry
@@ -48,12 +51,12 @@ public class Data {
 		return (getter, setter);
 	}
 	
-	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) JSONGetSet<T>(System.Type type, string node_name, string field_name) {
+	public static (Getter<T?>, Setter<T?>) JSONGetSet<T>(System.Type type, string node_name, string field_name) {
 		var node = type.GetProperty(node_name);
 		if (node == null) {
 			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
 		}
-		System.Func<BaseObject, T?> getter = (o) => {
+		Getter<T?> getter = (o) => {
 			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (GetNode(root, field_name) is JSONNode n) {
 				return CreateConvertFunc<JSONNode, T>()(n);
@@ -62,7 +65,7 @@ public class Data {
 				return default!;
 			}
 		};
-		System.Action<BaseObject, T?> setter = (o, v) => {
+		Setter<T?> setter = (o, v) => {
 			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (v is T value) {
 				SetNode(root, field_name, CreateConvertFunc<T, SimpleJSON.JSONNode>()(value));
@@ -77,12 +80,12 @@ public class Data {
 	}
 	
 	// We love raw JSON dumps :3
-	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) JSONGetSetRaw(System.Type type, string node_name, string field_name) {
+	public static (Getter<string?>, Setter<string?>) JSONGetSetRaw(System.Type type, string node_name, string field_name) {
 		var node = type.GetProperty(node_name);
 		if (node == null) {
 			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
 		}
-		System.Func<BaseObject, string?> getter = (o) => {
+		Getter<string?> getter = (o) => {
 			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (GetNode(root, field_name) is JSONNode n) {
 				return n.ToString();
@@ -91,7 +94,7 @@ public class Data {
 				return null;
 			}
 		};
-		System.Action<BaseObject, string?> setter = (o, v) => {
+		Setter<string?> setter = (o, v) => {
 			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (string.IsNullOrEmpty(v)) {
 				RemoveNode(root, field_name);
@@ -107,24 +110,24 @@ public class Data {
 		return (getter, setter);
 	}
 	
-	public static (System.Func<BaseObject, T?>, System.Action<BaseObject, T?>) CustomGetSet<T>(string field_name) {
+	public static (Getter<T?>, Setter<T?>) CustomGetSet<T>(string field_name) {
 		return JSONGetSet<T?>(typeof(BaseObject), "CustomData", field_name);
 	}
 	
-	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) CustomGetSetRaw(string field_name) {
+	public static (Getter<string?>, Setter<string?>) CustomGetSetRaw(string field_name) {
 		return JSONGetSetRaw(typeof(BaseObject), "CustomData", field_name);
 	}
 	
-	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) PropertyGetSetRaw(string prop_name, string type) {
+	public static (Getter<string?>, Setter<string?>) PropertyGetSetRaw(string prop_name, string type) {
 		return PropertyGetSetPart(prop_name, "value", (JsonToRaw, RawToJson), type);
 	}
 	
-	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) PropertyGetSetPart(string? prop_name, string part) {
+	public static (Getter<string?>, Setter<string?>) PropertyGetSetPart(string? prop_name, string part) {
 		return PropertyGetSetPart(prop_name, part, (CreateConvertFunc<JSONNode, string?>(), CreateConvertFunc<string, JSONNode?>()));
 	}
 	
-	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) PropertyGetSetPart(string? prop_name, string part, (System.Func<JSONNode, string?>, System.Func<string, JSONNode?>) part_get_set, string? default_type = null) {
-		System.Func<BaseObject, string?> getter = (o) => {
+	public static (Getter<string?>, Setter<string?>) PropertyGetSetPart(string? prop_name, string part, (System.Func<JSONNode, string?>, System.Func<string, JSONNode?>) part_get_set, string? default_type = null) {
+		Getter<string?> getter = (o) => {
 			if (prop_name == null) {
 				return null;
 			}
@@ -141,7 +144,7 @@ public class Data {
 				return null;
 			}
 		};
-		System.Action<BaseObject, string?> setter = (o, v) => {
+		Setter<string?> setter = (o, v) => {
 			var root = (o as BaseCustomEvent)!.Data ?? new SimpleJSON.JSONObject();
 			var props = GetNode(root, "properties")?.AsArray ?? new JSONArray();
 			if (prop_name == null) {
@@ -182,9 +185,9 @@ public class Data {
 	}
 	
 	// Create and delete gradient
-	public static (System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>) GetSetGradient() {
-		System.Func<BaseObject, bool?> getter = (o) => ((BaseEvent)o).CustomLightGradient != null;
-		System.Action<BaseObject, bool?> setter = (o, v) => { if (o is BaseEvent e) {
+	public static (Getter<bool?>, Setter<bool?>) GetSetGradient() {
+		Getter<bool?> getter = (o) => ((BaseEvent)o).CustomLightGradient != null;
+		Setter<bool?> setter = (o, v) => { if (o is BaseEvent e) {
 			if (!(v ?? false)) {
 				if (e.CustomLightGradient != null) {
 					var jc = new JSONArray();
@@ -213,15 +216,15 @@ public class Data {
 	}
 	
 	// Create and delete animation
-	public static (System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>) GetSetAnimation(bool v2) {
+	public static (Getter<bool?>, Setter<bool?>) GetSetAnimation(bool v2) {
 		string animation_key = v2 ? "_animation" : "animation";
 		return CustomGetSetNode(animation_key, "{}");
 	}
 	
 	// Create or remove object with default json
-	public static (System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>) CustomGetSetNode(string path, string json) {
-		System.Func<BaseObject, bool?> getter = (o) => GetNode(o.CustomData, path) != null;
-		System.Action<BaseObject, bool?> setter = (o, v) => {
+	public static (Getter<bool?>, Setter<bool?>) CustomGetSetNode(string path, string json) {
+		Getter<bool?> getter = (o) => GetNode(o.CustomData, path) != null;
+		Setter<bool?> setter = (o, v) => {
 			if (!(v ?? false)) {
 				RemoveNode(o.CustomData, path);
 			}
@@ -232,8 +235,8 @@ public class Data {
 		return (getter, setter);
 	}
 	
-	public static (System.Func<BaseObject, string?>, System.Action<BaseObject, string?>) CustomGetSetColor(string field_name) {
-		System.Func<BaseObject, string?> getter = (o) => {
+	public static (Getter<string?>, Setter<string?>) CustomGetSetColor(string field_name) {
+		Getter<string?> getter = (o) => {
 			if (GetNode(o.CustomData, field_name) is JSONNode n) {
 				var color = n.ReadColor();
 				return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
@@ -242,7 +245,7 @@ public class Data {
 				return null;
 			}
 		};
-		System.Action<BaseObject, string?> setter = (o, v) => {
+		Setter<string?> setter = (o, v) => {
 			if (string.IsNullOrEmpty(v)) {
 				RemoveNode(o.CustomData, field_name);
 			}
@@ -261,7 +264,7 @@ public class Data {
 #region Editing many objects
 	
 	// Value, Mixed?
-	public static (T?, bool) GetAllOrNothing<T>(IEnumerable<BaseObject> editing, System.Func<BaseObject, T?> getter) {
+	public static (T?, bool) GetAllOrNothing<T>(IEnumerable<BaseObject> editing, Getter<T?> getter) {
 		var it = editing.GetEnumerator();
 		it.MoveNext();
 		var first = getter(it.Current);
@@ -278,7 +281,7 @@ public class Data {
 		return (first, false);
 	}
 	
-	public static void UpdateObjects<T>(IEnumerable<BaseObject> editing, System.Action<BaseObject, T?> setter, T? value, bool time = false) {
+	public static void UpdateObjects<T>(IEnumerable<BaseObject> editing, Setter<T?> setter, T? value, bool time = false) {
 		var beatmapActions = new List<BeatmapObjectModifiedAction>();
 		foreach (var o in editing!) {
 			var orig = BeatmapFactory.Clone(o);

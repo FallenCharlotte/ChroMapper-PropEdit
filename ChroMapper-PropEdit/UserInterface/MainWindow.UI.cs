@@ -105,7 +105,7 @@ public partial class MainWindow {
 	}
 	
 	// CustomData node gets removed when value = default
-	private Toggle AddCheckbox(string title, System.ValueTuple<System.Func<BaseObject, bool?>, System.Action<BaseObject, bool?>> get_set, bool? _default, string tooltip = "") {
+	private Toggle AddCheckbox(string title, System.ValueTuple<Data.Getter<bool?>, Data.Setter<bool?>> get_set, bool? _default, string tooltip = "") {
 		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
 		var (value_or, _) = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1);
@@ -121,7 +121,7 @@ public partial class MainWindow {
 		});
 	}
 	
-	private UIDropdown AddDropdown<T>(string? title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, Map<T?> type, bool nullable = false, string tooltip = "") {
+	private UIDropdown AddDropdown<T>(string? title, System.ValueTuple<Data.Getter<T?>, Data.Setter<T?>> get_set, Map<T?> type, bool nullable = false, string tooltip = "") {
 		var container = (title != null)
 			? AddLine(title, null, tooltip)
 			: current_panel!;
@@ -142,7 +142,7 @@ public partial class MainWindow {
 		return input;
 	}
 	
-	private UITextInput AddParsed<T>(string title, System.ValueTuple<System.Func<BaseObject, T?>, System.Action<BaseObject, T?>> get_set, bool time = false, string tooltip = "") where T : struct {
+	private UITextInput AddParsed<T>(string title, System.ValueTuple<Data.Getter<T?>, Data.Setter<T?>> get_set, bool time = false, string tooltip = "") where T : struct {
 		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
 		var (value, mixed) = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
@@ -154,7 +154,7 @@ public partial class MainWindow {
 		}), mixed);
 	}
 	
-	private UITextInput AddTextbox(string? title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, bool tall = false, string tooltip = "") {
+	private UITextInput AddTextbox(string? title, System.ValueTuple<Data.Getter<string?>, Data.Setter<string?>> get_set, bool tall = false, string tooltip = "") {
 		var container = (title != null)
 			? AddLine(title, tall ? (new Vector2(0, 22)) : null, tooltip)
 			: current_panel!;
@@ -171,7 +171,7 @@ public partial class MainWindow {
 		}, tall), mixed);
 	}
 	
-	private void AddPointDefinition(string title, System.ValueTuple<System.Func<BaseObject, string?>, System.Action<BaseObject, string?>> get_set, string tooltip = "") {
+	private void AddPointDefinition(string title, System.ValueTuple<Data.Getter<string?>, Data.Setter<string?>> get_set, string tooltip = "") {
 		var container = AddLine(title, new Vector2(0, 22), tooltip);
 		var staged = editing!;
 		var (value, mixed) = Data.GetAllOrNothing<string>(editing!, get_set.Item1);

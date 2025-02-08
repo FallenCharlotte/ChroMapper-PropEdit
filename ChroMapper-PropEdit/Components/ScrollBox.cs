@@ -99,17 +99,18 @@ public class ScrollBox : MonoBehaviour {
 		// Wait some frames then wiggle
 		var target = GetComponentInParent<Window>();
 		float scroll = TargetScroll ?? scrollbar!.value;
-		
-		for (var i = 0; i < 5; ++i) {
+		/*
+		for (var i = 0; i < 0; ++i) {
 			yield return new WaitForEndOfFrame();
-		}
+		}*/
 		
-		for (var i = 0; i < 8; ++i) {
+		for (var i = 0; i < 15; ++i) {
 			if (i % 2 == 0) {
 				target.GetComponent<RectTransform>().sizeDelta += new Vector2(0.25f, 0);
 				target.GetComponent<RectTransform>().sizeDelta += new Vector2(-0.25f, 0);
 				scrollbar!.value = scroll;
 			}
+			yield return new WaitForEndOfFrame();
 			yield return new WaitForEndOfFrame();
 		}
 		dirty = false;

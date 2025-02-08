@@ -185,28 +185,15 @@ public partial class MainWindow {
 			}
 		}, true), mixed);
 		
-		System.Func<string[]> arr_get = () => {
-			var arr = (Data.RawToJson(value ?? "") as JSONArray) ?? new JSONArray();
-			var lines = new string[arr.Count];
-			for (var i = 0; i < arr.Count; ++i) {
-				lines[i] = arr[i].ToString();
-			}
-			return lines;
+		ArrayEditor.Getter arr_get = () => {
+			return (Data.RawToJson(value ?? "") as JSONArray) ?? new JSONArray();
 		};
 		
-		System.Action<string[]> arr_set = (string[] values) => {
-			var node = new JSONArray();
-			
-			foreach (var value in values) {
-				if (value != "") {
-					node.Add("", Data.RawToJson(value));
-				}
-			}
-			
+		ArrayEditor.Setter arr_set = (JSONArray node) => {
 			Data.UpdateObjects<string?>(staged, get_set.Item2, node.ToString());
 		};
 		
-		var array = ArrayEditor.Create(current_panel!, title, (arr_get, arr_set));
+		var array = ArrayEditor.Create(current_panel!, title, (arr_get, arr_set), true);
 		
 		if (!(value?.StartsWith("[") ?? false)) {
 			array.gameObject.SetActive(false);

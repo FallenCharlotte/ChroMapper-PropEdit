@@ -12,29 +12,25 @@ namespace ChroMapper_PropEdit.Components {
 // TODO: More generic getter/setter, the raw toggle is jank and not flexible enough
 
 public class ArrayEditor : MonoBehaviour {
+	
+	public delegate JSONArray Getter();
+	public delegate void Setter(JSONArray v);
 	// Return raw json
-	public Func<string[]>? Getter;
-	public Action<string[]>? Setter;
+	Getter? _getter = null;
+	Setter? _setter = null;
+	bool raw = false;
 	
 	public ArrayEditor() {
 		inputs = new List<UITextInput>();
 	}
 	
-	public static ArrayEditor Create(GameObject parent, JSONNode root, string path, string title, string tooltip = "") {
-		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(root, path, title, false, tooltip);
+	public static ArrayEditor Create(GameObject parent, string title, ValueTuple<Getter, Setter> get_set, bool raw = false, string tooltip = "") {
+		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(title, raw, get_set, tooltip);
 	}
 	
-	public static ArrayEditor Create(GameObject parent, string title, ValueTuple<Func<string[]>, Action<string[]>> get_set) {
-		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(title, get_set);
-	}
-	
-	public ArrayEditor Init(JSONNode root, string path, string title, bool raw = false, string tooltip = "") {
-		(Getter, Setter) = NodePathGetSet(root, path, raw);
-		container = gameObject.AddComponent<Collapsible>().Init(title, true, tooltip, false);
-		return this;
-	}
-	public ArrayEditor Init(string title, ValueTuple<Func<string[]>, Action<string[]>> get_set, string tooltip = "") {
-		(Getter, Setter) = get_set;
+	public ArrayEditor Init(string title, bool raw, ValueTuple<Getter, Setter> get_set, string tooltip = "") {
+		(_getter, _setter) = get_set;
+		this.raw = raw;
 		container = gameObject.AddComponent<Collapsible>().Init(title, true, tooltip, false);
 		return this;
 	}
@@ -45,9 +41,10 @@ public class ArrayEditor : MonoBehaviour {
 			GameObject.Destroy(child.gameObject);
 		}
 		
-		var lines = Getter!();
+		var node = _getter!();
 		
-		foreach (var line in lines) {
+		foreach (var item in node) {
+			var line = (raw) ? item.Value.ToString() : (string)item.Value;
 			AddLine(line);
 		}
 		
@@ -57,7 +54,17 @@ public class ArrayEditor : MonoBehaviour {
 	}
 	
 	public void Submit() {
-		Setter!(inputs.Select(it => it.InputField.text).ToArray());
+		var lines = inputs.Select(it => it.InputField.text).ToArray();
+		
+		var node = new JSONArray();
+		
+		foreach (var line in lines) {
+			if (line != "") {
+				node.Add("", raw ? Data.RawToJson(line) : line);
+			}
+		}
+		
+		_setter!(node);
 		
 		Refresh();
 	}
@@ -70,31 +77,16 @@ public class ArrayEditor : MonoBehaviour {
 		inputs.Add(input);
 	}
 	
-	public static (System.Func<string[]>, System.Action<string[]>) NodePathGetSet(JSONNode root, string path, bool raw) {
-		System.Func<string[]> getter = () => {
-			var node = Data.GetNode(root, path)?.AsArray ?? new JSONArray();
-			var items = new string[node.Count];
-			for (var i = 0; i < node.Count; ++i) {
-				items[i] = (raw)
-					? node[i].ToString()
-					: (string)node[i];
-			}
-			return items;
+	public static (Getter, Setter) NodePathGetSet(JSONNode root, string path) {
+		Getter getter = () => {
+			return Data.GetNode(root, path)?.AsArray ?? new JSONArray();
 		};
-		System.Action<string[]> setter = (string[] inputs) => {
-			var node = new JSONArray();
-			
-			foreach (var input in inputs) {
-				if (input != "") {
-					node.Add("", raw ? Data.RawToJson(input) : input);
-				}
-			}
-			
-			if (node.Count == 0) {
+		Setter setter = (JSONArray v) => {
+			if (v.Count == 0) {
 				Data.RemoveNode(root, path);
 			}
 			else {
-				Data.SetNode(root, path, node);
+				Data.SetNode(root, path, v);
 			}
 		};
 		

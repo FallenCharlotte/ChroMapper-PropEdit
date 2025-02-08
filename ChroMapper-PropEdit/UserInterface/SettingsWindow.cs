@@ -126,8 +126,8 @@ public class SettingsWindow {
 			RefreshRequirements();
 		}
 		
-		information_editor = ArrayEditor.Create(panel!, GetGustomData(), "_information", "Information", tooltip.GetTooltip(TooltipStrings.Tooltip.Information));
-		warnings_editor = ArrayEditor.Create(panel!, GetGustomData(), "_warnings", "Warnings", tooltip.GetTooltip(TooltipStrings.Tooltip.Warning));
+		information_editor = ArrayEditor.Create(panel!, "Information", ArrayEditor.NodePathGetSet(GetGustomData(), "_information"), false, tooltip.GetTooltip(TooltipStrings.Tooltip.Information));
+		warnings_editor = ArrayEditor.Create(panel!, "Warnings", ArrayEditor.NodePathGetSet(GetGustomData(), "_warnings"), false, tooltip.GetTooltip(TooltipStrings.Tooltip.Warning));
 		
 		{
 			var collapsible = Collapsible.Create(panel!, "Settings Override", "Map Options", true, tooltip.GetTooltip(TooltipStrings.Tooltip.MapOptions));
@@ -391,16 +391,27 @@ public class SettingsWindow {
 				GameObject.Destroy(child.gameObject);
 			}
 			
-			var v2 = BeatSaberSongContainer.Instance.Map.Version[0] == '2';
-			var pds = BeatSaberSongContainer.Instance.Map.CustomData[v2 ? "_pointDefinitions" : "pointDefinitions"];
+			var pds = BeatSaberSongContainer.Instance.Map.PointDefinitions;
 			
 			foreach (var pd in pds) {
-				ArrayEditor.Create(pointdefinitions_panel, pd.Key, ArrayEditor.NodePathGetSet(pds, pd.Key, true)).Refresh();
+				ArrayEditor.Getter getter = () => pds.ContainsKey(pd.Key)
+					? pds[pd.Key]
+					: new JSONArray();
+				ArrayEditor.Setter setter = (JSONArray v) => {
+					if (v.Count == 0) {
+						pds.Remove(pd.Key);
+						Refresh();
+					}
+					else {
+						pds[pd.Key] = v;
+					}
+				};
+				ArrayEditor.Create(pointdefinitions_panel, pd.Key, (getter, setter), true).Refresh();
 			}
 			
 			var new_input = UI.AddTextbox(pointdefinitions_panel, "", (v) => {
 				if (!string.IsNullOrEmpty(v)) {
-					Data.SetNode(pds, v!, new JSONArray());
+					pds.Add(v!, new JSONArray());
 					Refresh();
 				}
 			});

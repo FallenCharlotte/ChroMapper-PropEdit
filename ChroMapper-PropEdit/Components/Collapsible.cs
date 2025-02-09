@@ -1,4 +1,5 @@
 // Derived (very far) from CM's StrobeGeneratorPassUIController
+using System.Collections;
 using System.Linq;
 
 using UnityEngine;
@@ -13,6 +14,7 @@ public class Collapsible : MonoBehaviour
 	public Toggle? expandToggle;
 	public GameObject? panel;
 	private string? settings_key;
+	private float? height_cache;
 	
 	public static Collapsible Create(GameObject parent, string name, string label, bool expanded) {
 		return Create(parent, name, label, expanded, "");
@@ -79,6 +81,7 @@ public class Collapsible : MonoBehaviour
 		
 		panel = UI.AddChild(gameObject, "Panel");
 		UI.AttachTransform(panel, new Vector2(0, 50), pos: Vector2.zero);
+		panel.AddComponent<RectMask2D>();
 		if (background)
 		{
 			var image = panel.AddComponent<Image>();
@@ -104,7 +107,7 @@ public class Collapsible : MonoBehaviour
 			layout.childAlignment = TextAnchor.UpperCenter;
 		}
 		
-		SetExpanded(expanded);
+		SetExpandedNow(expanded, true);
 		
 		return this;
 	}
@@ -113,11 +116,61 @@ public class Collapsible : MonoBehaviour
 		SendMessageUpwards("DirtyPanel");
 	}
 	
+	private const float anim_dur = 0.25f;
+	
+	private IEnumerator AnimExpanded(bool expanded) {
+		var rect = (panel!.transform as RectTransform)!;
+		var size = rect.sizeDelta;
+		SetExpandedNow(expanded, false);
+		float time_start = Time.time;
+		if (expanded) {
+			panel!.SetActive(expanded);
+			if (height_cache == null) {
+				yield return new WaitForEndOfFrame();
+				height_cache = rect.sizeDelta.y;
+			}
+			do {
+				size.y = (Easing.Cubic.Out((Time.time - time_start) / anim_dur)) * height_cache ?? 0;
+				rect.sizeDelta = size;
+				LayoutRebuilder.MarkLayoutForRebuild(transform.parent as RectTransform);
+				yield return new WaitForEndOfFrame();
+			} while ((Time.time - time_start) < anim_dur);
+			{
+				var csf = panel.GetComponent<ContentSizeFitter>();
+				csf.enabled = true;
+			}
+		}
+		else {
+			height_cache = size.y;
+			{
+				var csf = panel.GetComponent<ContentSizeFitter>();
+				csf.enabled = false;
+			}
+			while ((Time.time - time_start) < anim_dur) {
+				size.y = (1 - Easing.Cubic.Out((Time.time - time_start) / anim_dur)) * height_cache ?? 0;
+				rect.sizeDelta = size;
+				LayoutRebuilder.MarkLayoutForRebuild(transform.parent as RectTransform);
+				yield return new WaitForEndOfFrame();
+			}
+			panel!.SetActive(expanded);
+		}
+		SendMessageUpwards("DirtyPanel");
+		yield break;
+	}
+	
 	public void SetExpanded(bool expanded)
 	{
-		panel!.SetActive(expanded);
+		if (isActiveAndEnabled) {
+			StartCoroutine(AnimExpanded(expanded));
+		}
+		else {
+			SetExpandedNow(expanded, true);
+		}
+	}
+	
+	private void SetExpandedNow(bool expanded, bool set_active) {
+		if (set_active) panel!.SetActive(expanded);
 		expandToggle!.transform.localEulerAngles = (expanded ? 1 : 0) * 180f * Vector3.forward;
-		SendMessageUpwards("DirtyPanel");
 		if (settings_key != null) {
 			Settings.Set(settings_key, expanded);
 		}

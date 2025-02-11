@@ -97,6 +97,7 @@
     <Compile Include="Components\Clickable.cs" />
     <Compile Include="Components\Collapsible.cs" />
     <Compile Include="Components\DragWindowController.cs" />
+    <Compile Include="Components\DropdownButton.cs" />
     <Compile Include="Components\ResizeWindowController.cs" />
     <Compile Include="Components\ScrollBox.cs" />
     <Compile Include="Components\Window.cs" />

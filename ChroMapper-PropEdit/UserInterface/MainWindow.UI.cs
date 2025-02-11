@@ -195,12 +195,57 @@ public partial class MainWindow {
 		
 		var array = ArrayEditor.Create(current_panel!, title, (arr_get, arr_set), true);
 		
-		if (!(value?.StartsWith("[") ?? false)) {
+		var pds = new Map<string?>();
+		
+		foreach (var pd in BeatSaberSongContainer.Instance.Map.PointDefinitions.Keys) {
+			pds.Add($"\"{pd}\"", pd);
+		}
+		
+		var dd_container = UI.AddChild(current_panel!, title + " PD Dropdown");
+		UI.AttachTransform(dd_container, new Vector2(0, 20), new Vector2(0, 0));
+		var backup_panel = current_panel;
+		current_panel = dd_container;
+		var dropdown = AddDropdown(null, get_set, pds, true);
+		UI.AttachTransform(dropdown.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
+		current_panel = backup_panel;
+		
+		System.Action show_array = () => {
+			array.gameObject.SetActive(true);
+			array.Refresh();
+			dd_container.gameObject.SetActive(false);
+		};
+		System.Action show_dropdown = () => {
 			array.gameObject.SetActive(false);
+			dd_container.gameObject.SetActive(true);
+		};
+		
+		if ((value?.StartsWith("[") ?? false)) {
+			show_array();
+		}
+		else if ((value?.StartsWith("\"") ?? false)) {
+			show_dropdown();
 		}
 		else {
-			array.Refresh();
+			array.gameObject.SetActive(false);
+			dd_container.gameObject.SetActive(false);
 		}
+		
+		var type_changer = DropdownButton.Create(container, new List<string>() {
+			"Point Definition Type:",
+			"Array",
+			"Named"
+		}, (v) => {
+			switch (v) {
+			case "Array":
+				show_array();
+				break;
+			case "Named":
+				show_dropdown();
+				break;
+			default:
+				break;
+			}
+		}, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"));
 	}
 	
 #endregion

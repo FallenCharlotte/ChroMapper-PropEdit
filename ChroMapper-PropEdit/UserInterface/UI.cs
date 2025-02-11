@@ -15,7 +15,7 @@ using Convert = System.Convert;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
-public class UI {
+public static class UI {
 	public static GameObject AddChild(GameObject parent, string name, params System.Type[] components) {
 		var obj = new GameObject(name, components);
 		obj.transform.SetParent(parent.transform);
@@ -246,6 +246,11 @@ public class UI {
 		return Sprite.Create(texture2D, new Rect(0, 0, texture2D.width, texture2D.height), new Vector2(0, 0), 100.0f);
 	}
 	
+	public static Sprite GetSprite(string name) {
+		Sprite[] sprites = (Sprite[])Resources.FindObjectsOfTypeAll(typeof(Sprite));
+		return sprites.Single(s => s.name == name);
+	}
+	
 	public static void RefreshTooltips(GameObject? root) {
 		if (root == null)
 			return;
@@ -255,6 +260,36 @@ public class UI {
 		foreach (var t in root.GetComponentsInChildren<Tooltip>(show_tooltips)) {
 			t.enabled = show_tooltips;
 		}
+	}
+	
+	// From https://discussions.unity.com/t/how-to-get-a-component-from-an-object-and-add-it-to-another-copy-components-at-runtime/80939/4
+	public static T GetCopyOf<T>(this T comp, T other) where T : Component
+	{
+		System.Type type = comp.GetType();
+		//if (type != other.GetType()) return null; // type mis-match
+		BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Default | BindingFlags.DeclaredOnly;
+		PropertyInfo[] pinfos = type.GetProperties(flags);
+		foreach (var pinfo in pinfos) {
+			if (pinfo.CanWrite) {
+				try {
+					pinfo.SetValue(comp, pinfo.GetValue(other, null), null);
+				}
+				catch { } // In case of NotImplementedException being thrown. For some reason specifying that exception didn't seem to catch it, so I didn't catch anything specific.
+			}
+		}
+		FieldInfo[] finfos = type.GetFields(flags);
+		foreach (var finfo in finfos) {
+			finfo.SetValue(comp, finfo.GetValue(other));
+		}
+		return comp;
+	}
+	public static T AddComponent<T>(this GameObject go, T toAdd) where T : Component
+	{
+		return go.AddComponent<T>().GetCopyOf(toAdd);
+	}
+	public static T AddComponent<T>(this Transform t, T toAdd) where T : Component
+	{
+		return t.gameObject.AddComponent<T>().GetCopyOf(toAdd);
 	}
 	
 	// Stop textbox input from triggering actions, copied from the node editor

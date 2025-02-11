@@ -18,7 +18,14 @@ public partial class MainWindow {
 	public InputAction? keybind;
 	public Window? window;
 	public GameObject? panel;
-	public GameObject? current_panel;
+	public Stack<GameObject> panels;
+	public GameObject? current_panel {
+		get {
+			return (panels.Count > 0)
+				? panels.Peek()
+				: null;
+		}
+	}
 	public ScrollBox? scrollbox;
 	public List<BaseObject>? editing;
 	
@@ -27,6 +34,7 @@ public partial class MainWindow {
 			UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
 			"Prop Edit",
 			ToggleWindow);
+		panels = new Stack<GameObject>();
 		try {
 			var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
 				.Where(x => x.name == "Node Editor")
@@ -195,15 +203,63 @@ public partial class MainWindow {
 		
 		var array = ArrayEditor.Create(current_panel!, title, (arr_get, arr_set), true);
 		
-		if (!(value?.StartsWith("[") ?? false)) {
+		var pds = new Map<string?>();
+		
+		foreach (var pd in BeatSaberSongContainer.Instance.Map.PointDefinitions.Keys) {
+			pds.Add($"\"{pd}\"", pd);
+		}
+		
+		var dd_container = UI.AddChild(current_panel!, title + " PD Dropdown");
+		UI.AttachTransform(dd_container, new Vector2(0, 20), new Vector2(0, 0));
+		panels.Push(dd_container);
+		var dropdown = AddDropdown(null, get_set, pds, true);
+		UI.AttachTransform(dropdown.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
+		panels.Pop();
+		
+		System.Action show_array = () => {
+			array.gameObject.SetActive(true);
+			array.Refresh();
+			dd_container.gameObject.SetActive(false);
+		};
+		System.Action show_dropdown = () => {
 			array.gameObject.SetActive(false);
+			dd_container.gameObject.SetActive(true);
+		};
+		
+		if ((value?.StartsWith("[") ?? false)) {
+			show_array();
+		}
+		else if ((value?.StartsWith("\"") ?? false)) {
+			show_dropdown();
 		}
 		else {
-			array.Refresh();
+			array.gameObject.SetActive(false);
+			dd_container.gameObject.SetActive(false);
 		}
+		
+		var type_changer = DropdownButton.Create(container, new List<string>() {
+			"Point Definition Type:",
+			"Array",
+			"Named"
+		}, (v) => {
+			switch (v) {
+			case "Array":
+				show_array();
+				break;
+			case "Named":
+				show_dropdown();
+				break;
+			default:
+				break;
+			}
+		}, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"));
 	}
 	
 #endregion
+	
+	public void AddExpando(string name, string label, bool expanded) {
+		panels.Push(Collapsible.Create(current_panel ?? panel!, name, label, expanded).panel!);
+	}
 	
 	private void Resize() {
 		var layout = panel!.GetComponent<LayoutElement>();

@@ -15,7 +15,7 @@ using ChroMapper_PropEdit.Enums;
 
 namespace ChroMapper_PropEdit.Utils {
 
-public class Data {
+public static class Data {
 	
 #region Getter/setter factories
 	

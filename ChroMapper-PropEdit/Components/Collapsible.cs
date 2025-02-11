@@ -68,8 +68,7 @@ public class Collapsible : MonoBehaviour
 			expanded = Settings.Get(settings_key, expanded);
 		}
 		expandToggle = UI.AddCheckbox(header, expanded, SetExpanded);
-		Sprite[] sprites = (Sprite[])Resources.FindObjectsOfTypeAll(typeof(Sprite));
-		Sprite arrow = sprites.Single(s => s.name == "ArrowIcon");
+		Sprite arrow = UI.GetSprite("ArrowIcon");
 		
 		Image[] images = expandToggle.gameObject.GetComponentsInChildren<Image>();
 		foreach (var image in images) {

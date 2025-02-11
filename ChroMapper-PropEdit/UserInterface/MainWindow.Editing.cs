@@ -50,7 +50,8 @@ public partial class MainWindow {
 			var type = o.ObjectType;
 			var v2 = BeatSaberSongContainer.Instance.Map.Version[0] == '2';
 			
-			current_panel = panel;
+			panels.Clear();
+			panels.Push(panel);
 			
 			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true, (o is BaseGrid)
 				? tooltip.GetTooltip(PropertyType.Object, TooltipStrings.Tooltip.Beat)
@@ -68,8 +69,7 @@ public partial class MainWindow {
 					}
 					AddLine("");
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
-						current_panel = collapsible.panel;
+						AddExpando(CHROMA_NAME, "Chroma", true);
 						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Color));
 						if (v2) {
 							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableSpawnEffect));
@@ -78,12 +78,11 @@ public partial class MainWindow {
 							AddCheckbox("Spawn Effect", Data.CustomGetSet<bool?>("spawnEffect"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnEffect));
 							AddCheckbox("Disable Debris", Data.CustomGetSet<bool?>("disableDebris"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableDebris));
 						}
-						current_panel = panel;
+						panels.Pop();
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
-						current_panel = collapsible.panel;
+						AddExpando(NOODLE_NAME, "Noodle Extensions", true);
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NJS));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnOffset));
 						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Coordinates));
@@ -108,7 +107,7 @@ public partial class MainWindow {
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true,tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Track)); //prob. needs more info
 						AddAnimation(PropertyType.Note, v2);
-						current_panel = panel;
+						panels.Pop();
 					}
 					
 					break;
@@ -131,15 +130,13 @@ public partial class MainWindow {
 					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
-						current_panel = collapsible.panel;
+						AddExpando(CHROMA_NAME, "Chroma", true);
 						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Color));
-						current_panel = panel;
+						panels.Pop();
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
-						current_panel = collapsible.panel;
+						AddExpando(NOODLE_NAME, "Noodle Extensions", true);
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.NJS));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.SpawnOffset));
 						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Coordinates));
@@ -158,7 +155,7 @@ public partial class MainWindow {
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Track));
 						AddAnimation(PropertyType.Arc, v2);
-						current_panel = panel;
+						panels.Pop();
 					}
 					
 				}	break;
@@ -176,15 +173,13 @@ public partial class MainWindow {
 					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
-						current_panel = collapsible.panel;
+						AddExpando(CHROMA_NAME, "Chroma", true);
 						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Color));
-						current_panel = panel;
+						panels.Pop();
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
-						current_panel = collapsible.panel;
+						AddExpando(NOODLE_NAME, "Noodle Extensions", true);
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.NJS));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.SpawnOffset));
 						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.Coordinates));
@@ -203,7 +198,7 @@ public partial class MainWindow {
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Track));
 						AddAnimation(PropertyType.Chain, v2);
-						current_panel = panel;
+						panels.Pop();
 					}
 					
 				}	break;
@@ -224,15 +219,13 @@ public partial class MainWindow {
 					AddLine("");
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
-						current_panel = collapsible.panel;
+						AddExpando(CHROMA_NAME, "Chroma", true);
 						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Color));
-						current_panel = panel;
+						panels.Pop();
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						var collapsible = Collapsible.Create(panel, NOODLE_NAME, "Noodle Extensions", true);
-						current_panel = collapsible.panel;
+						AddExpando(NOODLE_NAME, "Noodle Extensions", true);
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.NJS));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.SpawnOffset));
 						AddTextbox("Coordinates", Data.CustomGetSetRaw(ob.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Coordinates));
@@ -248,7 +241,7 @@ public partial class MainWindow {
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Track));
 						AddAnimation(PropertyType.Obstacle, v2);
-						current_panel = panel;
+						panels.Pop();
 					}
 					
 					break;
@@ -273,8 +266,7 @@ public partial class MainWindow {
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
-							current_panel = collapsible.panel;
+							AddExpando(CHROMA_NAME, "Chroma", true);
 							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LightID));
 							AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Color));
 							if (events.Where(e => e.IsTransition).Count() == editing.Count()) {
@@ -290,7 +282,7 @@ public partial class MainWindow {
 									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Easing));
 								}
 							}
-							current_panel = panel;
+							panels.Pop();
 						}
 					}
 					// Laser Speeds
@@ -299,20 +291,18 @@ public partial class MainWindow {
 						AddLine("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
-							current_panel = collapsible.panel;
+							AddExpando(CHROMA_NAME, "Chroma", true);
 							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LockRotation));
 							AddDropdown<int?>("Direction",     Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.LaserDirection, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserDirection));
-							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeyPreciseSpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.PreciseSpeed));
-							current_panel = panel;
+							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.PreciseSpeed));
+							panels.Pop();
 						}
 					}
 					// Ring Rotation
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
 						AddLine("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
-							current_panel = collapsible.panel;
+							AddExpando(CHROMA_NAME, "Chroma", true);
 							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingFilter));
 							if (v2) {
 								AddCheckbox("Reset", Data.CustomGetSet<bool?>("_reset"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2Reset));
@@ -325,18 +315,17 @@ public partial class MainWindow {
 							if (v2) {
 								AddCheckbox("Counter Spin", Data.CustomGetSet<bool?>("_counterSpin"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2CounterSpin));
 							}
-							current_panel = panel;
+							panels.Pop();
 						}
 					}
 					// Ring Zoom
 					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
 						AddLine("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							var collapsible = Collapsible.Create(panel, CHROMA_NAME, "Chroma", true);
-							current_panel = collapsible.panel;
+							AddExpando(CHROMA_NAME, "Chroma", true);
 							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingZoomStep));
 							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));
-							current_panel = panel;
+							panels.Pop();
 						}
 					}
 					// Boost Color
@@ -370,11 +359,11 @@ public partial class MainWindow {
 							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
 						AddLine("");
-						AddTextbox("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
+						AddPointDefinition("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
 						foreach (var property in Events.NoodleProperties) {
-							AddTextbox(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), true, tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
+							AddPointDefinition(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
-						AddTextbox("Time", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_time" : "time"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateTime));
+						AddPointDefinition("Time", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_time" : "time"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateTime));
 						break;
 					
 					case "AssignPathAnimation":
@@ -385,11 +374,11 @@ public partial class MainWindow {
 							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
 						AddLine("");
-						AddTextbox("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
+						AddPointDefinition("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
 						foreach (var property in Events.NoodleProperties) {
 							AddPointDefinition(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
-						AddTextbox("Definite Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_definitePosition" : "definitePosition"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+						AddPointDefinition("Definite Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_definitePosition" : "definitePosition"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
 						break;
 					
 					// Noodle
@@ -499,30 +488,27 @@ public partial class MainWindow {
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						{
 							var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("renderSettings") ?? false);
-							var collapsible = Collapsible.Create(panel, "_Render Settings", "Render Settings", has_any || mixed);
-							current_panel = collapsible.panel;
+							AddExpando("_Render Settings", "Render Settings", has_any || mixed);
 							foreach (var prop in Vivify.RenderSettings) {
 								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
 							}
-							current_panel = panel;
+							panels.Pop();
 						}
 						{
 							var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("qualitySettings") ?? false);
-							var collapsible = Collapsible.Create(panel, "_Quality Settings", "Quality Settings", has_any || mixed);
-							current_panel = collapsible.panel;
+							AddExpando("_Quality Settings", "Quality Settings", has_any || mixed);
 							foreach (var prop in Vivify.QualitySettings) {
 								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
 							}
-							current_panel = panel;
+							panels.Pop();
 						}
 						{
 							var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("xrSettings") ?? false);
-							var collapsible = Collapsible.Create(panel, "_XR Settings", "XR Settings", has_any || mixed);
-							current_panel = collapsible.panel;
+							AddExpando("_XR Settings", "XR Settings", has_any || mixed);
 							foreach (var prop in Vivify.XRSettings) {
 								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
 							}
-							current_panel = panel;
+							panels.Pop();
 						}
 						break;
 					}
@@ -542,12 +528,13 @@ public partial class MainWindow {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
 		AddCheckbox("Animation", Data.GetSetAnimation(v2), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimatePath));
 		if (editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() == editing.Count()) {
-			AddCheckbox("  Color", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],"), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimateColor));
+			AddExpando("Animations", "Animationss", true);
+			AddCheckbox("Color", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],"), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimateColor));
 			foreach (var property in Events.NoodleProperties) {
-				AddCheckbox("  "+property.Key, Data.CustomGetSetNode(CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2]), false, tooltip.GetTooltip(type, $"Animate{property.Key}"));
+				AddCheckbox(property.Key, Data.CustomGetSetNode(CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2]), false, tooltip.GetTooltip(type, $"Animate{property.Key}"));
 			}
-			AddCheckbox("  Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
-			AddLine("");
+			AddCheckbox("Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+			panels.Pop();
 		}
 	}
 	
@@ -584,12 +571,11 @@ public partial class MainWindow {
 		if (asset != null) {
 			var mat = bundleInfo?.Materials?.Forward(asset);
 			if (mat != null && (bundleInfo?.Properties?.ContainsKey(mat) ?? false)) {
-				var collapsible = Collapsible.Create(panel!, "Properties", "Properties", true);
-				current_panel = collapsible.panel;
+				panels.Push(Collapsible.Create(panel!, "Properties", "Properties", true).panel!);
 				foreach (var prop in bundleInfo.Properties[mat]) {
 					AddTextbox(prop.Key, Data.PropertyGetSetRaw(prop.Key, prop.Value.ToString()), true);
 				}
-				current_panel = panel;
+				panels.Pop();
 			}
 		}
 	}
@@ -620,53 +606,51 @@ public partial class MainWindow {
 			}
 		}
 		
-		var collapsible = Collapsible.Create(panel!, "Properties", "Properties", true);
-		current_panel = collapsible.panel;
+		panels.Push(Collapsible.Create(panel!, "Properties", "Properties", true).panel!);
 		foreach (var prop in all_props) {
 			var container = UI.AddChild(current_panel!, prop + " Container");
 			UI.AttachTransform(container, new Vector2(0, 20), pos: new Vector2(0, 0));
-			current_panel = container;
+			panels.Push(container);
 			var id_box = AddTextbox(null, Data.PropertyGetSetPart(prop.Key, "id"));
 			UI.LeftColumn(id_box.gameObject);
 			AddDropdown(null, Data.PropertyGetSetPart(prop.Key, "type"), Vivify.PropertyTypes, false);
-			current_panel = collapsible.panel;
+			panels.Pop();
 			var value_box = AddTextbox(null, Data.PropertyGetSetRaw(prop.Key, prop.Value.ToString()), true);
 			UI.MoveTransform((RectTransform)value_box.transform, new Vector2(0, 22), new Vector2(0, 0));
 		}
 		AddTextbox("Add Property", Data.PropertyGetSetPart(null, "id"));
-		current_panel = panel;
+		panels.Pop();
 	}
 	
 	private void AddObjectProperties() {
 		{
 			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("colorNotes") ?? false);
-			var collapsible = Collapsible.Create(panel!, "_Color Notes", "Color Notes", has_any || mixed);
-			current_panel = collapsible.panel;
+			panels.Push(Collapsible.Create(panel!, "_Color Notes", "Color Notes", has_any || mixed).panel!);
 			AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "colorNotes.track"), true);
 			AddPrefab("Asset", "colorNotes.asset");
 			AddPrefab("Any Direction Asset", "colorNotes.anyDirectionAsset");
 			AddPrefab("Debris Asset", "colorNotes.debrisAsset");
+			panels.Pop();
 		}
 		{
 			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("burstSliders") ?? false);
-			var collapsible = Collapsible.Create(panel!, "_Burst Sliders", "Burst Sliders", has_any || mixed);
-			current_panel = collapsible.panel;
+			AddExpando("_Burst Sliders", "Burst Sliders", has_any || mixed);
 			AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "burstSliders.track"), true);
 			AddPrefab("Asset", "burstSliders.asset");
 			AddPrefab("Debris Asset", "burstSliders.debrisAsset");
+			panels.Pop();
 		}
 		{
 			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("burstSliderElemeents") ?? false);
-			var collapsible = Collapsible.Create(panel!, "_Burst Slider Elements", "Burst Slider Elements", has_any || mixed);
-			current_panel = collapsible.panel;
+			AddExpando("_Burst Slider Elements", "Burst Slider Elements", has_any || mixed);
 			AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "burstSliderElemeents.track"), true);
 			AddPrefab("Asset", "burstSliderElemeents.asset");
 			AddPrefab("Debris Asset",  "burstSliderElemeents.debrisAsset");
+			panels.Pop();
 		}
 		{
 			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("saber") ?? false);
-			var collapsible = Collapsible.Create(panel!, "_Sabers", "Sabers", has_any || mixed);
-			current_panel = collapsible.panel;
+			AddExpando("_Sabers", "Sabers", has_any || mixed);
 			AddDropdown("Type", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "saber.type"), Vivify.SaberTypes, false);
 			AddPrefab("Asset", "saber.asset");
 			AddPrefab("Trail Asset", "saber.trailAsset");
@@ -675,8 +659,9 @@ public partial class MainWindow {
 			AddParsed("Trail Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "saber.trailDuration"));
 			AddParsed("Trail Sampling Frequency", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "saber.trailSamplingFrequency"));
 			AddParsed("Trail Granularity", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "saber.trailGranularity"));
+			panels.Pop();
 		}
-		current_panel = panel;
+		panels.Pop();
 	}
 }
 

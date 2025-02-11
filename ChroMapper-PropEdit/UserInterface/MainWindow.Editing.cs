@@ -23,7 +23,7 @@ using static ChroMapper_PropEdit.UserInterface.TooltipStrings;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
-public partial class MainWindow {
+public partial class MainWindow : UIWindow {
 	public readonly string CHROMA_NAME = "Chroma";
 	public readonly string NOODLE_NAME = "Noodle Extensions";
 	TooltipStrings tooltip = TooltipStrings.Instance;

@@ -13,20 +13,9 @@ using ChroMapper_PropEdit.Utils;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
-public partial class MainWindow {
+public partial class MainWindow : UIWindow {
 	public ExtensionButton main_button;
 	public InputAction? keybind;
-	public Window? window;
-	public GameObject? panel;
-	public Stack<GameObject> panels;
-	public GameObject? current_panel {
-		get {
-			return (panels.Count > 0)
-				? panels.Peek()
-				: null;
-		}
-	}
-	public ScrollBox? scrollbox;
 	public List<BaseObject>? editing;
 	
 	public MainWindow() {
@@ -60,7 +49,7 @@ public partial class MainWindow {
 		}
 	}
 	
-	public void ToggleWindow() {
+	public override void ToggleWindow() {
 		if (window == null) return;
 		window!.Toggle();
 		UpdateSelection(window!.gameObject.activeSelf);
@@ -71,28 +60,12 @@ public partial class MainWindow {
 	}
 	
 	public void Init(MapEditorUI mapEditorUI) {
-		var parent = mapEditorUI.MainUIGroup[5].gameObject;
-		
-		window = Window.Create("Main", "Prop Editor", parent, new Vector2(220, 256));
-		window.onShow += Resize;
-		window.onResize += Resize;
+		base.Init(mapEditorUI, "Prop Editor");
 		
 		{
-			var button = UI.AddButton(window.title!, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"), () => Plugin.settings!.ToggleWindow());
+			var button = UI.AddButton(window!.title!, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"), () => Plugin.settings!.ToggleWindow());
 			UI.AttachTransform(button.gameObject, pos: new Vector2(-25, -14), size: new Vector2(30, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
 		}
-		
-		var container = UI.AddChild(window.gameObject, "Prop Scroll Container");
-		UI.AttachTransform(container, new Vector2(-10, -40), new Vector2(0, -15), new Vector2(0, 0), new Vector2(1, 1));
-		{
-			var image = container.AddComponent<Image>();
-			image.sprite = PersistentUI.Instance.Sprites.Background;
-			image.type = Image.Type.Sliced;
-			image.color = new Color(0.1f, 0.1f, 0.1f, 1);
-		}
-		
-		scrollbox = ScrollBox.Create(container);
-		panel = scrollbox.content;
 		
 		UpdateSelection(true);
 		
@@ -257,11 +230,7 @@ public partial class MainWindow {
 	
 #endregion
 	
-	public void AddExpando(string name, string label, bool expanded) {
-		panels.Push(Collapsible.Create(current_panel ?? panel!, name, label, expanded).panel!);
-	}
-	
-	private void Resize() {
+	protected override void OnResize() {
 		var layout = panel!.GetComponent<LayoutElement>();
 		layout!.minHeight = window!.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
 	}

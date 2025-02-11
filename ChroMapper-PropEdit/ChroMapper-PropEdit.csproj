@@ -114,6 +114,7 @@
     <Compile Include="UserInterface\SettingsWindow.cs" />
     <Compile Include="UserInterface\TooltipStrings.cs" />
     <Compile Include="UserInterface\UI.cs" />
+    <Compile Include="UserInterface\UIWindow.cs" />
     <Compile Include="Utils\BundleInfo.cs" />
     <Compile Include="Utils\CustomRequirement.cs" />
     <Compile Include="Utils\Data.cs" />

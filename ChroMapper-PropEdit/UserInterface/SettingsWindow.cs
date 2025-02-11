@@ -13,19 +13,15 @@ using SimpleJSON;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
-public class SettingsWindow {
-	public Window? window;
-	public GameObject? panel;
+public class SettingsWindow : UIWindow {
 	public GameObject? requirements_panel;
 	public GameObject? settings_panel;
-	public GameObject? current_panel;
 	public GameObject? pointdefinitions_panel;
 	public Toggle? chroma_enable;
 	public Toggle? noodle_enable;
 	public Toggle? split_value;
 	public Toggle? color_hex;
 	public Toggle? tooltip_enable;
-	public ScrollBox? scrollbox;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
 	TooltipStrings tooltip = TooltipStrings.Instance;
@@ -55,28 +51,12 @@ public class SettingsWindow {
 #endif
 	
 	public void Init(MapEditorUI mapEditorUI) {
-		var parent = mapEditorUI.MainUIGroup[5].gameObject;
-		
-		window = Window.Create("Settings", "Settings", parent, size: new Vector2(200, 80));
-		window.onShow += OnResize;
-		window.onResize += OnResize;
+		base.Init(mapEditorUI, "Settings");
 		
 		{
-			var button = UI.AddButton(window.title!, "Close", ToggleWindow);
+			var button = UI.AddButton(window!.title!, "Close", ToggleWindow);
 			UI.AttachTransform(button.gameObject, pos: new Vector2(-35, -14), size: new Vector2(50, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
 		}
-		
-		var window_content = UI.AddChild(window.gameObject, "Settings Window Content");
-		UI.AttachTransform(window_content, new Vector2(-10, -40), new Vector2(0, -15), new Vector2(0, 0), new Vector2(1, 1));
-		{
-			var image = window_content.AddComponent<Image>();
-			image.sprite = PersistentUI.Instance.Sprites.Background;
-			image.type = Image.Type.Sliced;
-			image.color = new Color(0.1f, 0.1f, 0.1f, 1);
-		}
-		scrollbox = ScrollBox.Create(window_content);
-		panel = scrollbox.content;
-		
 		
 		UI.AddLabel(panel!, "PropEdit", "PropEdit Settings", Vector2.zero);
 		{
@@ -130,11 +110,10 @@ public class SettingsWindow {
 		warnings_editor = ArrayEditor.Create(panel!, "Warnings", ArrayEditor.NodePathGetSet(GetGustomData(), "_warnings"), false, tooltip.GetTooltip(TooltipStrings.Tooltip.Warning));
 		
 		{
-			var collapsible = Collapsible.Create(panel!, "Settings Override", "Map Options", true, tooltip.GetTooltip(TooltipStrings.Tooltip.MapOptions));
+			AddExpando("Settings Override", "Map Options", true, tooltip.GetTooltip(TooltipStrings.Tooltip.MapOptions));
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "Player Options", "Player Options", true);
+				AddExpando("Player Options", "Player Options", true);
 				prefix = "_playerOptions";
-				current_panel = c2.panel;
 				AddDropdown("Left Handed", "_leftHanded", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.LeftHanded));
 				AddParsed<float>("Player Height", "_playerHeight", tooltip.GetTooltip(TooltipStrings.Tooltip.PlayerHeight));
 				AddDropdown("Automatic Player Height", "_automaticPlayerHeight", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.AutomaticPlayerHeight));
@@ -152,11 +131,11 @@ public class SettingsWindow {
 				AddDropdown("Adaptive Sfx", "_adaptiveSfx", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.AdaptiveSFX));
 				AddDropdown("Expert- Effects Filter", "_environmentEffectsFilterDefaultPreset", MapSettings.EffectsFilters, tooltip.GetTooltip(TooltipStrings.Tooltip.ExpertEffectsFilter));
 				AddDropdown("Expert+ Effects Filter", "_environmentEffectsFilterExpertPlusPreset", MapSettings.EffectsFilters, tooltip.GetTooltip(TooltipStrings.Tooltip.ExpertPlusEffectsFilter));
+				panels.Pop();
 			}
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "Modifiers", "Modifiers", true);
+				AddExpando("Modifiers", "Modifiers", true);
 				prefix = "_modifiers";
-				current_panel = c2.panel;
 				AddDropdown("Energy Type", "_energyType", MapSettings.EnergyTypes, tooltip.GetTooltip(TooltipStrings.Tooltip.EnergyType));
 				AddDropdown("No Fail", "_noFailOn0Energy", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.NoFail));
 				AddDropdown("Instant Fail", "_instaFail", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.InstantFail));
@@ -172,39 +151,41 @@ public class SettingsWindow {
 				AddDropdown("Pro Mode", "_proMode", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.ProMode));
 				AddDropdown("Zen Mode", "_zenMode", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.ZenMode));
 				AddDropdown("Small Cubes", "_smallCubes", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.SmallCubes));
+				panels.Pop();
 			}
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "Environments", "Environments", true);
+				AddExpando("Environments", "Environments", true);
 				prefix = "_environments";
-				current_panel = c2.panel;
 				AddDropdown("Override Environments", "_overrideEnvironments", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.OverrideEnvironments));
+				panels.Pop();
 			}
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "Colors", "Colors", true);
+				AddExpando("Colors", "Colors", true);
 				prefix = "_colors";
-				current_panel = c2.panel;
 				AddDropdown("Override Colors", "_overrideDefaultColors", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.OverrideColors));
+				panels.Pop();
 			}
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "Graphics", "Graphics", true);
+				AddExpando("Graphics", "Graphics", true);
 				prefix = "_graphics";
-				current_panel = c2.panel;
 				AddParsed<int>("Mirror Quality", "_mirrorGraphicsSettings", tooltip.GetTooltip(TooltipStrings.Tooltip.MirrorQuality));
 				AddParsed<int>("Bloom Post Process", "_mainEffectGraphicsSettings", tooltip.GetTooltip(TooltipStrings.Tooltip.BloomPostProcess));
 				AddParsed<int>("Smoke", "_smokeGraphicsSettings", tooltip.GetTooltip(TooltipStrings.Tooltip.Smoke));
 				AddDropdown("Burn Mark Trails", "_burnMarkTrailsEnabled", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.BurnMarkTrails));
 				AddDropdown("Screen Displacement", "_screenDisplacementEffectsEnabled", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.Information));
 				AddParsed<int>("Max Shockwave Particles", "_maxShockwaveParticles", tooltip.GetTooltip(TooltipStrings.Tooltip.MaxShockwaveParticles));
+				panels.Pop();
 			}
 			{
-				var c2 = Collapsible.Create(collapsible.panel!, "Chroma", "Chroma", true);
+				AddExpando("Chroma", "Chroma", true);
 				prefix = "_chroma";
-				current_panel = c2.panel;
 				AddDropdown("Disable Chroma Events", "_disableChromaEvents", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.DisableChromaEvents));
 				AddDropdown("Disable Environment Enhancements", "_disableEnvironmentEnhancements", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.DisableEnvironmentEnhancements));
 				AddDropdown("Disable Note Coloring", "_disableNoteColoring", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.DisableNoteColoring));
 				AddDropdown("Force Zen Mode Walls", "_forceZenModeWalls", MapSettings.OptionBool, tooltip.GetTooltip(TooltipStrings.Tooltip.ForceZenModeWalls));
+				panels.Pop();
 			}
+			panels.Pop();
 		}
 		
 		if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
@@ -419,12 +400,12 @@ public class SettingsWindow {
 		}
 	}
 	
-	private void OnResize() {
+	protected override void OnResize() {
 		var layout = panel!.GetComponent<LayoutElement>();
 		layout!.minHeight = window!.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
 	}
 	
-	public void ToggleWindow() {
+	public override void ToggleWindow() {
 		Refresh();
 		window!.Toggle();
 	}

@@ -206,6 +206,7 @@ public partial class MainWindow : UIWindow {
 		System.Action show_dropdown = () => {
 			array.gameObject.SetActive(false);
 			dd_container.gameObject.SetActive(true);
+			scrollbox!.SendMessage("DirtyPanel");
 		};
 		
 		if ((value?.StartsWith("[") ?? false)) {

@@ -106,7 +106,7 @@ public partial class MainWindow : UIWindow {
 							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Link));
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true,tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Track)); //prob. needs more info
-						AddAnimation(PropertyType.Note, v2);
+						AddAnimations(PropertyType.Note, v2);
 						panels.Pop();
 					}
 					
@@ -154,7 +154,7 @@ public partial class MainWindow : UIWindow {
 							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Link));
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Track));
-						AddAnimation(PropertyType.Arc, v2);
+						AddAnimations(PropertyType.Arc, v2);
 						panels.Pop();
 					}
 					
@@ -197,7 +197,7 @@ public partial class MainWindow : UIWindow {
 							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Link));
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Track));
-						AddAnimation(PropertyType.Chain, v2);
+						AddAnimations(PropertyType.Chain, v2);
 						panels.Pop();
 					}
 					
@@ -240,7 +240,7 @@ public partial class MainWindow : UIWindow {
 							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Uninteractable)); // not sure if this means that it will screw up your score
 						}
 						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Track));
-						AddAnimation(PropertyType.Obstacle, v2);
+						AddAnimations(PropertyType.Obstacle, v2);
 						panels.Pop();
 					}
 					
@@ -524,17 +524,28 @@ public partial class MainWindow : UIWindow {
 		}
 	}}
 	
-	private void AddAnimation(PropertyType type, bool v2) {
+	private void AddAnimations(PropertyType type, bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
 		AddCheckbox("Animation", Data.GetSetAnimation(v2), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimatePath));
 		if (editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() == editing.Count()) {
 			AddExpando("Animations", "Animationss", true);
-			AddCheckbox("Color", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],"), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimateColor));
+			AddAnimation("Color", CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimateColor));
 			foreach (var property in Events.NoodleProperties) {
-				AddCheckbox(property.Key, Data.CustomGetSetNode(CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2]), false, tooltip.GetTooltip(type, $"Animate{property.Key}"));
+				AddAnimation(property.Key, CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2], tooltip.GetTooltip(type, $"Animate{property.Key}"));
 			}
-			AddCheckbox("Definite Position", Data.CustomGetSetNode(CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]"), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+			AddAnimation("Definite Position", CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
 			panels.Pop();
+		}
+	}
+	
+	private void AddAnimation(string name, string path, string default_json, string tooltip) {
+		var (getter, setter) = Data.CustomGetSetNode(path, default_json);
+		var (value, _) = Data.GetAllOrNothing(editing!, getter);
+		if (value ?? false) {
+			AddPointDefinition(name, Data.CustomGetSetRaw(path), tooltip);
+		}
+		else {
+			AddCheckbox(name, (getter, setter), false, tooltip);
 		}
 	}
 	

@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -59,6 +60,14 @@ public partial class MainWindow : UIWindow {
 		keybind?.Disable();
 	}
 	
+#if CHROMPER_11
+	private IEnumerator WaitUpdate() {
+		yield return new WaitForEndOfFrame();
+		UpdateSelection(false);
+		yield break;
+	}
+#endif
+	
 	public void Init(MapEditorUI mapEditorUI) {
 		base.Init(mapEditorUI, "Prop Editor");
 		
@@ -79,7 +88,11 @@ public partial class MainWindow : UIWindow {
 		UpdateSelection(true);
 		
 		SelectionController.SelectionChangedEvent += () => UpdateSelection(true);
+#if CHROMPER_11
+		BeatmapActionContainer.ActionCreatedEvent += (_) => window.StartCoroutine(WaitUpdate());
+#else
 		BeatmapActionContainer.ActionCreatedEvent += (_) => UpdateSelection(false);
+#endif
 		BeatmapActionContainer.ActionUndoEvent += (_) => UpdateSelection(false);
 		BeatmapActionContainer.ActionRedoEvent += (_) => UpdateSelection(false);
 		

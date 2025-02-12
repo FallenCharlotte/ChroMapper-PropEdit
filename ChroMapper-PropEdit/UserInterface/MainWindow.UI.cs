@@ -63,8 +63,17 @@ public partial class MainWindow : UIWindow {
 		base.Init(mapEditorUI, "Prop Editor");
 		
 		{
-			var button = UI.AddButton(window!.title!, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"), () => Plugin.settings!.ToggleWindow());
+			var button = UI.AddButton(window!.title!, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"), () => Plugin.plugin_settings!.ToggleWindow());
 			UI.AttachTransform(button.gameObject, pos: new Vector2(-25, -14), size: new Vector2(30, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
+			var tooltip = button.gameObject.AddComponent<Tooltip>();
+			tooltip.TooltipOverride = "PropEdit Settings";
+		}
+		{
+			// Sprite yoinked from ChroMapper/Assets/_Graphics/Textures And Sprites/UI/BeatsaberSpriteSheet.png
+			var button = UI.AddButton(window!.title!, UI.LoadSprite("ChroMapper_PropEdit.Resources.EditorIcon.png"), () => Plugin.map_settings!.ToggleWindow());
+			UI.AttachTransform(button.gameObject, pos: new Vector2(-60, -14), size: new Vector2(30, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
+			var tooltip = button.gameObject.AddComponent<Tooltip>();
+			tooltip.TooltipOverride = "Map Settings";
 		}
 		
 		UpdateSelection(true);
@@ -230,10 +239,6 @@ public partial class MainWindow : UIWindow {
 	
 #endregion
 	
-	protected override void OnResize() {
-		var layout = panel!.GetComponent<LayoutElement>();
-		layout!.minHeight = window!.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
-	}
 }
 
 }

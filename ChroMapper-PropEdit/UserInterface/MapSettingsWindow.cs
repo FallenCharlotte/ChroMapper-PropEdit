@@ -13,15 +13,10 @@ using SimpleJSON;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
-public class SettingsWindow : UIWindow {
+public class MapSettingsWindow : UIWindow {
 	public GameObject? requirements_panel;
 	public GameObject? settings_panel;
 	public GameObject? pointdefinitions_panel;
-	public Toggle? chroma_enable;
-	public Toggle? noodle_enable;
-	public Toggle? split_value;
-	public Toggle? color_hex;
-	public Toggle? tooltip_enable;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
 	TooltipStrings tooltip = TooltipStrings.Instance;
@@ -51,54 +46,14 @@ public class SettingsWindow : UIWindow {
 #endif
 	
 	public void Init(MapEditorUI mapEditorUI) {
-		base.Init(mapEditorUI, "Settings");
+		base.Init(mapEditorUI, "Map Settings");
 		
 		{
-			var button = UI.AddButton(window!.title!, "Close", ToggleWindow);
-			UI.AttachTransform(button.gameObject, pos: new Vector2(-35, -14), size: new Vector2(50, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
+			var button = UI.AddButton(window!.title!, UI.GetSprite("CloseIcon"), ToggleWindow);
+			button.Image.color = Color.red;
+			UI.AttachTransform(button.gameObject, pos: new Vector2(-25, -14), size: new Vector2(30, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
 		}
 		
-		UI.AddLabel(panel!, "PropEdit", "PropEdit Settings", Vector2.zero);
-		{
-			var container = UI.AddField(panel!, "Show Chroma", null, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowChroma));
-			chroma_enable = UI.AddCheckbox(container, false, (v) => {
-				Settings.Set(Settings.ShowChromaKey, v);
-				Plugin.main?.UpdateSelection(false);
-			});
-		}
-		{
-			var container = UI.AddField(panel!, "Show Noodle Extensions", null, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowNoodleExtensions));
-			noodle_enable = UI.AddCheckbox(container, false, (v) => {
-				Settings.Set(Settings.ShowNoodleKey, v);
-				Plugin.main?.UpdateSelection(false);
-			});
-		}
-		{
-			var container = UI.AddField(panel!, "Split light values", null, tooltip.GetTooltip(TooltipStrings.Tooltip.SplitLightValues));
-			split_value = UI.AddCheckbox(container, false, (v) => {
-				Settings.Set(Settings.SplitValue, v);
-				Plugin.main?.UpdateSelection(false);
-			});
-		}
-		{
-			var container = UI.AddField(panel!, "Colors as Hex", null, tooltip.GetTooltip(TooltipStrings.Tooltip.ColorsAsHex));
-			color_hex = UI.AddCheckbox(container, false, (v) => {
-				Settings.Set(Settings.ColorHex, v);
-				Plugin.main?.UpdateSelection(false);
-			});
-		}
-		{
-			var container = UI.AddField(panel!, "Show Tooltips", null, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowTooltips));
-			tooltip_enable = UI.AddCheckbox(container, false, (v) => {
-				Settings.Set(Settings.ShowTooltips, v);
-				Plugin.main?.UpdateSelection(false);
-				UI.RefreshTooltips(Plugin.main?.panel);
-				UI.RefreshTooltips(panel);
-			});
-		}
-		
-		UI.AddField(panel!, "");
-		UI.AddLabel(panel!, "Map", "Map Settings", Vector2.zero);
 		{
 			var collapsible = Collapsible.Create(panel!, "Requirements", "Requirements", true, tooltip.GetTooltip(TooltipStrings.Tooltip.Requirement));
 			requirements_panel = collapsible.panel;
@@ -346,7 +301,7 @@ public class SettingsWindow : UIWindow {
 		return requirementsAndSuggestions.FirstOrDefault((r) => r.Name == name);
 	}
 	
-	public SettingsWindow() {
+	public MapSettingsWindow() {
 		// Break into ChroMapper's house and grab the requirement check list via reflection
 		var req_type = typeof(RequirementCheck);
 		var ras = req_type.GetField("requirementsAndSuggestions", BindingFlags.Static | BindingFlags.NonPublic);
@@ -357,11 +312,6 @@ public class SettingsWindow : UIWindow {
 	}
 	
 	public void Refresh() {
-		chroma_enable!.isOn = Settings.Get(Settings.ShowChromaKey, true);
-		noodle_enable!.isOn = Settings.Get(Settings.ShowNoodleKey, true);
-		split_value!.isOn = Settings.Get(Settings.SplitValue, true);
-		color_hex!.isOn = Settings.Get(Settings.ColorHex, true);
-		tooltip_enable!.isOn = Settings.Get(Settings.ShowTooltips, true);
 		foreach (var r in requirements) {
 			r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(DifficultyInfo(), BeatSaberSongContainer.Instance.Map)));
 		}
@@ -408,6 +358,7 @@ public class SettingsWindow : UIWindow {
 	public override void ToggleWindow() {
 		Refresh();
 		window!.Toggle();
+		scrollbox!.scrollbar!.value = 1;
 	}
 }
 

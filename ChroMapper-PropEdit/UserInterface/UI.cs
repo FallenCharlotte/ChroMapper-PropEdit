@@ -99,6 +99,7 @@ public static class UI {
 	public static UIButton AddButton(GameObject parent, Sprite sprite, UnityAction on_press) {
 		var button = Object.Instantiate(PersistentUI.Instance.ButtonPrefab, parent.transform);
 		button.SetImage(sprite);
+		button.Image.transform.localRotation = Quaternion.identity;
 		button.Button.onClick.AddListener(on_press);
 		return button;
 	}

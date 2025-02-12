@@ -40,6 +40,7 @@ public abstract class UIWindow {
 		
 		scrollbox = ScrollBox.Create(container);
 		panel = scrollbox.content;
+		panels.Push(panel!);
 	}
 	
 	public void AddExpando(string name, string label, bool expanded, string tooltip = "") {
@@ -48,7 +49,10 @@ public abstract class UIWindow {
 	
 	public abstract void ToggleWindow();
 	
-	protected abstract void OnResize();
+	protected virtual void OnResize() {
+		var layout = panel!.GetComponent<LayoutElement>();
+		layout!.minHeight = window!.GetComponent<RectTransform>().sizeDelta.y - 40 - 15;
+	}
 }
 
 }

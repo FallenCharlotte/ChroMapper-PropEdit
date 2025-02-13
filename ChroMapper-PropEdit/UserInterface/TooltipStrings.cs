@@ -153,6 +153,7 @@ namespace ChroMapper_PropEdit.UserInterface {
 			SplitLightValues,
 			ColorsAsHex,
 			ShowTooltips,
+			ForceLanes,
 			
 			// Requirements
 			Requirement,
@@ -374,6 +375,7 @@ namespace ChroMapper_PropEdit.UserInterface {
 			{ Tooltip.SplitLightValues, "Shows separate Color and Action options instead of a single Value for events." },
 			{ Tooltip.ColorsAsHex, "Shows the Chroma color in hex #RRGGBBAA format instead of an array." },
 			{ Tooltip.ShowTooltips, "Shows descriptive tooltips when hovering over options." },
+			{ Tooltip.ForceLanes, "Always show custom event lanes for _heck, Chroma, and Noodle Extensions." },
 			
 			// Requirements
 			{ Tooltip.Requirement, "View/Edit the mod requirements for the map.\n\"Required\" -> Players must have the mod installed to play the map.\n\"Suggested\" -> Players can play the map without the mod, but it is recommended. Some mods, like Chroma and Cinema, won't activate unless they are at least a suggestion.\n\"None\" -> Players don't need the mod as the map doesn't contain any mod features.\n\nNOTE: In most cases, the values set by CM are correct, only change them if you know what you're doing." },

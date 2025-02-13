@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -10,7 +12,7 @@ public class PluginSettingsWindow : UIWindow {
 	public Toggle? split_value;
 	public Toggle? color_hex;
 	public Toggle? tooltip_enable;
-	public Toggle? force_events;
+	public Toggle? force_lanes;
 	TooltipStrings tooltip = TooltipStrings.Instance;
 	
 	public void Init(MapEditorUI mapEditorUI) {
@@ -50,6 +52,12 @@ public class PluginSettingsWindow : UIWindow {
 			UI.RefreshTooltips(panel);
 		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowTooltips));
 		
+		force_lanes = AddCheckbox("Force Custom Event Lanes", (v) => {
+			Settings.Set(Settings.ForceLanes, v);
+			if (v) ShowDefaultLanes();
+		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ForceLanes));
+		
+		
 		Refresh();
 		UI.RefreshTooltips(panel);
 	}
@@ -60,6 +68,7 @@ public class PluginSettingsWindow : UIWindow {
 		split_value!.isOn = Settings.Get(Settings.SplitValue, true);
 		color_hex!.isOn = Settings.Get(Settings.ColorHex, true);
 		tooltip_enable!.isOn = Settings.Get(Settings.ShowTooltips, true);
+		force_lanes!.isOn = Settings.Get(Settings.ForceLanes, false);
 	}
 	
 	public override void ToggleWindow() {
@@ -70,6 +79,27 @@ public class PluginSettingsWindow : UIWindow {
 	private Toggle AddCheckbox(string label, UnityAction<bool> setter, string tooltip = "") {
 		var container = UI.AddField(current_panel!, label, null, tooltip);
 		return UI.AddCheckbox(container, false, setter);
+	}
+	
+	private static string[] Lanes = new string[] {
+		"AnimateTrack",
+		"AssignPathAnimation",
+		"AssignTrackParent",
+		"AssignPlayerToTrack",
+		"AnimateComponent"
+	};
+	
+	private void ShowDefaultLanes() {
+		var collection = BeatmapObjectContainerCollection.GetCollectionForType(Beatmap.Enums.ObjectType.CustomEvent) as CustomEventGridContainer;
+		var ceg_type = typeof(CustomEventGridContainer);
+		var cets = ceg_type.GetField("customEventTypes", BindingFlags.Instance | BindingFlags.NonPublic);
+		var customEventTypes = cets.GetValue(collection) as List<string>;
+		foreach (var lane in Lanes) {
+			if (!customEventTypes!.Contains(lane)) {
+				customEventTypes.Add(lane);
+			}
+		}
+		ceg_type.GetMethod("RefreshTrack", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(collection, null);
 	}
 }
 

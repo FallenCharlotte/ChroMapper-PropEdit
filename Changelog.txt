@@ -1,3 +1,11 @@
+v0.9
+	Add auto custom event lane shower!
+	Fix for ghost objects on stable!
+	Split plugin settings from map settings!
+	Fancy(ish) point definitions!
+	Slidy expandos!
+	Mapwide point definitions! Finally!
+
 v0.8.1
 	Fix InstantiatePrefab for real this time
 	Chromper 11 support

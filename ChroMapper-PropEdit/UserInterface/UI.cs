@@ -258,7 +258,7 @@ public static class UI {
 		
 		var show_tooltips = Settings.Get(Settings.ShowTooltips, true)!.AsBool;
 		
-		foreach (var t in root.GetComponentsInChildren<Tooltip>(show_tooltips)) {
+		foreach (var t in root.GetComponentsInChildren<Tooltip>(true)) {
 			t.enabled = show_tooltips;
 		}
 	}

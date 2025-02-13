@@ -50,7 +50,9 @@ public class ArrayEditor : MonoBehaviour {
 		
 		AddLine("");
 		
-		SendMessageUpwards("DirtyPanel");
+		if (isActiveAndEnabled) {
+			SendMessageUpwards("DirtyPanel");
+		}
 	}
 	
 	public void Submit() {

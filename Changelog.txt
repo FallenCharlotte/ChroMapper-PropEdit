@@ -1,3 +1,7 @@
+v0.9.1
+	Fixes cobsole errors
+	Make disable tooltips actually work
+
 v0.9
 	Add auto custom event lane shower!
 	Fix for ghost objects on stable!

@@ -47,6 +47,7 @@ public class MapSettingsWindow : UIWindow {
 	
 	public void Init(MapEditorUI mapEditorUI) {
 		base.Init(mapEditorUI, "Map Settings");
+		scrollbox!.TargetScroll = 1;
 		
 		{
 			var button = UI.AddButton(window!.title!, UI.GetSprite("CloseIcon"), ToggleWindow);

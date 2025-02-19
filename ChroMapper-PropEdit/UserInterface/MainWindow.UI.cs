@@ -62,7 +62,7 @@ public partial class MainWindow : UIWindow {
 	
 #if CHROMPER_11
 	private IEnumerator WaitUpdate() {
-		yield return new WaitForEndOfFrame();
+		yield return 1;
 		UpdateSelection(false);
 		yield break;
 	}
@@ -89,7 +89,11 @@ public partial class MainWindow : UIWindow {
 		
 		SelectionController.SelectionChangedEvent += () => UpdateSelection(true);
 #if CHROMPER_11
-		BeatmapActionContainer.ActionCreatedEvent += (_) => window.StartCoroutine(WaitUpdate());
+		BeatmapActionContainer.ActionCreatedEvent += (_) => {
+			if (window.isActiveAndEnabled) {
+				window.StartCoroutine(WaitUpdate());
+			}
+		};
 #else
 		BeatmapActionContainer.ActionCreatedEvent += (_) => UpdateSelection(false);
 #endif

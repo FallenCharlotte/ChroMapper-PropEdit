@@ -281,12 +281,12 @@ public static class Data {
 		return (first, false);
 	}
 	
-	public static void UpdateObjects<T>(IEnumerable<BaseObject> editing, Setter<T?> setter, T? value, bool time = false) {
-		var beatmapActions = new List<BeatmapObjectModifiedAction>();
-		foreach (var o in editing!) {
-			var orig = BeatmapFactory.Clone(o);
-			
-			if (time) {
+	public static void UpdateObjects<T>(List<BaseObject> editing, Setter<T?> setter, T? value, bool time = false) {
+		if (time) {
+			var beatmapActions = new List<BeatmapObjectModifiedAction>();
+			foreach (var o in editing!) {
+				var orig = BeatmapFactory.Clone(o);
+				
 				// Based on SelectionController.MoveSelection
 				var collection = BeatmapObjectContainerCollection.GetCollectionForType(o.ObjectType);
 				
@@ -295,20 +295,28 @@ public static class Data {
 				setter(o, value);
 				
 				collection.SpawnObject(o, false, true);
-			}
-			else {
-				setter(o, value);
-				o.RefreshCustom();
+				
+				beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, orig, $"Edited a {o.ObjectType} with Prop Edit.", true));
 			}
 			
-			beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, orig, $"Edited a {o.ObjectType} with Prop Edit.", true));
-		}
-		
-		BeatmapActionContainer.AddAction(
-			new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
-			true);
-		if (time) {
+			BeatmapActionContainer.AddAction(
+				new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
+				true);
 			BeatmapObjectContainerCollection.RefreshAllPools();
+		}
+		else {
+			var modified = new List<BaseObject>();
+			var beatmapActions = new List<BeatmapObjectModifiedAction>();
+			foreach (var o in editing!) {
+				var mod = BeatmapFactory.Clone(o);
+				modified.Add(mod);
+				
+				setter(mod, value);
+				mod.RefreshCustom();
+			}
+			BeatmapActionContainer.AddAction(
+				new BeatmapObjectModifiedCollectionAction(modified, editing, $"Edited ({editing.Count()}) objects with Prop Edit."),
+				true);
 		}
 	}
 	

@@ -105,7 +105,7 @@ public partial class MainWindow : UIWindow {
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Flip));
 							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Link));
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true,tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Track)); //prob. needs more info
+						AddTracks("Tracks", Data.CustomGetSetRaw(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Track)); //prob. needs more info
 						AddAnimations(PropertyType.Note, v2);
 						panels.Pop();
 					}
@@ -153,7 +153,7 @@ public partial class MainWindow : UIWindow {
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Flip));
 							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Link));
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Track));
+						AddTracks("Tracks", Data.CustomGetSetRaw(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Track));
 						AddAnimations(PropertyType.Arc, v2);
 						panels.Pop();
 					}
@@ -196,7 +196,7 @@ public partial class MainWindow : UIWindow {
 							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
 							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Link));
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Track));
+						AddTracks("Tracks", Data.CustomGetSetRaw(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Track));
 						AddAnimations(PropertyType.Chain, v2);
 						panels.Pop();
 					}
@@ -239,7 +239,7 @@ public partial class MainWindow : UIWindow {
 						else {
 							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Uninteractable)); // not sure if this means that it will screw up your score
 						}
-						AddTextbox("Track", Data.CustomGetSetRaw(o.CustomKeyTrack), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Track));
+						AddTracks("Tracks", Data.CustomGetSetRaw(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Track));
 						AddAnimations(PropertyType.Obstacle, v2);
 						panels.Pop();
 					}
@@ -352,7 +352,7 @@ public partial class MainWindow : UIWindow {
 					switch (types.First()) {
 					// Heck
 					case "AnimateTrack":
-						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
@@ -367,7 +367,7 @@ public partial class MainWindow : UIWindow {
 						break;
 					
 					case "AssignPathAnimation":
-						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
@@ -383,19 +383,19 @@ public partial class MainWindow : UIWindow {
 					
 					// Noodle
 					case "AssignTrackParent":
-						AddTextbox("Parent", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_parentTrack" : "parentTrack"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackParentParent));
-						AddTextbox("Children", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_childrenTracks" : "childrenTracks"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackChildren));
+						AddTrack("Parent", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_parentTrack" : "parentTrack"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackParentParent));
+						AddTracks("Children", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_childrenTracks" : "childrenTracks"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackChildren));
 						AddCheckbox("Keep Position", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", v2 ? "_worldPositionStays" : "worldPositionStays"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackKeepPosition));
 						break;
 					
 					case "AssignPlayerToTrack":
-						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTrack));
+						AddTracks("Tracks", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTrack));
 						AddTextbox("Target", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_target" : "target"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTarget));
 						break;
 					
 					// Chroma
 					case "AssignFogTrack":
-						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
@@ -409,7 +409,7 @@ public partial class MainWindow : UIWindow {
 						break;
 					
 					case "AnimateComponent":
-						AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
@@ -458,7 +458,7 @@ public partial class MainWindow : UIWindow {
 					case "InstantiatePrefab":
 						AddPrefab("Prefab", "asset", false);
 						AddTextbox("ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
-						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "track"), false);
+						AddTrack("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "track"));
 						AddTextbox("Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "position"), true);
 						AddTextbox("Local Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "localPosition"), true);
 						AddTextbox("Rotation", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "rotation"), true);
@@ -528,7 +528,7 @@ public partial class MainWindow : UIWindow {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
 		AddCheckbox("Animation", Data.GetSetAnimation(v2), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimatePath));
 		if (editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() == editing.Count()) {
-			AddExpando("Animations", "Animationss", true);
+			AddExpando("Animations", "Animations", true);
 			AddAnimation("Color", CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimateColor));
 			foreach (var property in Events.NoodleProperties) {
 				AddAnimation(property.Key, CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2], tooltip.GetTooltip(type, $"Animate{property.Key}"));
@@ -556,6 +556,35 @@ public partial class MainWindow : UIWindow {
 		else {
 			AddTextbox(label, Data.CustomGetSetRaw(key), true, tooltip);
 		}
+	}
+	
+	// Unarrayable track
+	private void AddTrack(string? title, System.ValueTuple<Data.Getter<string?>, Data.Setter<string?>> get_set, string tooltip = "") {
+		// TODO: dropdown
+		AddTextbox(title, get_set, false, tooltip);
+	}
+	
+	// Arrayable tracks
+	private void AddTracks(string title, System.ValueTuple<Data.Getter<string?>, Data.Setter<string?>> get_set, string tooltip = "") {
+		// TODO: dropdowns somehow?
+		var staged = editing!;
+		var (getter, setter) = get_set;
+		var (value, mixed) = Data.GetAllOrNothing<string>(staged, getter);
+		
+		ArrayEditor.Getter arr_get = () => {
+			if (mixed) return null;
+			return Data.RawToJson(value ?? "{}") switch {
+				JSONArray arr => arr,
+				JSONString s => JSONObject.Parse($"[{s}]").AsArray,
+				_ => new JSONArray()
+			};
+		};
+		
+		ArrayEditor.Setter arr_set =
+			(JSONArray node) => Data.UpdateObjects<string?>(staged, setter, node.ToString());
+		
+		
+		ArrayEditor.Create(current_panel!, title, (arr_get, arr_set)).Refresh();
 	}
 	
 	private void AddMaterial() {
@@ -595,7 +624,7 @@ public partial class MainWindow : UIWindow {
 		AddTextbox("Depth Texture Mode", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.depthTextureMode"), true);
 		AddDropdown("Clear Flags", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "properties.clearFlags"), Vivify.ClearFlags, true);
 		AddTextbox("Background Colors", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.backgroundColor"), true);
-		AddTextbox("Culling Track(s)", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.culling.track"), true);
+		AddTracks("Culling Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.culling.track"));
 		AddCheckbox("Culling Whitelist", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.culling.whitelist"), false);
 		// Do these have defaults? Idk :3
 		AddDropdown("Bloom Pre Pass", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.bloomPrePass"), MapSettings.OptionBool, true);

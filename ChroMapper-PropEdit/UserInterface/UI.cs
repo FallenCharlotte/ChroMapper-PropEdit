@@ -232,6 +232,15 @@ public static class UI {
 		return trans;
 	}
 	
+	public static UITextInput SetMixed(UITextInput input, bool mixed) {
+		if (mixed) {
+			var placeholder = input.gameObject.GetComponentInChildren<TMPro.TMP_Text>();
+			placeholder.text = "Mixed";
+		}
+		
+		return input;
+	}
+	
 	public static void LeftColumn(GameObject obj) {
 		UI.AttachTransform(obj, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 1));
 	}

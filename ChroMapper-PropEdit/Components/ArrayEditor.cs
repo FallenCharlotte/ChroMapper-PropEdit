@@ -13,7 +13,7 @@ namespace ChroMapper_PropEdit.Components {
 
 public class ArrayEditor : MonoBehaviour {
 	
-	public delegate JSONArray Getter();
+	public delegate JSONArray? Getter();
 	public delegate void Setter(JSONArray v);
 	// Return raw json
 	Getter? _getter = null;
@@ -43,12 +43,17 @@ public class ArrayEditor : MonoBehaviour {
 		
 		var node = _getter!();
 		
-		foreach (var item in node) {
-			var line = (raw) ? item.Value.ToString() : (string)item.Value;
-			AddLine(line);
+		if (node == null) {
+			AddLine("", true);
 		}
-		
-		AddLine("");
+		else {
+			foreach (var item in node) {
+				var line = (raw) ? item.Value.ToString() : (string)item.Value;
+				AddLine(line);
+			}
+			
+			AddLine("");
+		}
 		
 		if (isActiveAndEnabled) {
 			SendMessageUpwards("DirtyPanel");
@@ -71,10 +76,11 @@ public class ArrayEditor : MonoBehaviour {
 		Refresh();
 	}
 	
-	private void AddLine(string value) {
+	private void AddLine(string value, bool mixed = false) {
 		var input = UI.AddTextbox(container!.panel!, value, (_) => Submit(), true);
 		
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 20), new Vector2(0, 0));
+		UI.SetMixed(input, mixed);
 		
 		inputs.Add(input);
 	}

@@ -140,21 +140,12 @@ public partial class MainWindow : UIWindow {
 		}, type, nullable);
 	}
 	
-	private UITextInput SetMixed(UITextInput input, bool mixed) {
-		if (mixed) {
-			var placeholder = input.gameObject.GetComponentInChildren<TMPro.TMP_Text>();
-			placeholder.text = "Mixed";
-		}
-		
-		return input;
-	}
-	
 	private UITextInput AddParsed<T>(string title, System.ValueTuple<Data.Getter<T?>, Data.Setter<T?>> get_set, bool time = false, string tooltip = "") where T : struct {
 		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
 		var (value, mixed) = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
 		
-		return SetMixed(UI.AddParsed<T>(container, value, (v) => {
+		return UI.SetMixed(UI.AddParsed<T>(container, value, (v) => {
 			if (!(v == null && value == null)) {
 				Data.UpdateObjects<T?>(staged, get_set.Item2, v, time);
 			}
@@ -168,7 +159,7 @@ public partial class MainWindow : UIWindow {
 		var staged = editing!;
 		var (value, mixed) = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
 		
-		return SetMixed(UI.AddTextbox(container, value, (v) => {
+		return UI.SetMixed(UI.AddTextbox(container, value, (v) => {
 			if (v == "") {
 				v = null;
 			}
@@ -183,7 +174,7 @@ public partial class MainWindow : UIWindow {
 		var staged = editing!;
 		var (value, mixed) = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
 		
-		var textbox = SetMixed(UI.AddTextbox(container, value, (v) => {
+		var textbox = UI.SetMixed(UI.AddTextbox(container, value, (v) => {
 			if (v == "") {
 				v = null;
 			}

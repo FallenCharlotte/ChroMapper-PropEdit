@@ -39,5 +39,10 @@ msbuild
 echo "Check..."
 read || exit
 
+git checkout main
+git merge --ff-only
+
 git push
 git push --tags
+
+git checkout dev

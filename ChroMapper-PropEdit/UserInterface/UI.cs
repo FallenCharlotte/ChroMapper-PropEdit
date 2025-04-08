@@ -160,22 +160,12 @@ public static class UI {
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		input.InputField.text = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
 		input.InputField.onEndEdit.AddListener((s) => {
-			// No IParsable in mono ;_;
-			var methods = typeof(T).GetMethods();
-			System.Reflection.MethodInfo? parse = null;
-			foreach (var method in methods) {
-				if (method.Name == "TryParse") {
-					parse = method;
-					break;
-				}
-			}
-			if (parse == null) {
-				Debug.LogError("Tried to parse a non-parsable type!");
-				return;
-			}
-			object?[] parameters = new object?[]{s, null};
-			bool res = (bool)parse.Invoke(null, parameters);
-			setter(res ? (T)parameters[1]! : null);
+			var table = new System.Data.DataTable();
+			var computed = table.Compute(s, "");
+			T? converted = (computed == System.DBNull.Value)
+				? null
+				: (T)Convert.ChangeType(computed, typeof(T));
+			setter(converted);
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);

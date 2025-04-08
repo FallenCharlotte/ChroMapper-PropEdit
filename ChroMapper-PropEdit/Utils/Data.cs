@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using SimpleJSON;
 
@@ -384,26 +385,38 @@ public static class Data {
 		return Expression.Lambda<System.Func<TInput, TOutput>>(convert, source).Compile();
 	}
 	
+	private static Regex? MATH_REG = null;
+	
 	public static JSONNode? RawToJson(string raw) {
+		MATH_REG ??= new Regex(@"(?<!""{1}.*)(?:\(?\s*[\d\.]+\)?\s*[\-+/*]\s*)+[\d\.]+\s*\)?");
+		var table = new System.Data.DataTable();
+		var maths = MATH_REG.Matches(raw);
+		foreach (Match math in maths) {
+			var computed = table.Compute(math.Value, "");
+			raw = raw.Replace(math.Value, computed.ToString());
+		}
+		
 		JSONNode n;
 		try {
 			n = JSON.Parse(raw);
+			return n;
 		}
-		catch (Exception) {
-			try {
-				n = JSON.Parse($"[{raw}]");
-			}
-			catch (Exception) {
-				try {
-					n = JSON.Parse($"\"{raw}\"");
-				}
-				catch (Exception) {
-					Debug.LogWarning($"Couldn't interpret \"{raw}\" as JSON");
-					return null;
-				}
-			}
+		catch (Exception) { };
+		
+		try {
+			n = JSON.Parse($"[{raw}]");
+			return n;
 		}
-		return n;
+		catch (Exception) { };
+		
+		try {
+			n = JSON.Parse($"\"{raw}\"");
+			return n;
+		}
+		catch (Exception) { };
+		
+		Debug.LogWarning($"Couldn't interpret \"{raw}\" as JSON");
+		return null;
 	}
 	
 	public static string? JsonToRaw(JSONNode node) {

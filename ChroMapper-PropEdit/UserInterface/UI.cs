@@ -183,6 +183,12 @@ public static class UI {
 	public static UITextInput AddTextbox(GameObject parent, string? value, UnityAction<string?> setter, bool tall = false) {
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, parent.transform);
 		input.InputField.pointSize = tall ? 12 : 14;
+		foreach (var text in input.gameObject.GetComponentsInChildren<TMPro.TMP_Text>()) {
+			// Value derived from bullshit conversions of the Unity Editor:
+			// 2nd Horizontal option, 5th Vertical option
+			// 0x1 << 2 + 0x100 << 5
+			text.alignment = (TMPro.TextAlignmentOptions) 0x1002;
+		}
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		input.InputField.text = value ?? "";
 		input.InputField.onEndEdit.AddListener((string? s) => {

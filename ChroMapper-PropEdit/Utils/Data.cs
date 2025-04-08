@@ -89,7 +89,7 @@ public static class Data {
 		Getter<string?> getter = (o) => {
 			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
 			if (GetNode(root, field_name) is JSONNode n) {
-				return n.ToString();
+				return JsonToRaw(n);
 			}
 			else {
 				return null;

@@ -48,7 +48,9 @@ public class ArrayEditor : MonoBehaviour {
 		}
 		else {
 			foreach (var item in node) {
-				var line = (raw) ? item.Value.ToString() : (string)item.Value;
+				var line = (raw)
+					? item.Value.ToString().Replace(",", ", ")
+					: (string)item.Value;
 				AddLine(line);
 			}
 			
@@ -79,7 +81,7 @@ public class ArrayEditor : MonoBehaviour {
 	private void AddLine(string value, bool mixed = false) {
 		var input = UI.AddTextbox(container!.panel!, value, (_) => Submit(), true);
 		
-		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 20), new Vector2(0, 0));
+		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
 		UI.SetMixed(input, mixed);
 		
 		inputs.Add(input);

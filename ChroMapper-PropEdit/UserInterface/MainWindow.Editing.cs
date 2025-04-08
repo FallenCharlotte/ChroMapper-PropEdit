@@ -587,7 +587,7 @@ public partial class MainWindow : UIWindow {
 			(JSONArray node) => Data.UpdateObjects<string?>(staged, setter, node.ToString());
 		
 		
-		ArrayEditor.Create(current_panel!, title, (arr_get, arr_set)).Refresh();
+		ArrayEditor.Create(current_panel!, title, (arr_get, arr_set), false, tooltip).Refresh();
 	}
 	
 	private void AddMaterial() {

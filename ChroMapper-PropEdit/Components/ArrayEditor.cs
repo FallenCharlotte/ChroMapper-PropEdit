@@ -35,11 +35,15 @@ public class ArrayEditor : MonoBehaviour {
 		return this;
 	}
 	
+	private int linenum = 0;
+	
 	public void Refresh() {
 		inputs = new List<UITextInput>();
 		foreach (Transform child in container!.panel!.transform) {
 			GameObject.Destroy(child.gameObject);
 		}
+		
+		linenum = 0;
 		
 		var node = _getter!();
 		
@@ -62,7 +66,20 @@ public class ArrayEditor : MonoBehaviour {
 		}
 	}
 	
-	public void Submit() {
+	public void Submit(int sender) {
+		if (sender == linenum - 1) {
+			if (inputs[sender].InputField.text == "") {
+				return;
+			}
+			var obj = transform;
+			string path = "";
+			while (obj != null) {
+				path = "/" + obj.gameObject.name + path;
+				obj = obj.parent;
+			}
+			Plugin.main!.Refocus = path;
+		}
+		
 		var lines = inputs.Select(it => it.InputField.text).ToArray();
 		
 		var node = new JSONArray();
@@ -78,8 +95,13 @@ public class ArrayEditor : MonoBehaviour {
 		Refresh();
 	}
 	
+	public void FocusLast() {
+		inputs[inputs.Count - 1].InputField.ActivateInputField();
+	}
+	
 	private void AddLine(string value, bool mixed = false) {
-		var input = UI.AddTextbox(container!.panel!, value, (_) => Submit(), true);
+		var i = linenum++;
+		var input = UI.AddTextbox(container!.panel!, value, (_) => Submit(i), true);
 		
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
 		UI.SetMixed(input, mixed);

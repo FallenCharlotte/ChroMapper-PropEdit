@@ -171,10 +171,8 @@ public static class UI {
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
 		});
 		input.InputField.onSelect.AddListener(delegate {
-			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
-				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
-			}
+			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
 		});
 		
 		return input;
@@ -198,10 +196,8 @@ public static class UI {
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
 		});
 		input.InputField.onSelect.AddListener(delegate {
-			if (!CMInputCallbackInstaller.IsActionMapDisabled(ActionMapsDisabled[0])) {
-				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-				CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
-			}
+			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
 		});
 		
 		return input;

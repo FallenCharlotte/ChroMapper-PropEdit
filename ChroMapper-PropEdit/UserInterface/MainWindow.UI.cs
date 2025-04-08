@@ -68,6 +68,14 @@ public partial class MainWindow : UIWindow {
 		yield break;
 	}
 #endif
+
+	private IEnumerator WaitFocus() {
+		var refocus = Refocus;
+		Refocus = null;
+		yield return 1;
+		GameObject.Find(refocus).GetComponent<ArrayEditor>().FocusLast();
+		yield break;
+	}
 	
 	public void Init(MapEditorUI mapEditorUI) {
 		base.Init(mapEditorUI, "Prop Editor");

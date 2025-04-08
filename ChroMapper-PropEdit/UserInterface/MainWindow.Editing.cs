@@ -28,6 +28,7 @@ public partial class MainWindow : UIWindow {
 	public readonly string NOODLE_NAME = "Noodle Extensions";
 	TooltipStrings tooltip = TooltipStrings.Instance;
 	BundleInfo? bundleInfo = null;
+	public string? Refocus = null;
 	private ObjectType? old_type = null;
 	
 	public void UpdateSelection() { lock(this) {
@@ -532,6 +533,10 @@ public partial class MainWindow : UIWindow {
 		else {
 			window!.SetTitle("No items selected");
 			old_type = null;
+		}
+		
+		if (Refocus != null) {
+			window.StartCoroutine(WaitFocus());
 		}
 	}}
 	

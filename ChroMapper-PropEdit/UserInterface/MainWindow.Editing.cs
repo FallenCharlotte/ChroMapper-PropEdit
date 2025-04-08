@@ -28,9 +28,10 @@ public partial class MainWindow : UIWindow {
 	public readonly string NOODLE_NAME = "Noodle Extensions";
 	TooltipStrings tooltip = TooltipStrings.Instance;
 	BundleInfo? bundleInfo = null;
+	private ObjectType? old_type = null;
 	
-	public void UpdateSelection(bool real) { lock(this) {
-		scrollbox!.TargetScroll = real ? 1f : scrollbox!.scrollbar!.value;
+	public void UpdateSelection() { lock(this) {
+		var old_scroll = scrollbox!.scrollbar!.value;
 		
 		foreach (Transform child in panel!.transform) {
 			GameObject.Destroy(child.gameObject);
@@ -43,12 +44,18 @@ public partial class MainWindow : UIWindow {
 			
 			if (editing.GroupBy(o => o.ObjectType).Count() > 1) {
 				UI.AddLabel(panel!, "Unsupported", "Multi-Type Unsupported!", Vector2.zero);
+				old_type = null;
 				return;
 			}
 			
 			var o = editing.First();
 			var type = o.ObjectType;
 			var v2 = BeatSaberSongContainer.Instance.Map.Version[0] == '2';
+			
+			scrollbox!.TargetScroll = (type != old_type)
+				? 1f
+				: old_scroll;
+			old_type = type;
 			
 			panels.Clear();
 			panels.Push(panel);
@@ -524,6 +531,7 @@ public partial class MainWindow : UIWindow {
 		}
 		else {
 			window!.SetTitle("No items selected");
+			old_type = null;
 		}
 	}}
 	

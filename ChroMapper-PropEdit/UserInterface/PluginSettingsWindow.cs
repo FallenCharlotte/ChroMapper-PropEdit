@@ -26,27 +26,27 @@ public class PluginSettingsWindow : UIWindow {
 		
 		chroma_enable = AddCheckbox("Show Chroma", (v) => {
 			Settings.Set(Settings.ShowChromaKey, v);
-			Plugin.main?.UpdateSelection(false);
+			Plugin.main?.UpdateSelection();
 		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowChroma));
 		
 		noodle_enable = AddCheckbox("Show Noodle Extensions", (v) => {
 			Settings.Set(Settings.ShowNoodleKey, v);
-			Plugin.main?.UpdateSelection(false);
+			Plugin.main?.UpdateSelection();
 		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowNoodleExtensions));
 		
 		split_value = AddCheckbox("Split light values", (v) => {
 			Settings.Set(Settings.SplitValue, v);
-			Plugin.main?.UpdateSelection(false);
+			Plugin.main?.UpdateSelection();
 		}, tooltip.GetTooltip(TooltipStrings.Tooltip.SplitLightValues));
 		
 		color_hex = AddCheckbox("Colors as Hex", (v) => {
 			Settings.Set(Settings.ColorHex, v);
-			Plugin.main?.UpdateSelection(false);
+			Plugin.main?.UpdateSelection();
 		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ColorsAsHex));
 		
 		tooltip_enable = AddCheckbox("Show Tooltips", (v) => {
 			Settings.Set(Settings.ShowTooltips, v);
-			Plugin.main?.UpdateSelection(false);
+			Plugin.main?.UpdateSelection();
 			UI.RefreshTooltips(Plugin.main?.panel);
 			UI.RefreshTooltips(Plugin.map_settings?.panel);
 			UI.RefreshTooltips(panel);

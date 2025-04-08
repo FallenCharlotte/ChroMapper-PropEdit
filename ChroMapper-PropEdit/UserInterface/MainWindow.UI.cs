@@ -53,7 +53,8 @@ public partial class MainWindow : UIWindow {
 	public override void ToggleWindow() {
 		if (window == null) return;
 		window!.Toggle();
-		UpdateSelection(window!.gameObject.activeSelf);
+		old_type = null;
+		UpdateSelection();
 	}
 	
 	public void Disable() {
@@ -85,9 +86,9 @@ public partial class MainWindow : UIWindow {
 			tooltip.TooltipOverride = "Map Settings";
 		}
 		
-		UpdateSelection(true);
+		UpdateSelection();
 		
-		SelectionController.SelectionChangedEvent += () => UpdateSelection(true);
+		SelectionController.SelectionChangedEvent += () => UpdateSelection();
 #if CHROMPER_11
 		BeatmapActionContainer.ActionCreatedEvent += (_) => {
 			if (window.isActiveAndEnabled) {
@@ -95,10 +96,10 @@ public partial class MainWindow : UIWindow {
 			}
 		};
 #else
-		BeatmapActionContainer.ActionCreatedEvent += (_) => UpdateSelection(false);
+		BeatmapActionContainer.ActionCreatedEvent += (_) => UpdateSelection();
 #endif
-		BeatmapActionContainer.ActionUndoEvent += (_) => UpdateSelection(false);
-		BeatmapActionContainer.ActionRedoEvent += (_) => UpdateSelection(false);
+		BeatmapActionContainer.ActionUndoEvent += (_) => UpdateSelection();
+		BeatmapActionContainer.ActionRedoEvent += (_) => UpdateSelection();
 		
 		keybind?.Enable();
 		

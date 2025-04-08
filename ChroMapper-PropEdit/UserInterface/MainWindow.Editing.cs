@@ -352,33 +352,35 @@ public partial class MainWindow : UIWindow {
 					switch (types.First()) {
 					// Heck
 					case "AnimateTrack":
-						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
 							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
-						AddLine("");
+						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddExpando("Properties", "Point Definitions", true);
 						AddPointDefinition("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
 						foreach (var property in Events.NoodleProperties) {
 							AddPointDefinition(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
 						AddPointDefinition("Time", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_time" : "time"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateTime));
+						panels.Pop();
 						break;
 					
 					case "AssignPathAnimation":
-						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
 							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
-						AddLine("");
+						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddExpando("Properties", "Point Definitions", true);
 						AddPointDefinition("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
 						foreach (var property in Events.NoodleProperties) {
 							AddPointDefinition(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
 						AddPointDefinition("Definite Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_definitePosition" : "definitePosition"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+						panels.Pop();
 						break;
 					
 					// Noodle
@@ -395,26 +397,27 @@ public partial class MainWindow : UIWindow {
 					
 					// Chroma
 					case "AssignFogTrack":
-						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
 							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
-						
+						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						AddExpando("Properties", "Properties", true);
 						AddParsed("Attenuation", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_attenuation"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackAttenuation));
 						AddParsed("Offset", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_offset"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackOffset));
 						AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_startY"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackStartY));
 						AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_height"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackHeight));
+						panels.Pop();
 						break;
 					
 					case "AnimateComponent":
-						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
 						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
 							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
+						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						//it seems these are only normal json inputs. might have to change the tooltip then.
 						AddTextbox("Environment Fog", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "BloomFogEnvironment"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentBloomFogEnvironment));
 						AddTextbox("Tube Bloom Light", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "TubeBloomPrePassLight"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentTubeBloomPrePassLight));

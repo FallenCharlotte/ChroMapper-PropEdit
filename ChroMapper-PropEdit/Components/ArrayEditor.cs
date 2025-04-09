@@ -104,7 +104,7 @@ public class ArrayEditor : MonoBehaviour {
 		var i = linenum++;
 		var input = UI.AddTextbox(container!.panel!, value, (_) => Submit(i), true);
 		
-		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
+		UI.MoveTransform((RectTransform)input.transform.parent, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
 		UI.SetMixed(input, mixed);
 		
 		inputs.Add(input);

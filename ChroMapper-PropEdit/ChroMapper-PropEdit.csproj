@@ -102,6 +102,7 @@
     <Compile Include="Components\DropdownButton.cs" />
     <Compile Include="Components\ResizeWindowController.cs" />
     <Compile Include="Components\ScrollBox.cs" />
+    <Compile Include="Components\Textbox.cs" />
     <Compile Include="Components\Window.cs" />
     <Compile Include="Enums\Events.cs" />
     <Compile Include="Enums\Map.cs" />

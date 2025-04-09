@@ -73,12 +73,13 @@ public partial class MainWindow : UIWindow {
 	private IEnumerator WaitFocus() {
 		var refocus = Refocus;
 		Refocus = null;
+		
 		Debug.Log(refocus);
 		int combo = 0;
 		do {
 			yield return 1;
 			var ret = GameObject.Find(refocus).GetComponent<ArrayEditor>().FocusLast();
-			combo = (ret && UI.TextboxEditing) 
+			combo = (ret && Textbox.TextboxEditing) 
 				? combo + 1
 				: 0;
 		}
@@ -168,7 +169,7 @@ public partial class MainWindow : UIWindow {
 			if (!(v == null && value == null)) {
 				Data.UpdateObjects<T?>(staged, get_set.Item2, v, time);
 			}
-		}), mixed);
+		}), mixed).TextInput!;
 	}
 	
 	private UITextInput AddTextbox(string? title, System.ValueTuple<Data.Getter<string?>, Data.Setter<string?>> get_set, bool tall = false, string tooltip = "") {
@@ -185,7 +186,7 @@ public partial class MainWindow : UIWindow {
 			if (v != value) {
 				Data.UpdateObjects<string?>(staged, get_set.Item2, v);
 			}
-		}, tall), mixed);
+		}, tall), mixed).TextInput!;
 	}
 	
 	private void AddPointDefinition(string title, System.ValueTuple<Data.Getter<string?>, Data.Setter<string?>> get_set, string tooltip = "") {

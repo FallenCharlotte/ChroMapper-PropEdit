@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+using ChroMapper_PropEdit.Components;
 using ChroMapper_PropEdit.Enums;
 
 using Convert = System.Convert;
@@ -155,59 +156,27 @@ public static class UI {
 		return dropdown;
 	}
 	
-	public static UITextInput AddParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
-		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, parent.transform);
-		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		var strval = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
-		input.InputField.text = strval;
-		input.InputField.onEndEdit.AddListener((s) => {
-			if (s != strval) {
-				var table = new System.Data.DataTable();
-				var computed = table.Compute(s, "");
-				T? converted = (computed == System.DBNull.Value)
-					? null
-					: (T)Convert.ChangeType(computed, typeof(T));
-				setter(converted);
-			}
-			
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
-			TextboxEditing = false;
-		});
-		input.InputField.onSelect.AddListener(delegate {
-			TextboxEditing = true;
-			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
-		});
+	public static Textbox AddParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
+		var input = Textbox.Create(parent);
+		UI.AttachTransform(input.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		input.Value = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
+		input.OnChange = (s) => {
+			var table = new System.Data.DataTable();
+			var computed = table.Compute(s, "");
+			T? converted = (computed == System.DBNull.Value)
+				? null
+				: (T)Convert.ChangeType(computed, typeof(T));
+			setter(converted);
+		};
 		
 		return input;
 	}
 	
-	public static UITextInput AddTextbox(GameObject parent, string? value, UnityAction<string?> setter, bool tall = false) {
-		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, parent.transform);
-		input.InputField.pointSize = tall ? 12 : 14;
-		foreach (var text in input.gameObject.GetComponentsInChildren<TMPro.TMP_Text>()) {
-			// Value derived from bullshit conversions of the Unity Editor:
-			// 2nd Horizontal option, 5th Vertical option
-			// 0x1 << 2 + 0x100 << 5
-			text.alignment = (TMPro.TextAlignmentOptions) 0x1002;
-		}
-		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		input.InputField.text = value ?? "";
-		input.InputField.onEndEdit.AddListener((string? s) => {
-			if (s != value) {
-				setter(s);
-			}
-			
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
-			TextboxEditing = false;
-		});
-		input.InputField.onSelect.AddListener(delegate {
-			TextboxEditing = true;
-			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
-		});
+	public static Textbox AddTextbox(GameObject parent, string? value, Textbox.Setter setter, bool tall = false) {
+		var input = Textbox.Create(parent, tall);
+		UI.AttachTransform(input.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		input.Value = value ?? "";
+		input.OnChange = setter;
 		
 		return input;
 	}
@@ -233,10 +202,9 @@ public static class UI {
 		return trans;
 	}
 	
-	public static UITextInput SetMixed(UITextInput input, bool mixed) {
+	public static Textbox SetMixed(Textbox input, bool mixed) {
 		if (mixed) {
-			var placeholder = input.gameObject.GetComponentInChildren<TMPro.TMP_Text>();
-			placeholder.text = "Mixed";
+			input.Placeholder = "Mixed";
 		}
 		
 		return input;
@@ -311,18 +279,6 @@ public static class UI {
 		}
 		return path;
 	}
-	
-	public static bool TextboxEditing { get; private set; }
-	
-	// Stop textbox input from triggering actions, copied from the node editor
-	
-	private static readonly System.Type[] actionMapsEnabledWhenNodeEditing = {
-		typeof(CMInput.ICameraActions), typeof(CMInput.IBeatmapObjectsActions), typeof(CMInput.INodeEditorActions),
-		typeof(CMInput.ISavingActions), typeof(CMInput.ITimelineActions)
-	};
-	
-	private static System.Type[] ActionMapsDisabled => typeof(CMInput).GetNestedTypes()
-		.Where(x => x.IsInterface && !actionMapsEnabledWhenNodeEditing.Contains(x)).ToArray();
 }
 
 }

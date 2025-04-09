@@ -21,7 +21,7 @@ public class ArrayEditor : MonoBehaviour {
 	bool raw = false;
 	
 	public ArrayEditor() {
-		inputs = new List<UITextInput>();
+		inputs = new List<Textbox>();
 	}
 	
 	public static ArrayEditor Create(GameObject parent, string title, ValueTuple<Getter, Setter> get_set, bool raw = false, string tooltip = "") {
@@ -38,7 +38,7 @@ public class ArrayEditor : MonoBehaviour {
 	private int linenum = 0;
 	
 	public void Refresh() {
-		inputs = new List<UITextInput>();
+		inputs = new List<Textbox>();
 		foreach (Transform child in container!.panel!.transform) {
 			GameObject.Destroy(child.gameObject);
 		}
@@ -68,13 +68,13 @@ public class ArrayEditor : MonoBehaviour {
 	
 	public void Submit(int sender) {
 		if (sender == linenum - 1) {
-			if (inputs[sender].InputField.text == "") {
+			if (inputs[sender].Value == "") {
 				return;
 			}
 			Plugin.main!.Refocus = gameObject.GetPath();
 		}
 		
-		var lines = inputs.Select(it => it.InputField.text).ToArray();
+		var lines = inputs.Select(it => it.Value).ToArray();
 		
 		var node = new JSONArray();
 		
@@ -91,7 +91,7 @@ public class ArrayEditor : MonoBehaviour {
 	
 	public bool FocusLast() {
 		if (container!.Expanded) {
-			inputs[inputs.Count - 1].InputField.ActivateInputField();
+			inputs[inputs.Count - 1].Select();
 			return true;
 		}
 		else {
@@ -127,7 +127,7 @@ public class ArrayEditor : MonoBehaviour {
 	}
 	
 	public Collapsible? container;
-	public List<UITextInput> inputs;
+	public List<Textbox> inputs;
 };
 
 }

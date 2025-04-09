@@ -71,13 +71,7 @@ public class ArrayEditor : MonoBehaviour {
 			if (inputs[sender].InputField.text == "") {
 				return;
 			}
-			var obj = transform;
-			string path = "";
-			while (obj != null) {
-				path = "/" + obj.gameObject.name + path;
-				obj = obj.parent;
-			}
-			Plugin.main!.Refocus = path;
+			Plugin.main!.Refocus = gameObject.GetPath();
 		}
 		
 		var lines = inputs.Select(it => it.InputField.text).ToArray();
@@ -95,8 +89,15 @@ public class ArrayEditor : MonoBehaviour {
 		Refresh();
 	}
 	
-	public void FocusLast() {
-		inputs[inputs.Count - 1].InputField.ActivateInputField();
+	public bool FocusLast() {
+		if (container!.Expanded) {
+			inputs[inputs.Count - 1].InputField.ActivateInputField();
+			return true;
+		}
+		else {
+			container!.expandToggle!.isOn = true;
+			return false;
+		}
 	}
 	
 	private void AddLine(string value, bool mixed = false) {

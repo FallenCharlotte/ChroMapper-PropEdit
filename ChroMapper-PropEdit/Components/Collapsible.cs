@@ -16,6 +16,11 @@ public class Collapsible : MonoBehaviour
 	private string? settings_key;
 	private float? height_cache;
 	
+	public bool Expanded {
+		get { return expandToggle!.isOn && anim == null; }
+		set { SetExpanded(value); }
+	}
+	
 	public static Collapsible Create(GameObject parent, string name, string label, bool expanded) {
 		return Create(parent, name, label, expanded, "");
 	}
@@ -117,6 +122,7 @@ public class Collapsible : MonoBehaviour
 	
 	private const float anim_dur = 0.25f;
 	
+	private IEnumerator? anim = null;
 	private IEnumerator AnimExpanded(bool expanded) {
 		var rect = (panel!.transform as RectTransform)!;
 		var size = rect.sizeDelta;
@@ -154,13 +160,18 @@ public class Collapsible : MonoBehaviour
 			panel!.SetActive(expanded);
 		}
 		SendMessageUpwards("DirtyPanel");
+		anim = null;
 		yield break;
 	}
 	
 	public void SetExpanded(bool expanded)
 	{
 		if (isActiveAndEnabled) {
-			StartCoroutine(AnimExpanded(expanded));
+			if (anim != null) {
+				StopCoroutine(anim);
+			}
+			anim = AnimExpanded(expanded);
+			StartCoroutine(anim);
 		}
 		else {
 			SetExpandedNow(expanded, true);

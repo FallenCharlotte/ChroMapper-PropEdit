@@ -169,8 +169,10 @@ public static class UI {
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+			TextboxEditing = false;
 		});
 		input.InputField.onSelect.AddListener(delegate {
+			TextboxEditing = true;
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
 		});
@@ -194,8 +196,10 @@ public static class UI {
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+			TextboxEditing = false;
 		});
 		input.InputField.onSelect.AddListener(delegate {
+			TextboxEditing = true;
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
 		});
@@ -293,6 +297,17 @@ public static class UI {
 	{
 		return t.gameObject.AddComponent<T>().GetCopyOf(toAdd);
 	}
+	public static string GetPath(this GameObject go) {
+		var trans = go.transform;
+		string path = "";
+		while (trans != null) {
+			path = "/" + trans.gameObject.name + path;
+			trans = trans.parent;
+		}
+		return path;
+	}
+	
+	public static bool TextboxEditing { get; private set; }
 	
 	// Stop textbox input from triggering actions, copied from the node editor
 	

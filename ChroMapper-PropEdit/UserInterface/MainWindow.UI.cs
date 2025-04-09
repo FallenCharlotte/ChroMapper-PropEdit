@@ -68,12 +68,21 @@ public partial class MainWindow : UIWindow {
 		yield break;
 	}
 #endif
-
+	
+	// And as always, death to Unity
 	private IEnumerator WaitFocus() {
 		var refocus = Refocus;
 		Refocus = null;
-		yield return 1;
-		GameObject.Find(refocus).GetComponent<ArrayEditor>().FocusLast();
+		int combo = 0;
+		do {
+			yield return 1;
+			var ret = GameObject.Find(refocus).GetComponent<ArrayEditor>().FocusLast();
+			combo = (ret && UI.TextboxEditing) 
+				? combo + 1
+				: 0;
+		}
+		while (combo < 5);
+		
 		yield break;
 	}
 	
@@ -219,6 +228,8 @@ public partial class MainWindow : UIWindow {
 			array.gameObject.SetActive(true);
 			array.Refresh();
 			dd_container.gameObject.SetActive(false);
+			Refocus = array.gameObject.GetPath();
+			window!.StartCoroutine(WaitFocus());
 		};
 		System.Action show_dropdown = () => {
 			array.gameObject.SetActive(false);

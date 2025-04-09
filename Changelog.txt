@@ -1,3 +1,6 @@
+v0.10.2
+	easeStep exists
+
 v0.10.1
 	Smart focus!
 	Don't trust events >:( Also keeps scroll position more often

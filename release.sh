@@ -40,10 +40,12 @@ msbuild
 echo "Check..."
 read || exit
 
+git push
+
 git checkout main
 git merge --ff-only $DEV_BRANCH
 
-git push main $DEV_BRANCH
+git push
 git push --tags
 
 git checkout $DEV_BRANCH

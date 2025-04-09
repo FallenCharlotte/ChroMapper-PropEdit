@@ -2,6 +2,7 @@
 
 PROJECT="$(basename "$(pwd)")"
 CHANGELOG="Changelog.txt"
+DEV_BRANCH="dev"
 tag=$1
 ver="$(grep -Eo '(([0-9]+\.){0,3}[0-9]+)' <<< "$1")"
 # Short version with v: the base tag for the UpdateChecker manifest
@@ -40,9 +41,9 @@ echo "Check..."
 read || exit
 
 git checkout main
-git merge --ff-only
+git merge --ff-only $DEV_BRANCH
 
-git push
+git push main $DEV_BRANCH
 git push --tags
 
-git checkout dev
+git checkout $DEV_BRANCH

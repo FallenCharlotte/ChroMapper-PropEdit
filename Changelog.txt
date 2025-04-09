@@ -1,3 +1,6 @@
+v0.10.3
+	Point definitions learn to share
+
 v0.10.2
 	easeStep exists
 

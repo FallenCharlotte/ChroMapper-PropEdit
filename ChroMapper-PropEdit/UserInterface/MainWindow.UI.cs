@@ -64,7 +64,7 @@ public partial class MainWindow : UIWindow {
 #if CHROMPER_11
 	private IEnumerator WaitUpdate() {
 		yield return 1;
-		UpdateSelection(false);
+		UpdateSelection();
 		yield break;
 	}
 #endif

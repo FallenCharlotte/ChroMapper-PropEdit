@@ -76,7 +76,8 @@ public static class Events {
 		{"easeInOutElastic", "Elastic In/Out"},
 		{"easeInBounce", "Bounce In"},
 		{"easeOutBounce", "Bounce Out"},
-		{"easeInOutBounce", "Bounce In/Out"}
+		{"easeInOutBounce", "Bounce In/Out"},
+		{"easeStep", "Step"}
 	};
 	
 	public static readonly Map<string?> LerpTypes = new Map<string?> {

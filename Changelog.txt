@@ -1,3 +1,8 @@
+v0.10.1
+	Smart focus!
+	Don't trust events >:( Also keeps scroll position more often
+	Oh yeah array editor supports tooltips :P
+
 v0.10
 	Prettier text boxes
 	Maaaaath

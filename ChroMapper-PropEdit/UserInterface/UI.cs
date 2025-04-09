@@ -158,14 +158,17 @@ public static class UI {
 	public static UITextInput AddParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
 		var input = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, parent.transform);
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		input.InputField.text = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
+		var strval = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
+		input.InputField.text = strval;
 		input.InputField.onEndEdit.AddListener((s) => {
-			var table = new System.Data.DataTable();
-			var computed = table.Compute(s, "");
-			T? converted = (computed == System.DBNull.Value)
-				? null
-				: (T)Convert.ChangeType(computed, typeof(T));
-			setter(converted);
+			if (s != strval) {
+				var table = new System.Data.DataTable();
+				var computed = table.Compute(s, "");
+				T? converted = (computed == System.DBNull.Value)
+					? null
+					: (T)Convert.ChangeType(computed, typeof(T));
+				setter(converted);
+			}
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
@@ -192,7 +195,9 @@ public static class UI {
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		input.InputField.text = value ?? "";
 		input.InputField.onEndEdit.AddListener((string? s) => {
-			setter(s);
+			if (s != value) {
+				setter(s);
+			}
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);

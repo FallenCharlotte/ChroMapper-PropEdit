@@ -73,6 +73,7 @@ public partial class MainWindow : UIWindow {
 	private IEnumerator WaitFocus() {
 		var refocus = Refocus;
 		Refocus = null;
+		Debug.Log(refocus);
 		int combo = 0;
 		do {
 			yield return 1;
@@ -228,8 +229,6 @@ public partial class MainWindow : UIWindow {
 			array.gameObject.SetActive(true);
 			array.Refresh();
 			dd_container.gameObject.SetActive(false);
-			Refocus = array.gameObject.GetPath();
-			window!.StartCoroutine(WaitFocus());
 		};
 		System.Action show_dropdown = () => {
 			array.gameObject.SetActive(false);
@@ -256,6 +255,8 @@ public partial class MainWindow : UIWindow {
 			switch (v) {
 			case "Array":
 				show_array();
+				Refocus = array.gameObject.GetPath();
+				window!.StartCoroutine(WaitFocus());
 				break;
 			case "Named":
 				show_dropdown();

@@ -1,5 +1,7 @@
 using TMPro;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -60,6 +62,19 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 		return this;
 	}
 	
+	public void TabNext(Textbox input) => TabDir(input, 1);
+	public void TabPrev(Textbox input) => TabDir(input, 1);
+	
+	public void TabDir(Textbox input, int dir) {
+		var textboxes = GetComponentsInChildren<Textbox>()
+			.Where(it => it.isActiveAndEnabled)
+			.ToList();
+		
+		var i = textboxes.IndexOf(input);
+		Debug.Log(i);
+		textboxes[(i + dir + textboxes.Count) % textboxes.Count].Select();
+	}
+	
 	public void Toggle() {
 		gameObject.SetActive(!gameObject.activeSelf);
 		if (gameObject.activeSelf) {
@@ -109,6 +124,8 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 	public void OnPointerExit(PointerEventData _) {
 		CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(Window), ActionMapsDisabled);
 	}
+	
+	private List<Selectable> tabIndexs = new List<Selectable>();
 	
 	private static System.Type[] ActionMapsDisabled = {
 		typeof(CMInput.ICameraActions), typeof(CMInput.IPlacementControllersActions)

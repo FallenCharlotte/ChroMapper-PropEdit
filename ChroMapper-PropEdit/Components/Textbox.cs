@@ -1,5 +1,5 @@
 //using System;
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -30,7 +30,7 @@ public class Textbox : Selectable {
 		return UI.AddChild(parent, "Textbox").AddComponent<Textbox>().Init(tall);
 	}
 	
-	private Textbox Init(bool tall = false) {
+	public Textbox Init(bool tall = false) {
 		TextInput = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, transform);
 		
 		TextInput.InputField.pointSize = tall ? 12 : 14;
@@ -42,7 +42,14 @@ public class Textbox : Selectable {
 		}
 		UI.AttachTransform(TextInput.gameObject, new Vector2(0, 1), new Vector2(0, 0));
 		
+		TextInput.InputField.onSelect.AddListener(delegate {
+			TextboxEditing = true;
+			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
+			StartCoroutine("WatchTabs");
+		});
 		TextInput.InputField.onEndEdit.AddListener((string s) => {
+			StopCoroutine("WatchTabs");
 			if (s != _value) {
 				OnChange!(s);
 			}
@@ -51,17 +58,24 @@ public class Textbox : Selectable {
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
 			TextboxEditing = false;
 		});
-		TextInput.InputField.onSelect.AddListener(delegate {
-			TextboxEditing = true;
-			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
-		});
 		
 		return this;
 	}
 	
 	public override void Select() {
 		TextInput?.InputField.ActivateInputField();
+	}
+	
+	private IEnumerator WatchTabs() {
+		for (;;) {
+			if (Input.GetKeyDown(KeyCode.Tab)) {
+				var dir = (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift))
+					? -1
+					: 1;
+				GetComponentInParent<Window>()?.TabDir(this, dir);
+			}
+			yield return new WaitForEndOfFrame();
+		}
 	}
 	
 	private string _value = "";

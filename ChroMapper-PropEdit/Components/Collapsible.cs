@@ -78,7 +78,7 @@ public class Collapsible : MonoBehaviour
 		Image[] images = expandToggle.gameObject.GetComponentsInChildren<Image>();
 		foreach (var image in images) {
 			image.sprite = arrow;
-			((RectTransform)image.gameObject.transform).sizeDelta = new Vector2(20, 15);
+			((RectTransform)image.gameObject.transform).sizeDelta = new Vector2(12, 9);
 		}
 		((RectTransform)expandToggle.transform).anchoredPosition = new Vector2(-15, 0);
 		

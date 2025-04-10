@@ -70,20 +70,10 @@ public partial class MainWindow : UIWindow {
 #endif
 	
 	// And as always, death to Unity
-	private IEnumerator WaitFocus() {
-		var refocus = Refocus;
-		Refocus = null;
+	private IEnumerator WaitFocus(string path, int dir) {
+		yield return new WaitForSeconds(0.1f);
 		
-		Debug.Log(refocus);
-		int combo = 0;
-		do {
-			yield return 1;
-			var ret = GameObject.Find(refocus).GetComponent<ArrayEditor>().FocusLast();
-			combo = (ret && Textbox.TextboxEditing) 
-				? combo + 1
-				: 0;
-		}
-		while (combo < 5);
+		window!.TabDir(GameObject.Find(path)?.GetComponent<Textbox>(), dir);
 		
 		yield break;
 	}
@@ -256,8 +246,9 @@ public partial class MainWindow : UIWindow {
 			switch (v) {
 			case "Array":
 				show_array();
-				Refocus = array.gameObject.GetPath();
-				window!.StartCoroutine(WaitFocus());
+				var path = textbox.gameObject.GetPath();
+				Debug.Log(path);
+				window!.StartCoroutine(WaitFocus(path, 1));
 				break;
 			case "Named":
 				show_dropdown();

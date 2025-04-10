@@ -24,7 +24,8 @@ public class Textbox : Selectable {
 		}
 	}
 	
-	public static bool TextboxEditing { get; private set; }
+	public static Textbox? Selected { get; private set; }
+	public static int TabDir { get; private set; }
 	
 	public static Textbox Create(GameObject parent, bool tall = false) {
 		return UI.AddChild(parent, "Textbox").AddComponent<Textbox>().Init(tall);
@@ -43,7 +44,8 @@ public class Textbox : Selectable {
 		UI.AttachTransform(TextInput.gameObject, new Vector2(0, 1), new Vector2(0, 0));
 		
 		TextInput.InputField.onSelect.AddListener(delegate {
-			TextboxEditing = true;
+			Selected = this;
+			TabDir = 0;
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
 			StartCoroutine("WatchTabs");
@@ -56,7 +58,7 @@ public class Textbox : Selectable {
 			
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
-			TextboxEditing = false;
+			Selected = null;
 		});
 		
 		return this;
@@ -66,13 +68,14 @@ public class Textbox : Selectable {
 		TextInput?.InputField.ActivateInputField();
 	}
 	
+	// TODO: This really should be an action
 	private IEnumerator WatchTabs() {
 		for (;;) {
 			if (Input.GetKeyDown(KeyCode.Tab)) {
-				var dir = (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift))
+				TabDir = (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift))
 					? -1
 					: 1;
-				GetComponentInParent<Window>()?.TabDir(this, dir);
+				GetComponentInParent<Window>()?.TabDir(this, TabDir);
 			}
 			yield return new WaitForEndOfFrame();
 		}

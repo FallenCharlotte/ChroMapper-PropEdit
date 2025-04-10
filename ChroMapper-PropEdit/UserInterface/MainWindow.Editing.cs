@@ -34,6 +34,13 @@ public partial class MainWindow : UIWindow {
 	public void UpdateSelection() { lock(this) {
 		var old_scroll = scrollbox!.scrollbar!.value;
 		
+		var old_focus = "";
+		var tab_dir = Textbox.TabDir;
+		
+		if (Textbox.Selected != null) {
+			old_focus = Textbox.Selected.gameObject.GetPath();
+		}
+		
 		foreach (Transform child in panel!.transform) {
 			GameObject.Destroy(child.gameObject);
 		}
@@ -535,8 +542,8 @@ public partial class MainWindow : UIWindow {
 			old_type = null;
 		}
 		
-		if (Refocus != null) {
-			window.StartCoroutine(WaitFocus());
+		if (old_focus != "") {
+			window.StartCoroutine(WaitFocus(old_focus, tab_dir));
 		}
 	}}
 	

@@ -103,6 +103,7 @@ public class ArrayEditor : MonoBehaviour {
 	private void AddLine(string value, bool mixed = false) {
 		var i = linenum++;
 		var input = UI.AddTextbox(container!.panel!, value, (_) => Submit(i), true);
+		input.gameObject.name = $"Input {i}";
 		
 		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
 		UI.SetMixed(input, mixed);

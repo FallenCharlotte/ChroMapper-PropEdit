@@ -65,13 +65,17 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 	public void TabNext(Textbox input) => TabDir(input, 1);
 	public void TabPrev(Textbox input) => TabDir(input, 1);
 	
-	public void TabDir(Textbox input, int dir) {
+	public void TabDir(Textbox? input, int dir) {
 		var textboxes = GetComponentsInChildren<Textbox>()
 			.Where(it => it.isActiveAndEnabled)
 			.ToList();
 		
-		var i = textboxes.IndexOf(input);
-		Debug.Log(i);
+		if (textboxes.Count == 0) return;
+		
+		var i = (input != null)
+			? textboxes.IndexOf(input)
+			: 0;
+		
 		textboxes[(i + dir + textboxes.Count) % textboxes.Count].Select();
 	}
 	

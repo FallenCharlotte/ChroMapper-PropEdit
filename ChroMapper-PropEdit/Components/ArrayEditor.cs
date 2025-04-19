@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 using ChroMapper_PropEdit.UserInterface;
 using ChroMapper_PropEdit.Utils;
@@ -16,22 +17,36 @@ public class ArrayEditor : MonoBehaviour {
 	public delegate JSONArray? Getter();
 	public delegate void Setter(JSONArray v);
 	// Return raw json
-	Getter? _getter = null;
-	Setter? _setter = null;
+	public Getter? _getter = null;
+	public Setter? _setter = null;
 	bool raw = false;
 	
 	public ArrayEditor() {
 		inputs = new List<Textbox>();
 	}
 	
-	public static ArrayEditor Create(GameObject parent, string title, ValueTuple<Getter, Setter> get_set, bool raw = false, string tooltip = "") {
-		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(title, raw, get_set, tooltip);
+	public static ArrayEditor Singleton(GameObject parent, string title, ValueTuple<Getter, Setter> get_set, bool raw = false, string tooltip = "") {
+		var go_name = $"{title} Array";
+		var ae = parent.transform.Find(go_name)?.GetComponent<ArrayEditor>();
+		if (ae == null) {
+			ae = UI.AddChild(parent, go_name).AddComponent<ArrayEditor>().Init(title, raw, tooltip);
+		}
+		(ae._getter, ae._setter) = get_set;
+		ae.Refresh();
+		return ae;
 	}
 	
-	public ArrayEditor Init(string title, bool raw, ValueTuple<Getter, Setter> get_set, string tooltip = "") {
-		(_getter, _setter) = get_set;
+	public static ArrayEditor Create(GameObject parent, string title, ValueTuple<Getter, Setter> get_set, bool raw = false, string tooltip = "") {
+		return Singleton(parent, title, get_set, raw, tooltip);
+	}
+	
+	public ArrayEditor Init(string title, bool raw, string tooltip = "") {
 		this.raw = raw;
 		container = gameObject.AddComponent<Collapsible>().Init(title, true, tooltip, false);
+		{
+			var layout = container.panel!.GetComponent<VerticalLayoutGroup>();
+			layout.padding = new RectOffset(5, 5, 0, 5);
+		}
 		return this;
 	}
 	

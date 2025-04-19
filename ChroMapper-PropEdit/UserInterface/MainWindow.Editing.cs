@@ -29,22 +29,22 @@ public partial class MainWindow : UIWindow {
 	TooltipStrings tooltip = TooltipStrings.Instance;
 	BundleInfo? bundleInfo = null;
 	public string? Refocus = null;
+
 	private ObjectType? old_type = null;
+	private bool full_rebuild = true;
 	
+	private void wipe() {
+		foreach (Transform child in panel!.transform) {
+			GameObject.Destroy(child.gameObject);
+		}
+	}
+
 	public void UpdateSelection() { lock(this) {
 		var old_scroll = scrollbox!.scrollbar!.value;
 		
 		var old_focus = "";
 		var tab_dir = Textbox.TabDir;
-		
-		if (Textbox.Selected != null) {
-			old_focus = Textbox.Selected.gameObject.GetPath();
-		}
-		
-		foreach (Transform child in panel!.transform) {
-			GameObject.Destroy(child.gameObject);
-		}
-		
+
 		editing = SelectionController.SelectedObjects.Select(it => it).ToList();
 		
 		if (SelectionController.HasSelectedObjects() && editing.Count() > 0) {
@@ -60,13 +60,20 @@ public partial class MainWindow : UIWindow {
 			var type = o.ObjectType;
 			var v2 = BeatSaberSongContainer.Instance.Map.Version[0] == '2';
 			
+			full_rebuild = false;
+			
+			if (type != old_type) {
+				wipe();
+				full_rebuild = true;
+			}
+
 			scrollbox!.TargetScroll = (type != old_type)
 				? 1f
 				: old_scroll;
 			old_type = type;
 			
 			panels.Clear();
-			panels.Push(panel);
+			panels.Push(panel!);
 			
 			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true, (o is BaseGrid)
 				? tooltip.GetTooltip(PropertyType.Object, TooltipStrings.Tooltip.Beat)
@@ -540,10 +547,11 @@ public partial class MainWindow : UIWindow {
 		else {
 			window!.SetTitle("No items selected");
 			old_type = null;
+			wipe();
 		}
 		
 		if (old_focus != "") {
-			window.StartCoroutine(WaitFocus(old_focus, tab_dir));
+			//window.StartCoroutine(WaitFocus(old_focus, tab_dir));
 		}
 	}}
 	
@@ -564,12 +572,19 @@ public partial class MainWindow : UIWindow {
 	private void AddAnimation(string name, string path, string default_json, string tooltip) {
 		var (getter, setter) = Data.CustomGetSetNode(path, default_json);
 		var (value, _) = Data.GetAllOrNothing(editing!, getter);
-		if (value ?? false) {
-			AddPointDefinition(name, Data.CustomGetSetRaw(path), tooltip);
-		}
-		else {
-			AddCheckbox(name, (getter, setter), false, tooltip);
-		}
+		
+		/*  PointdefinitionEditor.Singleton(
+		 *  	current_panel!,
+		 *  	name,
+		 *  	Data.CustomGetSetNode(path, default_json),
+		 *  	Data.CustomGetSetRaw(path)
+		 */
+		
+		var pd = AddPointDefinition(name, Data.CustomGetSetRaw(path), tooltip);
+		//var check = AddCheckbox(name, (getter, setter), false, tooltip);
+		
+		//pd.SetActive(value ?? false);
+		//check.transform.parent.gameObject.SetActive(!(value ?? false));
 	}
 	
 	private void AddColor(string label, string key, string tooltip = "") {
@@ -607,7 +622,7 @@ public partial class MainWindow : UIWindow {
 			(JSONArray node) => Data.UpdateObjects<string?>(staged, setter, node.ToString());
 		
 		
-		ArrayEditor.Create(current_panel!, title, (arr_get, arr_set), false, tooltip).Refresh();
+		ArrayEditor.Singleton(current_panel!, title, (arr_get, arr_set), false, tooltip);
 	}
 	
 	private void AddMaterial() {

@@ -62,13 +62,13 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 		return this;
 	}
 	
-	public void TabNext(Textbox input) => TabDir(input, 1);
-	public void TabPrev(Textbox input) => TabDir(input, 1);
-	
-	public void TabDir(Textbox? input, int dir) {
+	public void TabDir((Textbox?, int) args) {
+		var (input, dir) = args;
 		var textboxes = GetComponentsInChildren<Textbox>()
 			.Where(it => it.isActiveAndEnabled)
 			.ToList();
+		
+		Debug.Log($"{textboxes.Count} Tabable");
 		
 		if (textboxes.Count == 0) return;
 		
@@ -76,7 +76,22 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 			? textboxes.IndexOf(input)
 			: 0;
 		
-		textboxes[(i + dir + textboxes.Count) % textboxes.Count].Select();
+		Debug.Log($"Tab {i} + {dir}");
+		
+		var target = textboxes[(i + dir + textboxes.Count) % textboxes.Count];
+		target.Select();
+		
+		Debug.Log($"{Time.frameCount} {target.gameObject.GetPath()}");
+		/*
+		{
+			Vector3[] target_corners = new Vector3[4];
+			Vector3[] panel_corners = new Vector3[4];
+			((RectTransform)target.transform).GetWorldCorners(target_corners);
+			((RectTransform)transform.Find("Scroll Container").transform).GetWorldCorners(panel_corners);
+			Debug.Log(target_corners[0].y - panel_corners[0].y);
+			Debug.Log(panel_corners[1].y - target_corners[1].y);
+		}
+		*/
 	}
 	
 	public void Toggle() {

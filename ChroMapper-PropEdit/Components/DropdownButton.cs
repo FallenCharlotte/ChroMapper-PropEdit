@@ -44,7 +44,11 @@ public class DropdownButton : MonoBehaviour {
 		if (_base == null) {
 			_base = Instantiate(PersistentUI.Instance.DropdownPrefab).gameObject;
 			Destroy(_base.GetComponent<Image>());
-			_base.transform.Find("Arrow").AddComponent(_base.GetComponent<TMP_Dropdown>());
+			{
+				var arrow = _base.transform.Find("Arrow")!;
+				((RectTransform)arrow.transform).anchoredPosition = new Vector2(-6, 0);
+				arrow.AddComponent(_base.GetComponent<TMP_Dropdown>());
+			}
 			Destroy(_base.GetComponent<TMP_Dropdown>());
 			Destroy(_base.transform.Find("Label").gameObject);
 		}

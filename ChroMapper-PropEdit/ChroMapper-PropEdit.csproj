@@ -100,6 +100,7 @@
     <Compile Include="Components\Collapsible.cs" />
     <Compile Include="Components\DragWindowController.cs" />
     <Compile Include="Components\DropdownButton.cs" />
+    <Compile Include="Components\PointDefinitionEditor.cs" />
     <Compile Include="Components\ResizeWindowController.cs" />
     <Compile Include="Components\ScrollBox.cs" />
     <Compile Include="Components\Textbox.cs" />

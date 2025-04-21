@@ -29,21 +29,19 @@ public partial class MainWindow : UIWindow {
 	TooltipStrings tooltip = TooltipStrings.Instance;
 	BundleInfo? bundleInfo = null;
 	public string? Refocus = null;
+
 	private ObjectType? old_type = null;
+	private bool full_rebuild = true;
 	
-	public void UpdateSelection() { lock(this) {
-		var old_scroll = scrollbox!.scrollbar!.value;
-		
-		var old_focus = "";
-		var tab_dir = Textbox.TabDir;
-		
-		if (Textbox.Selected != null) {
-			old_focus = Textbox.Selected.gameObject.GetPath();
-		}
-		
+	private void wipe() {
 		foreach (Transform child in panel!.transform) {
 			GameObject.Destroy(child.gameObject);
 		}
+	}
+
+	public void UpdateSelection() { lock(this) {
+		Debug.Log("UpdateSelection()");
+		var old_scroll = scrollbox!.scrollbar!.value;
 		
 		editing = SelectionController.SelectedObjects.Select(it => it).ToList();
 		
@@ -60,13 +58,20 @@ public partial class MainWindow : UIWindow {
 			var type = o.ObjectType;
 			var v2 = BeatSaberSongContainer.Instance.Map.Version[0] == '2';
 			
+			full_rebuild = false;
+			
+			if (type != old_type) {
+				wipe();
+				full_rebuild = true;
+			}
+
 			scrollbox!.TargetScroll = (type != old_type)
 				? 1f
 				: old_scroll;
 			old_type = type;
 			
 			panels.Clear();
-			panels.Push(panel);
+			panels.Push(panel!);
 			
 			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true, (o is BaseGrid)
 				? tooltip.GetTooltip(PropertyType.Object, TooltipStrings.Tooltip.Beat)
@@ -540,36 +545,53 @@ public partial class MainWindow : UIWindow {
 		else {
 			window!.SetTitle("No items selected");
 			old_type = null;
+			wipe();
 		}
-		
+		/*
 		if (old_focus != "") {
 			window.StartCoroutine(WaitFocus(old_focus, tab_dir));
-		}
+		}*/
 	}}
 	
 	private void AddAnimations(PropertyType type, bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
 		AddCheckbox("Animation", Data.GetSetAnimation(v2), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimatePath));
-		if (editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() == editing.Count()) {
-			AddExpando("Animations", "Animations", true);
-			AddAnimation("Color", CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimateColor));
-			foreach (var property in Events.NoodleProperties) {
-				AddAnimation(property.Key, CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2], tooltip.GetTooltip(type, $"Animate{property.Key}"));
-			}
-			AddAnimation("Definite Position", CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
-			panels.Pop();
+		
+		AddExpando("Animations", "Animations", true);
+		AddAnimation("Color", CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimateColor));
+		foreach (var property in Events.NoodleProperties) {
+			AddAnimation(property.Key, CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2], tooltip.GetTooltip(type, $"Animate{property.Key}"));
 		}
+		AddAnimation("Definite Position", CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+		current_panel!.transform.parent.gameObject.SetActive(editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() == editing.Count());
+		panels.Pop();
 	}
 	
 	private void AddAnimation(string name, string path, string default_json, string tooltip) {
-		var (getter, setter) = Data.CustomGetSetNode(path, default_json);
-		var (value, _) = Data.GetAllOrNothing(editing!, getter);
-		if (value ?? false) {
-			AddPointDefinition(name, Data.CustomGetSetRaw(path), tooltip);
-		}
-		else {
-			AddCheckbox(name, (getter, setter), false, tooltip);
-		}
+		var (_, default_set) = Data.CustomGetSetNode(path, default_json);
+		var (getter, setter) = Data.CustomGetSetRaw(path);
+		var (value, mixed) = Data.GetAllOrNothing(editing!, getter);
+		
+		PointDefinitionEditor
+				.Singleton(
+				current_panel!,
+				name,
+				tooltip)
+			.Set(
+				value,
+				mixed,
+				(v) => {
+					if (v == "") {
+						v = null;
+					}
+					if (v != value) {
+						Data.UpdateObjects<string?>(editing!, setter, v);
+					}
+				}/*,
+				(v) => {
+					Data.UpdateObjects<bool?>(editing!, default_set, v);
+				}*/);
+		return;
 	}
 	
 	private void AddColor(string label, string key, string tooltip = "") {
@@ -582,13 +604,13 @@ public partial class MainWindow : UIWindow {
 	}
 	
 	// Unarrayable track
-	private void AddTrack(string? title, System.ValueTuple<Data.Getter<string?>, Data.Setter<string?>> get_set, string tooltip = "") {
+	private void AddTrack(string? title, (Data.Getter<string?>, Data.Setter<string?>) get_set, string tooltip = "") {
 		// TODO: dropdown
 		AddTextbox(title, get_set, false, tooltip);
 	}
 	
 	// Arrayable tracks
-	private void AddTracks(string title, System.ValueTuple<Data.Getter<string?>, Data.Setter<string?>> get_set, string tooltip = "") {
+	private void AddTracks(string title, (Data.Getter<string?>, Data.Setter<string?>) get_set, string tooltip = "") {
 		// TODO: dropdowns somehow?
 		var staged = editing!;
 		var (getter, setter) = get_set;
@@ -607,7 +629,9 @@ public partial class MainWindow : UIWindow {
 			(JSONArray node) => Data.UpdateObjects<string?>(staged, setter, node.ToString());
 		
 		
-		ArrayEditor.Create(current_panel!, title, (arr_get, arr_set), false, tooltip).Refresh();
+		ArrayEditor
+			.Singleton(current_panel!, title, tooltip)
+			.Set((arr_get, arr_set), false);
 	}
 	
 	private void AddMaterial() {

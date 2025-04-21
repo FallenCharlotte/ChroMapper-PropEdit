@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 using ChroMapper_PropEdit.UserInterface;
 using ChroMapper_PropEdit.Utils;
@@ -16,31 +17,49 @@ public class ArrayEditor : MonoBehaviour {
 	public delegate JSONArray? Getter();
 	public delegate void Setter(JSONArray v);
 	// Return raw json
-	Getter? _getter = null;
-	Setter? _setter = null;
+	public Getter? _getter = null;
+	public Setter? _setter = null;
 	bool raw = false;
 	
 	public ArrayEditor() {
 		inputs = new List<Textbox>();
 	}
 	
-	public static ArrayEditor Create(GameObject parent, string title, ValueTuple<Getter, Setter> get_set, bool raw = false, string tooltip = "") {
-		return UI.AddChild(parent, title).AddComponent<ArrayEditor>().Init(title, raw, get_set, tooltip);
+	public static ArrayEditor Singleton(GameObject parent, string title, string tooltip = "") {
+		var go_name = $"{title} Array";
+		var ae = parent.transform.Find(go_name)?.GetComponent<ArrayEditor>();
+		if (ae == null) {
+			ae = UI.AddChild(parent, go_name).AddComponent<ArrayEditor>().Init(title, tooltip);
+		}
+		return ae;
 	}
 	
-	public ArrayEditor Init(string title, bool raw, ValueTuple<Getter, Setter> get_set, string tooltip = "") {
+	public static ArrayEditor Create(GameObject parent, string title, ValueTuple<Getter, Setter> get_set, bool raw = false, string tooltip = "") {
+		return Singleton(parent, title, tooltip).Set(get_set, raw);
+	}
+	
+	public ArrayEditor Set((Getter, Setter) get_set, bool raw = false) {
 		(_getter, _setter) = get_set;
 		this.raw = raw;
+		Refresh();
+		return this;
+	}
+	
+	private ArrayEditor Init(string title, string tooltip = "") {
 		container = gameObject.AddComponent<Collapsible>().Init(title, true, tooltip, false);
+		{
+			var layout = container.panel!.GetComponent<VerticalLayoutGroup>();
+			layout.padding = new RectOffset(1, 1, 0, 1);
+		}
 		return this;
 	}
 	
 	private int linenum = 0;
 	
 	public void Refresh() {
-		inputs = new List<Textbox>();
-		foreach (Transform child in container!.panel!.transform) {
-			GameObject.Destroy(child.gameObject);
+		if (gameObject.name == "Color Array") {
+			//Debug.Log("Array Reset!");
+			//Debug.Log(Environment.StackTrace);
 		}
 		
 		linenum = 0;
@@ -60,9 +79,25 @@ public class ArrayEditor : MonoBehaviour {
 			
 			AddLine("");
 		}
+		while (linenum < inputs.Count) {
+			Debug.Log("Clearing extra lines");
+			GameObject.Destroy(inputs[inputs.Count - 1].gameObject);
+			inputs.RemoveAt(inputs.Count - 1);
+		}
 		
 		if (isActiveAndEnabled) {
 			SendMessageUpwards("DirtyPanel");
+		}
+		
+		// Redo the tab here
+		if (tab_from >= 0) {
+			Debug.Log(tab_from);
+			var textbox = (tab_from < inputs.Count)
+				? inputs[tab_from]
+				: inputs[0];
+			Debug.Log(textbox.isActiveAndEnabled);
+			tab_from = -1;
+			GetComponentInParent<Window>().TabDir((textbox, tab_dir));
 		}
 	}
 	
@@ -85,8 +120,6 @@ public class ArrayEditor : MonoBehaviour {
 		}
 		
 		_setter!(node);
-		
-		Refresh();
 	}
 	
 	public bool FocusLast() {
@@ -102,13 +135,19 @@ public class ArrayEditor : MonoBehaviour {
 	
 	private void AddLine(string value, bool mixed = false) {
 		var i = linenum++;
-		var input = UI.AddTextbox(container!.panel!, value, (_) => Submit(i), true);
-		input.gameObject.name = $"Input {i}";
-		
-		UI.MoveTransform((RectTransform)input.transform, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
-		UI.SetMixed(input, mixed);
-		
-		inputs.Add(input);
+		if (i >= inputs.Count) {
+			var input = UI.AddTextbox(container!.panel!, value, (_) => Submit(i), true);
+			input.gameObject.name = $"Input {i}";
+			
+			UI.MoveTransform((RectTransform)input.transform, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
+			UI.SetMixed(input, mixed);
+			
+			inputs.Add(input);
+		}
+		else {
+			var input = inputs[i];
+			input.Set(value, mixed, (_) => Submit(i));
+		}
 	}
 	
 	public static (Getter, Setter) NodePathGetSet(JSONNode root, string path) {
@@ -126,6 +165,16 @@ public class ArrayEditor : MonoBehaviour {
 		
 		return (getter, setter);
 	}
+	
+	// Redo the tab after changes are processed
+	public void TabDir((Textbox?, int) args) {
+		var (textbox, dir) = args;
+		tab_dir = dir;
+		tab_from = inputs.IndexOf(textbox!);
+	}
+	
+	private int tab_from = -1;
+	private int tab_dir = 0;
 	
 	public Collapsible? container;
 	public List<Textbox> inputs;

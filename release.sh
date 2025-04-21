@@ -35,7 +35,9 @@ rm "$CHANGELOG".old
 git add $PROJECT/Properties/AssemblyInfo.cs $PROJECT/manifest.json "$CHANGELOG"
 git commit -m "${tag}"
 git tag "${tag}"
+
 msbuild
+msbuild /p:DefineConstants="CHROMPER_11"
 
 echo "Check..."
 read || exit

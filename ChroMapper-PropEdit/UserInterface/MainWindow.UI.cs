@@ -65,6 +65,7 @@ public partial class MainWindow : UIWindow {
 	}
 	
 #if CHROMPER_11
+	// Because Chromper 11 fires ActionCreatedEvent before actually doing the action...
 	private IEnumerator WaitUpdate() {
 		yield return 1;
 		UpdateSelection();

@@ -81,7 +81,6 @@ public class ScrollBox : MonoBehaviour {
 	
 	private const float over_scoll = 10f;
 	public void ScrollTo(GameObject target) {
-		Debug.Log("ScrollTo");
 		Vector3[] target_corners = new Vector3[4];
 		Vector3[] mask_corners = new Vector3[4];
 		Vector3[] content_corners = new Vector3[4];
@@ -92,11 +91,9 @@ public class ScrollBox : MonoBehaviour {
 		var mask_height = mask_corners[1].y - mask_corners[0].y;
 		if (target_corners[0].y - mask_corners[0].y < 0) {
 			StartCoroutine(SmoothScroll((target_corners[0].y - mask_corners[0].y - over_scoll) / (content_height - mask_height)));
-			//scrollbar!.value += (target_corners[0].y - mask_corners[0].y) / (content_height - mask_height);
 		}
 		if (mask_corners[1].y - target_corners[1].y < 0) {
 			StartCoroutine(SmoothScroll((target_corners[1].y - mask_corners[1].y + over_scoll) / (content_height - mask_height)));
-			//scrollbar!.value -= (mask_corners[1].y - target_corners[1].y) / (content_height - mask_height);
 		}
 	}
 	

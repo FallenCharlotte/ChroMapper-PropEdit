@@ -34,14 +34,13 @@ public partial class MainWindow : UIWindow {
 	}
 	
 	public void UpdateSelection() { lock(this) {
-		var old_scroll = scrollbox!.scrollbar!.value;
-		
 		editing = SelectionController.SelectedObjects.Select(it => it).ToList();
 		
 		if (SelectionController.HasSelectedObjects() && editing.Count() > 0) {
 			window!.SetTitle($"{SelectionController.SelectedObjects.Count} Items selected");
 			
 			if (editing.GroupBy(o => o.ObjectType).Count() > 1) {
+				wipe();
 				UI.AddLabel(panel!, "Unsupported", "Multi-Type Unsupported!", Vector2.zero);
 				old_type = null;
 				return;
@@ -57,10 +56,6 @@ public partial class MainWindow : UIWindow {
 				wipe();
 				full_rebuild = true;
 			}
-
-			scrollbox!.TargetScroll = (type != old_type)
-				? 1f
-				: old_scroll;
 			old_type = type;
 			
 			panels.Clear();
@@ -532,6 +527,10 @@ public partial class MainWindow : UIWindow {
 					break;
 			}
 			UI.RefreshTooltips(panel);
+			if (full_rebuild) {
+				Debug.Log("Scroll plz");
+				scrollbox!.ScrollTop();
+			}
 		}
 		else {
 			window!.SetTitle("No items selected");
@@ -550,7 +549,7 @@ public partial class MainWindow : UIWindow {
 			AddAnimation(property.Key, CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2], tooltip.GetTooltip(type, $"Animate{property.Key}"));
 		}
 		AddAnimation("Definite Position", CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
-		current_panel!.transform.parent.gameObject.SetActive(editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() == editing.Count());
+		current_panel!.transform.parent.gameObject.SetActive(editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() > 0);
 		panels.Pop();
 	}
 	

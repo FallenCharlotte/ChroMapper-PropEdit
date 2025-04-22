@@ -89,12 +89,21 @@ public class ScrollBox : MonoBehaviour {
 		((RectTransform)content!.transform).GetWorldCorners(content_corners);
 		var content_height = content_corners[1].y - content_corners[0].y;
 		var mask_height = mask_corners[1].y - mask_corners[0].y;
+		var current_scroll = scrollbar!.value;
 		if (target_corners[0].y - mask_corners[0].y < 0) {
 			StartCoroutine(SmoothScroll((target_corners[0].y - mask_corners[0].y - over_scoll) / (content_height - mask_height)));
 		}
-		if (mask_corners[1].y - target_corners[1].y < 0) {
+		else if (mask_corners[1].y - target_corners[1].y < 0) {
 			StartCoroutine(SmoothScroll((target_corners[1].y - mask_corners[1].y + over_scoll) / (content_height - mask_height)));
 		}
+	}
+	
+	public void ScrollTop() {
+		if (!isActiveAndEnabled) {
+			scrollbar!.value = 1f;
+			return;
+		}
+		StartCoroutine(SmoothScroll(1 - scrollbar!.value));
 	}
 	
 	private const float anim_dur = 0.25f;

@@ -32,15 +32,12 @@ public class Textbox : Selectable {
 	}
 	
 	public Textbox Init(bool tall = false) {
-		if (tab_action == null) {
+		if (tab_next == null) {
 			var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
-				.Where(x => x.name == "Node Editor")
+				.Where(x => x.name == "Dialog Box")
 				.FirstOrDefault();
-			CMInputCallbackInstaller.InputInstance.Disable();
-			tab_action = map.AddAction("Tab Next", type: InputActionType.Button);
-			tab_action.AddBinding()
-				.WithPath("<Keyboard>/tab");
-			CMInputCallbackInstaller.InputInstance.Enable();
+			tab_next = map.FindAction("Navigate Down");
+			tab_back = map.FindAction("Navigate Up");
 		}
 		
 		TextInput = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, transform);
@@ -57,8 +54,8 @@ public class Textbox : Selectable {
 		TextInput.InputField.onSelect.AddListener((_) => {
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
-			tab_action!.performed += onTab;
-			tab_action!.Enable();
+			tab_next!.performed += onTabNext;
+			tab_back!.performed += onTabBack;
 		});
 		TextInput.InputField.onEndEdit.AddListener((string s) => {
 			if (s != _value) {
@@ -68,7 +65,8 @@ public class Textbox : Selectable {
 		TextInput.InputField.onDeselect.AddListener((_) => {
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
-			tab_action!.performed -= onTab;
+			tab_next!.performed -= onTabNext;
+			tab_back!.performed -= onTabBack;
 		});
 		
 		return this;
@@ -91,23 +89,30 @@ public class Textbox : Selectable {
 		TextInput?.InputField.ActivateInputField();
 	}
 	
-	private void onTab(InputAction.CallbackContext _) {
-		// This can happen sometimes, not sure why
+	private void onTabNext(InputAction.CallbackContext _) {
+		if (disabledCheck()) return;
+		gameObject.NotifyUpOnce("TabDir", (this, 1));
+	}
+	private void onTabBack(InputAction.CallbackContext _) {
+		if (disabledCheck()) return;
+		gameObject.NotifyUpOnce("TabDir", (this, -1));
+	}
+	// This can happen sometimes, not sure why
+	private bool disabledCheck() {
 		if (!isActiveAndEnabled) {
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
-			tab_action!.performed -= onTab;
-			return;
+			tab_next!.performed -= onTabNext;
+			tab_back!.performed -= onTabBack;
+			return true;
 		}
-		var dir = (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift))
-			? -1
-			: 1;
-		gameObject.NotifyUpOnce("TabDir", (this, dir));
+		return false;
 	}
 	
 	private string _value = "";
 	
-	private static InputAction? tab_action = null;
+	private static InputAction? tab_next = null;
+	private static InputAction? tab_back = null;
 	
 	// Stop textbox input from triggering actions, copied from the node editor
 	

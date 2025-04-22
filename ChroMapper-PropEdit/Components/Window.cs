@@ -83,6 +83,8 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 		
 		var target = textboxes[(i + dir + textboxes.Count) % textboxes.Count];
 		target.Select();
+		
+		GetComponentInChildren<ScrollBox>()?.ScrollTo(target.gameObject);
 	}
 	
 	public void Toggle() {

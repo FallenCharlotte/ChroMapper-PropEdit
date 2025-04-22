@@ -113,8 +113,11 @@ namespace ChroMapper_PropEdit.UserInterface {
 			
 			AnimateColor,
 			AnimatePosition,
-			AnimateRotation,
+			AnimateLocalPosition,
+			AnimatePositionOffset,
 			AnimateLocalRotation,
+			AnimateWorldRotation,
+			AnimateWorldRotationOffset,
 			AnimateScale,
 			AnimateDissolve,
 			AnimateDissolveArrow,
@@ -333,9 +336,12 @@ namespace ChroMapper_PropEdit.UserInterface {
 			// Animation
 			{ Tooltip.AnimatePath, "Create inline path animations on this {0}. Time values are relative to the {0}'s lifespan.\n0 -> {0} jumps in.\n0.5 -> {0} reaches the player.\n1 -> {0} jumps out." },
 			{ Tooltip.AnimateColor, "Animates the color of the {0}." },
-			{ Tooltip.AnimatePosition, "Animates the position offset of an object. It will continue any normal movement and have this stacked on top of it." },
+			{ Tooltip.AnimatePosition, "Animates the position of an object." },
+			{ Tooltip.AnimateLocalPosition, "Animates the local position of an object. Will overwrite `Position`." },
+			{ Tooltip.AnimatePositionOffset, "Animates the position offset of an object. It will continue any normal movement and have this stacked on top of it.\nOnly valid for \"playable\" objects like notes and walls, NOT THE PLAYER." },
 			{ Tooltip.AnimateLocalRotation, "Animates the local rotation offset of an object. This means it is rotated with itself as the origin. Uses euler values. Note that the note spawn effect will be rotated accordingly. Notes attempting to look towards the player may look strange, you can disable their look with disableNoteLook." },
-			{ Tooltip.AnimateRotation, "Animates the world rotation offset of an object. This means it is rotated with the world as the origin. Uses euler values. Think of 360 mode." },
+			{ Tooltip.AnimateWorldRotation, "Animates the world rotation of an object. This means it is rotated with the world as the origin. Uses euler values. Think of 360 mode." },
+			{ Tooltip.AnimateWorldRotationOffset, "Animates the world rotation offset of an object. This means it is rotated with the world as the origin. Uses euler values. Think of 360 mode.\nOnly valid for \"playable\" objects like notes and walls, NOT THE PLAYER." },
 			{ Tooltip.AnimateScale, "Animates the scale of an object. This will be based off their initial size. A scale of 1 is equal to normal size, anything under is smaller, over is larger." },
 			{ Tooltip.AnimateDissolve, "Animates the dissolve effect on both notes and walls. It's the effect that happens when things go away upon failing a song. Keep in mind that notes and the arrows on notes have separate dissolve properties, see dissolveArrow.\nNote: How this looks will depend on the player's graphics settings." },
 			{ Tooltip.AnimateDissolveArrow, "Animates the dissolve effect on the arrows of notes. Similar to the look of the disappearing notes modifier. Has no effect on obstacles" },
@@ -444,12 +450,21 @@ namespace ChroMapper_PropEdit.UserInterface {
 			{ Tooltip.ForceZenModeWalls, "Forces Obstacles to be shown in the Zen Mode modifier." },
 		};
 		
+		private string SafeGet(Tooltip property) {
+			if (!name.ContainsKey(property)) {
+				Debug.LogWarning($"Missing tooltip for {property}");
+				return "";
+			}
+			return name[property];
+		}
+		
 		public string GetTooltip(Tooltip property, params object?[] args) {
-			return string.Format(name[property], args);
+			return string.Format(SafeGet(property), args);
 		}
 		
 		public string GetTooltip(PropertyType type, Tooltip property) {
-			return string.Format(name[property], objects[type]);
+			
+			return string.Format(SafeGet(property), objects[type]);
 		}
 		
 		public string GetTooltip(PropertyType type, string propertyStr) {

@@ -377,7 +377,6 @@ public partial class MainWindow : UIWindow {
 						}
 						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddExpando("Properties", "Point Definitions", true);
-						AddPointDefinition("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
 						foreach (var property in Events.NoodleProperties) {
 							AddPointDefinition(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
@@ -393,7 +392,6 @@ public partial class MainWindow : UIWindow {
 						}
 						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						AddExpando("Properties", "Point Definitions", true);
-						AddPointDefinition("Color", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_color" : "color"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateColor));
 						foreach (var property in Events.NoodleProperties) {
 							AddPointDefinition(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
@@ -552,8 +550,8 @@ public partial class MainWindow : UIWindow {
 		AddCheckbox("Animation", Data.GetSetAnimation(v2), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimatePath));
 		
 		AddExpando("Animations", "Animations", true);
-		AddAnimation("Color", CustomKeyAnimation+"."+ (v2 ? "_color" : "color"), "[[0,0,0,0,0], [1,1,1,1,0.49]],", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimateColor));
 		foreach (var property in Events.NoodleProperties) {
+			if (property.Value[v2 ? 0 : 1] == "") continue;
 			AddAnimation(property.Key, CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2], tooltip.GetTooltip(type, $"Animate{property.Key}"));
 		}
 		AddAnimation("Definite Position", CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));

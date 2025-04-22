@@ -101,6 +101,8 @@ public class ArrayEditor : MonoBehaviour {
 			if (inputs[sender].Value == "") {
 				return;
 			}
+			tab_from = sender;
+			if (tab_dir != -1) tab_dir = 1;
 		}
 		
 		var lines = inputs.Select(it => it.Value).ToArray();

@@ -129,9 +129,11 @@ public partial class MainWindow : UIWindow {
 	private Toggle AddCheckbox(string title, (Data.Getter<bool?>, Data.Setter<bool?>) get_set, bool? _default, string tooltip = "") {
 		var container = AddLine(title, null, tooltip);
 		var staged = editing!;
-		var (value_or, _) = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1);
-		var value = value_or ?? _default ?? false;
+		var (value_or, mixed) = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1);
+		// Do some jank, mixed needs to be drawn as true but act like false
+		var value = (value_or ?? _default ?? false) || mixed;
 		UnityAction<bool> setter = (v) => {
+			v ^= mixed;
 			if (v == _default) {
 				Data.UpdateObjects<bool?>(staged, get_set.Item2, null);
 			}
@@ -140,13 +142,21 @@ public partial class MainWindow : UIWindow {
 			}
 		};
 		
+		Toggle toggle;
+		
 		if (full_rebuild) {
-			return UI.AddCheckbox(container, value!, setter);
+			toggle = UI.AddCheckbox(container, value!, setter);
 		}
 		else {
-			var toggle = container.GetComponentInChildren<Toggle>();
-			return UI.UpdateCheckbox(toggle!, value!, setter);
+			toggle = container.GetComponentInChildren<Toggle>();
+			toggle = UI.UpdateCheckbox(toggle!, value!, setter);
 		}
+		((Image)toggle.graphic).sprite = (mixed)
+			// Another sprite ripped from ChroMapper because it's unused and gets optimized out ;-;
+			? UI.LoadSprite("ChroMapper_PropEdit.Resources.Line.png")
+			: UI.GetSprite("Checkmark");
+		((Image)toggle.graphic).color = Color.black;
+		return toggle;
 	}
 	
 	private UIDropdown AddDropdown<T>(string? title, (Data.Getter<T?>, Data.Setter<T?>) get_set, Map<T?> type, bool nullable = false, string tooltip = "") {

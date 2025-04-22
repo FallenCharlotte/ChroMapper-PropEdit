@@ -249,7 +249,7 @@ public static class UI {
 	
 	public static Sprite GetSprite(string name) {
 		Sprite[] sprites = (Sprite[])Resources.FindObjectsOfTypeAll(typeof(Sprite));
-		return sprites.Single(s => s.name == name);
+		return sprites.First(s => s.name == name);
 	}
 	
 	public static void RefreshTooltips(GameObject? root) {

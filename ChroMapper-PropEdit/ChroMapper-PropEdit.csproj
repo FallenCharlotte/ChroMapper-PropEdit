@@ -128,6 +128,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Resources\EditorIcon.png" />
     <EmbeddedResource Include="Resources\Icon.png" />
+    <EmbeddedResource Include="Resources\Line.png" />
     <EmbeddedResource Include="Resources\Settings.png" />
     <EmbeddedResource Include="manifest.json" />
   </ItemGroup>

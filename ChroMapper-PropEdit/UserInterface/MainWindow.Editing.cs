@@ -1,15 +1,10 @@
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using UnityEngine;
 
 using Beatmap.Base;
 using Beatmap.Base.Customs;
 using Beatmap.Enums;
-using Beatmap.V2;
-using Beatmap.V2.Customs;
-using Beatmap.V3;
 using SimpleJSON;
 
 using ChroMapper_PropEdit.Components;

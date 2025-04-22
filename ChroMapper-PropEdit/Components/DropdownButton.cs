@@ -1,13 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Reflection;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 using ChroMapper_PropEdit.UserInterface;
-using ChroMapper_PropEdit.Utils;
-using SimpleJSON;
 
 namespace ChroMapper_PropEdit.Components {
 

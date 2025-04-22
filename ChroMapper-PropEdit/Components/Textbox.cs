@@ -2,6 +2,8 @@
 using System.Collections;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 using ChroMapper_PropEdit.UserInterface;
@@ -23,15 +25,26 @@ public class Textbox : Selectable {
 			placeholder.text = value;
 		}
 	}
-	
-	public static Textbox? Selected { get; private set; }
-	public static int TabDir { get; private set; }
+	public bool Modified {
+		get { return TextInput!.InputField.text != _value; }
+	}
 	
 	public static Textbox Create(GameObject parent, bool tall = false) {
 		return UI.AddChild(parent, "Textbox").AddComponent<Textbox>().Init(tall);
 	}
 	
 	public Textbox Init(bool tall = false) {
+		if (tab_action == null) {
+			var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
+				.Where(x => x.name == "Node Editor")
+				.FirstOrDefault();
+			CMInputCallbackInstaller.InputInstance.Disable();
+			tab_action = map.AddAction("Tab Next", type: InputActionType.Button);
+			tab_action.AddBinding()
+				.WithPath("<Keyboard>/tab");
+			CMInputCallbackInstaller.InputInstance.Enable();
+		}
+		
 		TextInput = Object.Instantiate(PersistentUI.Instance.TextInputPrefab, transform);
 		
 		TextInput.InputField.pointSize = tall ? 12 : 14;
@@ -43,45 +56,60 @@ public class Textbox : Selectable {
 		}
 		UI.AttachTransform(TextInput.gameObject, new Vector2(0, 1), new Vector2(0, 0));
 		
-		TextInput.InputField.onSelect.AddListener(delegate {
-			Selected = this;
-			TabDir = 0;
+		TextInput.InputField.onSelect.AddListener((_) => {
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
-			StartCoroutine("WatchTabs");
+			tab_action!.performed += onTab;
+			tab_action!.Enable();
 		});
 		TextInput.InputField.onEndEdit.AddListener((string s) => {
-			StopCoroutine("WatchTabs");
 			if (s != _value) {
 				OnChange!(s);
 			}
-			
+		});
+		TextInput.InputField.onDeselect.AddListener((_) => {
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
-			Selected = null;
+			tab_action!.performed -= onTab;
 		});
 		
 		return this;
+	}
+	
+	public Textbox Set(string? value, bool mixed, Setter setter) {
+		Value = value ?? "";
+		OnChange = setter;
+		Placeholder = (mixed) ? "Mixed" : "Empty";
+		
+		return this;
+	}
+	
+	public static void AddTabListener(GameObject go, UnityAction<(Textbox, int)> action) {
+		go.AddComponent<MessageReceiver>()
+			.AddEvent("TabDir", (args) => action(((Textbox, int))args));
 	}
 	
 	public override void Select() {
 		TextInput?.InputField.ActivateInputField();
 	}
 	
-	// TODO: This really should be an action
-	private IEnumerator WatchTabs() {
-		for (;;) {
-			if (Input.GetKeyDown(KeyCode.Tab)) {
-				TabDir = (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift))
-					? -1
-					: 1;
-				GetComponentInParent<Window>()?.TabDir(this, TabDir);
-			}
-			yield return new WaitForEndOfFrame();
+	private void onTab(InputAction.CallbackContext _) {
+		// This can happen sometimes, not sure why
+		if (!isActiveAndEnabled) {
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+			tab_action!.performed -= onTab;
+			return;
 		}
+		var dir = (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift))
+			? -1
+			: 1;
+		gameObject.NotifyUpOnce("TabDir", (this, dir));
 	}
 	
 	private string _value = "";
+	
+	private static InputAction? tab_action = null;
 	
 	// Stop textbox input from triggering actions, copied from the node editor
 	

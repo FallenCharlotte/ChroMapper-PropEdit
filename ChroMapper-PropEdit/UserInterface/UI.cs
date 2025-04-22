@@ -49,7 +49,7 @@ public static class UI {
 	
 	// A container for an input element with a label
 	public static GameObject AddField(GameObject parent, string title, Vector2? size, string tooltip) {
-		var container = UI.AddChild(parent, title + " Container");
+		var container = UI.AddChild(parent, title);
 		UI.AttachTransform(container, size ?? new Vector2(0, 20), pos: new Vector2(0, 0));
 		
 		var label = UI.AddChild(container, title + " Label", typeof(TextMeshProUGUI));
@@ -118,12 +118,28 @@ public static class UI {
 		var colorBlock = toggleComponent.colors;
 		colorBlock.normalColor = Color.white;
 		toggleComponent.colors = colorBlock;
-		toggleComponent.isOn = value;
-		toggleComponent.onValueChanged.AddListener(setter);
-		return toggleComponent;
+		return UpdateCheckbox(toggleComponent, value, setter);
+	}
+	
+	public static Toggle UpdateCheckbox(Toggle toggle, bool value, UnityAction<bool> setter) {
+		toggle.onValueChanged.RemoveAllListeners();
+		toggle.isOn = value;
+		toggle.onValueChanged.AddListener(setter);
+		return toggle;
 	}
 	
 	public static UIDropdown AddDropdown<T>(GameObject parent, T? value, UnityAction<T?> setter, Map<T?> type, bool nullable = false) {
+		var dropdown = CreateDropdown(parent);
+		return UpdateDropdown<T>(dropdown, value, setter, type, nullable);
+	}
+	
+	public static UIDropdown CreateDropdown(GameObject parent) {
+		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, parent.transform);
+		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		return dropdown;
+	}
+	
+	public static UIDropdown UpdateDropdown<T>(UIDropdown dropdown, T? value, UnityAction<T?> setter, Map<T?> type, bool nullable = false) {
 		// Get values from selected items
 		var options = new List<string>();
 		int i = 0;
@@ -144,8 +160,7 @@ public static class UI {
 		}
 		options.AddRange(type.dict.Values.ToList());
 		
-		var dropdown = Object.Instantiate(PersistentUI.Instance.DropdownPrefab, parent.transform);
-		UI.MoveTransform((RectTransform)dropdown.transform, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		dropdown.Dropdown.onValueChanged.RemoveAllListeners();
 		dropdown.SetOptions(options);
 		dropdown.Dropdown.value = i;
 		dropdown.Dropdown.onValueChanged.AddListener((i) => {
@@ -156,9 +171,17 @@ public static class UI {
 		return dropdown;
 	}
 	
-	public static Textbox AddParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
+	public static UITextInput AddParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
+		return CreateParsed<T>(parent, value, setter).TextInput!;
+	}
+	public static Textbox CreateParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
 		var input = Textbox.Create(parent);
 		UI.AttachTransform(input.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		
+		return UpdateParsed<T>(input, value, false, setter);
+	}
+	
+	public static Textbox UpdateParsed<T>(Textbox input, T? value, bool mixed, UnityAction<T?> setter) where T : struct {
 		input.Value = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
 		input.OnChange = (s) => {
 			var table = new System.Data.DataTable();
@@ -168,6 +191,7 @@ public static class UI {
 				: (T)Convert.ChangeType(computed, typeof(T));
 			setter(converted);
 		};
+		input.Placeholder = (mixed) ? "Mixed" : "Empty";
 		
 		return input;
 	}
@@ -175,10 +199,8 @@ public static class UI {
 	public static Textbox AddTextbox(GameObject parent, string? value, Textbox.Setter setter, bool tall = false) {
 		var input = Textbox.Create(parent, tall);
 		UI.AttachTransform(input.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		input.Value = value ?? "";
-		input.OnChange = setter;
 		
-		return input;
+		return input.Set(value, false, setter);
 	}
 	
 #endregion

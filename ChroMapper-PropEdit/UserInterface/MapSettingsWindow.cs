@@ -17,6 +17,7 @@ public class MapSettingsWindow : UIWindow {
 	public GameObject? requirements_panel;
 	public GameObject? settings_panel;
 	public GameObject? pointdefinitions_panel;
+	Textbox? new_pointdefinition_textbox;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
 	TooltipStrings tooltip = TooltipStrings.Instance;
@@ -146,6 +147,14 @@ public class MapSettingsWindow : UIWindow {
 		
 		if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
 			pointdefinitions_panel = Collapsible.Create(panel!, "Point Definitions", "Point Definitions", false).panel;
+			new_pointdefinition_textbox = UI.AddTextbox(pointdefinitions_panel!, "", (v) => {
+				if (!string.IsNullOrEmpty(v)) {
+					BeatSaberSongContainer.Instance.Map.PointDefinitions
+						.Add(v!, new JSONArray());
+					Refresh();
+				}
+			});
+			UI.MoveTransform((RectTransform)new_pointdefinition_textbox.transform, new Vector2(0, 20), new Vector2(0, 0));
 		}
 		
 		Refresh();
@@ -319,9 +328,7 @@ public class MapSettingsWindow : UIWindow {
 		information_editor?.Refresh();
 		warnings_editor?.Refresh();
 		if (pointdefinitions_panel != null) {
-			foreach (Transform child in pointdefinitions_panel.transform) {
-				GameObject.Destroy(child.gameObject);
-			}
+			var arr_editors = pointdefinitions_panel.GetComponentsInChildren<ArrayEditor>().ToList();
 			
 			var pds = BeatSaberSongContainer.Instance.Map.PointDefinitions;
 			
@@ -338,16 +345,16 @@ public class MapSettingsWindow : UIWindow {
 						pds[pd.Key] = v;
 					}
 				};
-				ArrayEditor.Create(pointdefinitions_panel, pd.Key, (getter, setter), true).Refresh();
+				arr_editors.Remove(ArrayEditor.Create(pointdefinitions_panel, pd.Key, (getter, setter), true));
 			}
 			
-			var new_input = UI.AddTextbox(pointdefinitions_panel, "", (v) => {
-				if (!string.IsNullOrEmpty(v)) {
-					pds.Add(v!, new JSONArray());
-					Refresh();
-				}
-			});
-			UI.MoveTransform((RectTransform)new_input.transform, new Vector2(0, 20), new Vector2(0, 0));
+			// Is there even a reason for this? Can they even be deleted right now?
+			foreach (var ae in arr_editors) {
+				GameObject.Destroy(ae.gameObject);
+			}
+			
+			new_pointdefinition_textbox!.transform.SetSiblingIndex(pointdefinitions_panel.transform.childCount);
+			new_pointdefinition_textbox!.Value = "";
 		}
 	}
 	

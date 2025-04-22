@@ -57,15 +57,16 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 		
 		this.title = UI.AddLabel(gameObject, "Title", title, pos: new Vector2(10, -20), size: new Vector2(-10, 30), font_size: 28, anchor_min: new Vector2(0, 1), anchor_max: new Vector2(1, 1), align: TextAlignmentOptions.Left);
 		
+		// Tab Receiver
+		Textbox.AddTabListener(gameObject, TabDir);
+		
 		gameObject.SetActive(false);
 		
 		return this;
 	}
 	
-	public void TabNext(Textbox input) => TabDir(input, 1);
-	public void TabPrev(Textbox input) => TabDir(input, 1);
-	
-	public void TabDir(Textbox? input, int dir) {
+	public void TabDir((Textbox, int) args) {
+		var (input, dir) = args;
 		var textboxes = GetComponentsInChildren<Textbox>()
 			.Where(it => it.isActiveAndEnabled)
 			.ToList();
@@ -76,7 +77,12 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 			? textboxes.IndexOf(input)
 			: 0;
 		
-		textboxes[(i + dir + textboxes.Count) % textboxes.Count].Select();
+		if (i == -1) {
+			Debug.LogWarning($"Couldn't find {input!.gameObject.GetPath()}");
+		}
+		
+		var target = textboxes[(i + dir + textboxes.Count) % textboxes.Count];
+		target.Select();
 	}
 	
 	public void Toggle() {

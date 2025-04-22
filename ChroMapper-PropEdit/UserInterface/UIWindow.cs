@@ -43,7 +43,7 @@ public abstract class UIWindow {
 		panels.Push(panel!);
 	}
 	
-	public void AddExpando(string name, string label, bool expanded, string tooltip = "") {
+	public virtual void AddExpando(string name, string label, bool expanded, string tooltip = "") {
 		panels.Push(Collapsible.Create(current_panel ?? panel!, name, label, expanded, tooltip).panel!);
 	}
 	

@@ -528,7 +528,6 @@ public partial class MainWindow : UIWindow {
 			}
 			UI.RefreshTooltips(panel);
 			if (full_rebuild) {
-				Debug.Log("Scroll plz");
 				scrollbox!.ScrollTop();
 			}
 		}

@@ -63,12 +63,12 @@ public class PluginSettingsWindow : UIWindow {
 	}
 	
 	public void Refresh() {
-		chroma_enable!.isOn = Settings.Get(Settings.ShowChromaKey, true);
-		noodle_enable!.isOn = Settings.Get(Settings.ShowNoodleKey, true);
-		split_value!.isOn = Settings.Get(Settings.SplitValue, true);
-		color_hex!.isOn = Settings.Get(Settings.ColorHex, true);
-		tooltip_enable!.isOn = Settings.Get(Settings.ShowTooltips, true);
-		force_lanes!.isOn = Settings.Get(Settings.ForceLanes, false);
+		chroma_enable!.SetIsOnWithoutNotify(Settings.Get(Settings.ShowChromaKey, true));
+		noodle_enable!.SetIsOnWithoutNotify(Settings.Get(Settings.ShowNoodleKey, true));
+		split_value!.SetIsOnWithoutNotify(Settings.Get(Settings.SplitValue, true));
+		color_hex!.SetIsOnWithoutNotify(Settings.Get(Settings.ColorHex, true));
+		tooltip_enable!.SetIsOnWithoutNotify(Settings.Get(Settings.ShowTooltips, true));
+		force_lanes!.SetIsOnWithoutNotify(Settings.Get(Settings.ForceLanes, false));
 	}
 	
 	public override void ToggleWindow() {

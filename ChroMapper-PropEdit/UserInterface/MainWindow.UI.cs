@@ -60,19 +60,6 @@ public partial class MainWindow : UIWindow {
 		UpdateSelection();
 	}
 	
-	public void Disable() {
-		keybind?.Disable();
-	}
-	
-#if CHROMPER_11
-	// Because Chromper 11 fires ActionCreatedEvent before actually doing the action...
-	private IEnumerator WaitUpdate() {
-		yield return 1;
-		UpdateSelection();
-		yield break;
-	}
-#endif
-	
 	public void Init(MapEditorUI mapEditorUI) {
 		base.Init(mapEditorUI, "Prop Editor");
 		
@@ -90,38 +77,69 @@ public partial class MainWindow : UIWindow {
 			tooltip.TooltipOverride = "Map Settings";
 		}
 		
-		UpdateSelection();
+		old_type = null;
 		
-		SelectionController.SelectionChangedEvent += () => UpdateSelection();
+		SelectionController.SelectionChangedEvent += UpdateFromSelection;
 #if CHROMPER_11
-		BeatmapActionContainer.ActionCreatedEvent += (_) => {
-			if (window.isActiveAndEnabled) {
-				window.StartCoroutine(WaitUpdate());
-			}
-		};
+		BeatmapActionContainer.ActionCreatedEvent += UpdateFromActionDelayed;
 #else
-		BeatmapActionContainer.ActionCreatedEvent += (_) => UpdateSelection();
+		BeatmapActionContainer.ActionCreatedEvent += UpdateFromAction;
 #endif
-		BeatmapActionContainer.ActionUndoEvent += (_) => UpdateSelection();
-		BeatmapActionContainer.ActionRedoEvent += (_) => UpdateSelection();
+		BeatmapActionContainer.ActionUndoEvent += UpdateFromAction;
+		BeatmapActionContainer.ActionRedoEvent += UpdateFromAction;
 		
 		keybind?.Enable();
 		
 		bundleInfo = new BundleInfo();
 	}
 	
+	public void Disable() {
+		SelectionController.SelectionChangedEvent -= UpdateFromSelection;
+#if CHROMPER_11
+		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromActionDelayed;
+#else
+		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromAction;
+#endif
+		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
+		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;
+		old_type = null;
+		keybind?.Disable();
+	}
+	
+	private void UpdateFromSelection() {
+		UpdateSelection();
+	}
+	
+	private void UpdateFromAction(BeatmapAction _) {
+		UpdateSelection();
+	}
+	
+#if CHROMPER_11
+	// Because Chromper 11 fires ActionCreatedEvent before actually doing the action...
+	private void UpdateFromActionDelayed(BeatmapAction _) {
+		if (window?.isActiveAndEnabled ?? false) {
+			window!.StartCoroutine(WaitUpdate());
+		}
+	}
+	
+	private IEnumerator WaitUpdate() {
+		yield return 1;
+		UpdateSelection();
+		yield break;
+	}
+#endif
+	
 #region Form Fields
 	
 	private GameObject AddLine(string title, Vector2? size = null, string tooltip = "") {
-		return (full_rebuild)
-			? UI.AddField(current_panel!, title, size, tooltip)
-			: current_panel!.transform.Find(title).gameObject;
+		var existing = (!full_rebuild) ? current_panel!.transform.Find(title)?.gameObject : null;
+		return existing ?? UI.AddField(current_panel!, title, size, tooltip);
 	}
 	
 	public override void AddExpando(string name, string label, bool expanded, string tooltip = "") {
-		var expando = (full_rebuild)
-			? Collapsible.Create(current_panel ?? panel!, name, label, expanded, tooltip)
-			: current_panel!.transform.Find(name).GetComponent<Collapsible>();
+		var expando = ((!full_rebuild)
+			? current_panel!.transform.Find(name)?.GetComponent<Collapsible>()
+			: null) ?? Collapsible.Create(current_panel ?? panel!, name, label, expanded, tooltip);
 		panels.Push(expando.panel!);
 	}
 	

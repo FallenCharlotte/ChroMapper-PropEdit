@@ -26,6 +26,7 @@ public partial class MainWindow : UIWindow {
 	
 	private ObjectType? old_type = null;
 	private Events.EventType? old_etype = null;
+	private string? old_cetype = null;
 	private bool full_rebuild = true;
 	
 	private void wipe(int skip = 0) {
@@ -377,9 +378,16 @@ public partial class MainWindow : UIWindow {
 						.Distinct();
 					
 					if (types.Count() > 1) {
-						// Still not attempting multi-type :3
+						wipe(1);
+						old_cetype = null;
 						break;
 					}
+					if (types.First() != old_cetype) {
+						wipe(1);
+						full_rebuild = true;
+					}
+					Plugin.Trace($"{old_cetype} => {types.First()}: {full_rebuild}");
+					old_cetype = types.First();
 					
 					switch (types.First()) {
 					// Heck

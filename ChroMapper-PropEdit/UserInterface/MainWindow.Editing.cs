@@ -25,19 +25,25 @@ public partial class MainWindow : UIWindow {
 	BundleInfo? bundleInfo = null;
 	
 	private ObjectType? old_type = null;
+	private Events.EventType? old_etype = null;
 	private bool full_rebuild = true;
 	
-	private void wipe() {
+	private void wipe(int skip = 0) {
+		Plugin.Trace($"Wipe after {skip}");
 		foreach (Transform child in panel!.transform) {
-			GameObject.Destroy(child.gameObject);
+			while (panel!.transform.childCount > skip) {
+				Plugin.Trace($"Delete {panel!.transform.GetChild(skip).gameObject.name}");
+				GameObject.DestroyImmediate(panel!.transform.GetChild(skip).gameObject);
+			}
 		}
 	}
 	
 	public void UpdateSelection() { lock(this) {
 		editing = SelectionController.SelectedObjects.Select(it => it).ToList();
+		Plugin.Trace($"{Time.frameCount} UpdateSelection: {editing.Count}");
 		
-		if (SelectionController.HasSelectedObjects() && editing.Count() > 0) {
-			window!.SetTitle($"{SelectionController.SelectedObjects.Count} Items selected");
+		if (SelectionController.HasSelectedObjects() && editing.Count > 0) {
+			window!.SetTitle($"{editing.Count} Items selected");
 			
 			if (editing.GroupBy(o => o.ObjectType).Count() > 1) {
 				wipe();
@@ -55,7 +61,9 @@ public partial class MainWindow : UIWindow {
 			if (type != old_type) {
 				wipe();
 				full_rebuild = true;
+				old_etype = null;
 			}
+			Plugin.Trace($"{old_type} => {type}: {full_rebuild}");
 			old_type = type;
 			
 			panels.Clear();
@@ -260,7 +268,23 @@ public partial class MainWindow : UIWindow {
 					var env = BeatSaberSongContainer.Instance.Info.EnvironmentName;
 #endif
 					var events = editing.Select(o => (BaseEvent)o);
+					
+					if (events.GroupBy(e => Events.GetEventType(e, env)).Count() > 1) {
+						wipe(1);
+						old_etype = null;
+						break;
+					}
+					
 					var f = events.First();
+					var new_etype = Events.GetEventType(f, env);
+					
+					if (new_etype != old_etype) {
+						wipe(1);
+						full_rebuild = true;
+					}
+					Plugin.Trace($"{old_etype} => {new_etype}: {full_rebuild}");
+					old_etype = new_etype;
+					
 					// Light
 					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
 						if (Settings.Get(Settings.SplitValue, true)!.AsBool) {
@@ -536,6 +560,7 @@ public partial class MainWindow : UIWindow {
 			old_type = null;
 			wipe();
 		}
+		Plugin.Trace($"End UpdateSelection: {old_type}");
 	}}
 	
 	private void AddAnimations(PropertyType type, bool v2) {

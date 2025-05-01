@@ -1,8 +1,43 @@
 using System.Collections.Generic;
 
+using Beatmap.Base;
+
 namespace ChroMapper_PropEdit.Enums {
 
 public static class Events {
+	public enum EventType {
+		Light,
+		LaserRotation,
+		RingRotation,
+		RingZoom,
+		ColorBoost,
+		LaneRotation,
+		Unknown
+	};
+	
+	public static EventType GetEventType(BaseEvent e, string env) {
+		if (e.IsLightEvent(env)) {
+			return EventType.Light;
+		}
+		if (e.IsLaserRotationEvent(env)) {
+			return EventType.LaserRotation;
+		}
+		if (e.Type == (int)Beatmap.Enums.EventTypeValue.RingRotation) {
+			return EventType.RingRotation;
+		}
+		if (e.IsRingZoomEvent(env)) {
+			return EventType.RingZoom;
+		}
+		if (e.IsColorBoostEvent()) {
+			return EventType.ColorBoost;
+		}
+		if (e.IsLaneRotationEvent()) {
+			return EventType.LaneRotation;
+		}
+		UnityEngine.Debug.LogError($"Unknown event type {e.Type} at beat {e.JsonTime}!");
+		return EventType.Unknown;
+	}
+	
 	public static readonly Map<int?> LightValues = new Map<int?> {
 		{0, "Off"},
 		{1, "RightOn"},

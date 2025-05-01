@@ -42,6 +42,11 @@ public class Plugin {
 	private void Exit() {
 		
 	}
+	
+	// For extra debug logging that shouldn't be included in releases
+	public static void Trace(object message) {
+		//Debug.Log(message);
+	}
 }
 
 }

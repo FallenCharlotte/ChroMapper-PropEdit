@@ -45,7 +45,9 @@ public class Plugin {
 	
 	// For extra debug logging that shouldn't be included in releases
 	public static void Trace(object message) {
-		//Debug.Log(message);
+#if EXTRA_LOGGING
+		Debug.Log(message);
+#endif
 	}
 }
 

@@ -10,18 +10,19 @@ namespace ChroMapper_PropEdit.Components {
 public class DropdownButton : MonoBehaviour {
 	public delegate void Callback(string v);
 	
-	public static DropdownButton Create(GameObject parent, List<string> values, Callback onChange, Sprite? sprite = null) {
+	public static DropdownButton Create(GameObject parent) {
 		var dropdown = Instantiate(GetBase(), parent.transform);
-		return dropdown.AddComponent<DropdownButton>().Init(values, onChange, sprite);
+		return dropdown.AddComponent<DropdownButton>();
 	}
 	
-	private DropdownButton Init(List<string> values, Callback onChange, Sprite? sprite = null) {
+	public DropdownButton Init(List<string> values, Callback onChange, Sprite? sprite = null) {
 		var dropdown = transform.Find("Arrow").GetComponent<TMP_Dropdown>();
 		
 		if (sprite != null) {
 			transform.Find("Arrow").GetComponent<Image>().sprite = sprite;
 		}
 		
+		dropdown.onValueChanged.RemoveAllListeners();
 		dropdown.ClearOptions();
 		dropdown.AddOptions(values);
 		dropdown.value = 0;

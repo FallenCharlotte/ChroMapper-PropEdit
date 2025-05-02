@@ -23,49 +23,66 @@ public class PointDefinitionEditor : MonoBehaviour {
 	}
 	
 	public PointDefinitionEditor Set(string? value, bool mixed, Textbox.Setter setter, UnityAction<bool>? default_setter = null) {
-		// Show checkbox
-		if (default_setter != null && value == null && mixed == false) {
-			make_default!.gameObject.SetActive(true);
-			full_value!.gameObject.SetActive(false);
-			helper_selector!.gameObject.SetActive(false);
-			ShowNone();
-			
-			UI.UpdateCheckbox(make_default!, false, default_setter);
+		full_value!.gameObject.SetActive(true);
+		helper_selector!.gameObject.SetActive(true);
+		
+		var types = new List<string>() {
+			"Point Definition Type:",
+			"Array",
+			"Named"
+		};
+		
+		if (default_setter != null) {
+			types.Add("Example");
+		}
+		
+		helper_selector.Init(types, (v) => {
+			switch (v) {
+			case "Array":
+				ShowArray();
+				StartCoroutine(DelayFocus());
+				break;
+			case "Named":
+				ShowDropdown();
+				break;
+			case "Example":
+				default_setter!(true);
+				break;
+			case "None":
+				break;
+			default:
+				break;
+			}
+		}, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"));
+		
+		full_value!.Set(value, mixed, setter);
+		
+		ArrayEditor.Getter arr_get = () => {
+			return (Data.RawToJson(value ?? "") as JSONArray) ?? new JSONArray();
+		};
+		ArrayEditor.Setter arr_set = (JSONArray node) => setter(node.ToString());
+		array_helper!.Set((arr_get, arr_set), true);
+		
+		var pds = new Map<string?>();
+		foreach (var pd in BeatSaberSongContainer.Instance.Map.PointDefinitions.Keys) {
+			pds.Add($"\"{pd}\"", pd);
+		}
+		
+		UI.UpdateDropdown(dropdown_helper!, value, (v) => setter(v), pds, true);
+		
+		if ((value?.StartsWith("[") ?? false)) {
+			ShowArray();
+		}
+		else if ((value?.StartsWith("\"") ?? false)) {
+			ShowDropdown();
 		}
 		else {
-			make_default!.gameObject.SetActive(false);
-			full_value!.gameObject.SetActive(true);
-			helper_selector!.gameObject.SetActive(true);
-			
-			full_value!.Set(value, mixed, setter);
-			
-			ArrayEditor.Getter arr_get = () => {
-				return (Data.RawToJson(value ?? "") as JSONArray) ?? new JSONArray();
-			};
-			ArrayEditor.Setter arr_set = (JSONArray node) => setter(node.ToString());
-			array_helper!.Set((arr_get, arr_set), true);
-			
-			var pds = new Map<string?>();
-			foreach (var pd in BeatSaberSongContainer.Instance.Map.PointDefinitions.Keys) {
-				pds.Add($"\"{pd}\"", pd);
-			}
-			
-			UI.UpdateDropdown(dropdown_helper!, value, (v) => setter(v), pds, true);
-			
-			if ((value?.StartsWith("[") ?? false)) {
-				ShowArray();
-			}
-			else if ((value?.StartsWith("\"") ?? false)) {
-				ShowDropdown();
-			}
-			else {
-				ShowNone();
-			}
-			
-			if (tab_dir != 0) {
-				gameObject.NotifyUpOnce("TabDir", (full_value, tab_dir));
-				tab_dir = 0;
-			}
+			ShowNone();
+		}
+		
+		if (tab_dir != 0) {
+			gameObject.NotifyUpOnce("TabDir", (full_value, tab_dir));
+			tab_dir = 0;
 		}
 		
 		return this;
@@ -73,7 +90,7 @@ public class PointDefinitionEditor : MonoBehaviour {
 	
 	// One-time object creation and layout stuff
 	private PointDefinitionEditor Init(string title) {
-		make_default = UI.AddCheckbox(gameObject, false, (v) => {} );
+		//make_default = UI.AddCheckbox(gameObject, false, (v) => {} );
 		full_value = UI.AddTextbox(gameObject, "", (v) => {}, true);
 		((RectTransform)full_value.transform).offsetMax = new Vector2(-14, 0);
 		
@@ -84,23 +101,7 @@ public class PointDefinitionEditor : MonoBehaviour {
 		dropdown_helper = UI.CreateDropdown(dd_container);
 		UI.AttachTransform(dropdown_helper.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0, 0), new Vector2(1, 1));
 		
-		helper_selector = DropdownButton.Create(gameObject, new List<string>() {
-			"Point Definition Type:",
-			"Array",
-			"Named"
-		}, (v) => {
-			switch (v) {
-			case "Array":
-				ShowArray();
-				StartCoroutine(DelayFocus());
-				break;
-			case "Named":
-				ShowDropdown();
-				break;
-			default:
-				break;
-			}
-		}, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"));
+		helper_selector = DropdownButton.Create(gameObject);
 		
 		// Tab Receiver
 		Textbox.AddTabListener(gameObject, TabDir);
@@ -151,7 +152,6 @@ public class PointDefinitionEditor : MonoBehaviour {
 	}
 	
 	int tab_dir = 0;
-	Toggle? make_default;
 	Textbox? full_value;
 	DropdownButton? helper_selector;
 	ArrayEditor? array_helper;

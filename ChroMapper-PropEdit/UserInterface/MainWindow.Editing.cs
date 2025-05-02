@@ -573,7 +573,6 @@ public partial class MainWindow : UIWindow {
 	
 	private void AddAnimations(PropertyType type, bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
-		AddCheckbox("Animation", Data.GetSetAnimation(v2), false, tooltip.GetTooltip(type, TooltipStrings.Tooltip.AnimatePath));
 		
 		AddExpando("Animations", "Animations", true);
 		foreach (var property in Events.NoodleProperties) {
@@ -581,7 +580,6 @@ public partial class MainWindow : UIWindow {
 			AddAnimation(property.Key, CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2], tooltip.GetTooltip(type, $"Animate{property.Key}"));
 		}
 		AddAnimation("Definite Position", CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
-		current_panel!.transform.parent.gameObject.SetActive(editing.Where(o => o.CustomData?.HasKey(CustomKeyAnimation) ?? false).Count() > 0);
 		panels.Pop();
 	}
 	

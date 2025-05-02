@@ -57,6 +57,9 @@ public class PluginSettingsWindow : UIWindow {
 			if (v) ShowDefaultLanes();
 		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ForceLanes));
 		
+		if (Settings.Get(Settings.ForceLanes, false)) {
+			ShowDefaultLanes();
+		}
 		
 		Refresh();
 		UI.RefreshTooltips(panel);

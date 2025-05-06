@@ -16,7 +16,6 @@ namespace ChroMapper_PropEdit.UserInterface {
 
 public partial class MainWindow : UIWindow {
 	public ExtensionButton main_button;
-	public InputAction? keybind;
 	public List<BaseObject>? editing;
 	
 	public MainWindow() {
@@ -25,31 +24,16 @@ public partial class MainWindow : UIWindow {
 			"Prop Edit",
 			ToggleWindow);
 		panels = new Stack<GameObject>();
-		try {
-			var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
-				.Where(x => x.name == "Node Editor")
-				.FirstOrDefault();
-			CMInputCallbackInstaller.InputInstance.Disable();
-			keybind = map.AddAction("Prop Editor", type: InputActionType.Button);
-			keybind.AddCompositeBinding("ButtonWithOneModifier")
-				.With("Button", "<Keyboard>/n")
-				.With("Modifier", "<Keyboard>/shift");
-			keybind.performed += (_) => {
-				if (   (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
-				    && !CMInputCallbackInstaller.IsActionMapDisabled(typeof(CMInput.INodeEditorActions))
-				    && !NodeEditorController.IsActive) {
-					ToggleWindow();
-				}
-				else {
-					//Debug.Log("Bullshit still required ;-;");
-				}
-			};
-			keybind.Disable();
-			CMInputCallbackInstaller.InputInstance.Enable();
+	}
+	
+	public void OnToggleWindow(InputAction.CallbackContext _) {
+		if (   (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+		    && !CMInputCallbackInstaller.IsActionMapDisabled(typeof(CMInput.INodeEditorActions))
+		    && !NodeEditorController.IsActive) {
+			ToggleWindow();
 		}
-		catch (System.Exception e) {
-			Debug.LogWarning("PropEdit couldn't register a keybind!");
-			Debug.LogException(e);
+		else {
+			Plugin.Trace("Bullshit still required ;-;");
 		}
 	}
 	
@@ -88,7 +72,7 @@ public partial class MainWindow : UIWindow {
 		BeatmapActionContainer.ActionUndoEvent += UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent += UpdateFromAction;
 		
-		keybind?.Enable();
+		Plugin.toggle_window?.Enable();
 		
 		bundleInfo = new BundleInfo();
 	}
@@ -103,7 +87,7 @@ public partial class MainWindow : UIWindow {
 		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;
 		old_type = null;
-		keybind?.Disable();
+		Plugin.toggle_window?.Disable();
 	}
 	
 	private void UpdateFromSelection() {

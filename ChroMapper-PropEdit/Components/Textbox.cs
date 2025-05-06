@@ -52,10 +52,7 @@ public class Textbox : Selectable {
 		UI.AttachTransform(TextInput.gameObject, new Vector2(0, 1), new Vector2(0, 0));
 		
 		TextInput.InputField.onSelect.AddListener((_) => {
-			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
-			tab_next!.performed += onTabNext;
-			tab_back!.performed += onTabBack;
+			StartEditing();
 		});
 		TextInput.InputField.onEndEdit.AddListener((string s) => {
 			if (s != _value) {
@@ -63,10 +60,7 @@ public class Textbox : Selectable {
 			}
 		});
 		TextInput.InputField.onDeselect.AddListener((_) => {
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
-			tab_next!.performed -= onTabNext;
-			tab_back!.performed -= onTabBack;
+			EndEditing();
 		});
 		
 		return this;
@@ -80,13 +74,29 @@ public class Textbox : Selectable {
 		return this;
 	}
 	
-	public static void AddTabListener(GameObject go, UnityAction<(Textbox, int)> action) {
-		go.AddComponent<MessageReceiver>()
+	public static MessageReceiver AddTabListener(GameObject go, UnityAction<(Textbox, int)> action) {
+		return go.AddComponent<MessageReceiver>()
 			.AddEvent("TabDir", (args) => action(((Textbox, int))args));
 	}
 	
 	public override void Select() {
 		TextInput?.InputField.ActivateInputField();
+	}
+	
+	private void StartEditing() {
+		CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+		CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
+		tab_next!.performed += onTabNext;
+		tab_back!.performed += onTabBack;
+		Plugin.array_insert!.performed += onInsert;
+	}
+	
+	private void EndEditing() {
+		CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+		CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+		tab_next!.performed -= onTabNext;
+		tab_back!.performed -= onTabBack;
+		Plugin.array_insert!.performed -= onInsert;
 	}
 	
 	private void onTabNext(InputAction.CallbackContext _) {
@@ -97,16 +107,22 @@ public class Textbox : Selectable {
 		if (disabledCheck()) return;
 		gameObject.NotifyUpOnce("TabDir", (this, -1));
 	}
+	private void onInsert(InputAction.CallbackContext _) {
+		if (disabledCheck()) return;
+		gameObject.NotifyUpOnce("Insert", this);
+	}
+	
 	// This can happen sometimes, not sure why
 	private bool disabledCheck() {
-		if (!isActiveAndEnabled) {
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
-			tab_next!.performed -= onTabNext;
-			tab_back!.performed -= onTabBack;
-			return true;
+		// I don't even, what the fuck
+		try {
+			if (isActiveAndEnabled) {
+				return false;
+			}
 		}
-		return false;
+		catch (System.Exception) { };
+		EndEditing();
+		return true;
 	}
 	
 	private string _value = "";

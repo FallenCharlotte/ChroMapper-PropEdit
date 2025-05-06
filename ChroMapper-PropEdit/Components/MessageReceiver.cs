@@ -22,6 +22,7 @@ public static class MessageSenderExtentions {
 		while (it = it.parent) {
 			if (it.GetComponent<MessageReceiver>() is MessageReceiver receiver) {
 				if (receiver.events.ContainsKey(name)) {
+					Plugin.Trace($"{receiver.gameObject.name}.{name}({arg})");
 					receiver.events[name](arg);
 					return true;
 				}

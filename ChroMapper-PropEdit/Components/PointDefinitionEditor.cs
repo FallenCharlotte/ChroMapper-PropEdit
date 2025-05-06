@@ -70,7 +70,7 @@ public class PointDefinitionEditor : MonoBehaviour {
 		
 		UI.UpdateDropdown(dropdown_helper!, value, (v) => setter(v), pds, true);
 		
-		if ((value?.StartsWith("[") ?? false)) {
+		if ((value?.StartsWith("[") ?? false && array_helper!.gameObject.activeInHierarchy == false)) {
 			ShowArray();
 		}
 		else if ((value?.StartsWith("\"") ?? false)) {

@@ -53,13 +53,20 @@ public class ArrayEditor : MonoBehaviour {
 			layout.padding = new RectOffset(1, 1, 0, 1);
 		}
 		// Tab Receiver
-		Textbox.AddTabListener(gameObject, TabDir);
+		Textbox.AddTabListener(gameObject, TabDir)
+			.AddEvent("Insert", (arg) => OnInsert((Textbox)arg));
 		return this;
 	}
 	
 	private int linenum = 0;
 	
 	public void Refresh() {
+		refresh_frame = true;
+	}
+	private void LateUpdate() {
+		if (!refresh_frame) return;
+		refresh_frame = false;
+		
 		linenum = 0;
 		
 		var node = _getter!();
@@ -69,6 +76,9 @@ public class ArrayEditor : MonoBehaviour {
 		}
 		else {
 			foreach (var item in node) {
+				if (linenum == insert) {
+					AddLine("");
+				}
 				var line = (raw)
 					? item.Value.ToString().Replace(",", ", ")
 					: (string)item.Value;
@@ -86,13 +96,15 @@ public class ArrayEditor : MonoBehaviour {
 			SendMessageUpwards("DirtyPanel");
 		}
 		
+		insert = -1;
+		
 		// Redo the tab here
 		if (tab_from >= 0) {
 			var textbox = (tab_from < inputs.Count)
 				? inputs[tab_from]
 				: inputs[0];
 			tab_from = -1;
-			gameObject.NotifyUpOnce("TabDir", (textbox, tab_dir));
+			gameObject.NotifyUpOnce("TabDir", ((Textbox)textbox, tab_dir));
 		}
 	}
 	
@@ -174,8 +186,36 @@ public class ArrayEditor : MonoBehaviour {
 		gameObject.NotifyUpOnce("TabDir", (textbox, dir));
 	}
 	
+	private void OnInsert(Textbox textbox) {
+		// Textbox empty
+		if (textbox.TextInput!.InputField.text.Length == 0) {
+			return;
+		}
+		// Something is selected
+		if (textbox.TextInput!.InputField.caretPosition != textbox.TextInput!.InputField.selectionAnchorPosition) {
+			return;
+		}
+		if (textbox.TextInput!.InputField.caretPosition == 0) {
+			var sender = inputs.IndexOf(textbox);
+			insert = sender;
+			tab_from = sender;
+			tab_dir = 0;
+			refresh_frame = true;
+		}
+		if (textbox.TextInput!.InputField.caretPosition == textbox.TextInput!.InputField.text.Length) {
+			var sender = inputs.IndexOf(textbox);
+			insert = sender + 1;
+			tab_from = sender;
+			tab_dir = 1;
+			refresh_frame = true;
+		}
+	}
+	
+	private bool refresh_frame = false;
+	
 	private int tab_from = -1;
 	private int tab_dir = 0;
+	private int insert = -1;
 	
 	public Collapsible? container;
 	public List<Textbox> inputs;

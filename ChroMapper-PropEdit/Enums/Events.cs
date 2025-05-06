@@ -139,10 +139,10 @@ public static class Events {
 	public static readonly Dictionary<string, string[]> NoodleProperties = new Dictionary<string, string[]> {
 		{"Position", new string[] { "", "position", "[[0,0,0,0], [0,0,0,0.49]]" }},
 		{"Local Position", new string[] { "_localPosition", "localPosition", "[[0,0,0,0], [0,0,0,0.49]]" }},
-		{"Position Offset", new string[] { "_position", "offsetPosition", "[[0,0,0,0], [0,0,0,0.49]]" }},
+		{"Offset Position", new string[] { "_position", "offsetPosition", "[[0,0,0,0], [0,0,0,0.49]]" }},
 		{"Local Rotation", new string[] { "_localRotation", "localRotation", "[[0,0,0,0], [0,0,0,0.49]]" }},
 		{"World Rotation", new string[] { "", "rotation", "[[0,0,0,0], [0,0,0,0.49]]" }},
-		{"World Rotation Offset", new string[] { "_rotation", "offsetWorldRotation", "[[0,0,0,0], [0,0,0,0.49]]" }},
+		{"Offset World Rotation", new string[] { "_rotation", "offsetWorldRotation", "[[0,0,0,0], [0,0,0,0.49]]" }},
 		{"Color", new string[] { "_color" , "color", "[[0,0,0,0,0], [1,1,1,1,0.49]],"}},
 		{"Scale", new string[] { "_scale", "scale", "[[1,1,1,0], [1,1,1,0.49]]" }},
 		{"Dissolve", new string[] { "_dissolve", "dissolve", "[[1,0], [1,0.49]]" }},

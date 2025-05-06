@@ -621,8 +621,9 @@ public partial class MainWindow : UIWindow {
 	
 	// Unarrayable track
 	private void AddTrack(string? title, (Data.Getter<string?>, Data.Setter<string?>) get_set, string tooltip = "") {
-		// TODO: dropdown
-		AddTextbox(title, get_set, false, tooltip);
+		var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent) as CustomEventGridContainer;
+		var tracks = new Map<string?>().AddRange(collection!.EventsByTrack.Keys);
+		AddDropdown(title, get_set, tracks, true, tooltip);
 	}
 	
 	// Arrayable tracks

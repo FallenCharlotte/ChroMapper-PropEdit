@@ -137,15 +137,14 @@ public class ArrayEditor : MonoBehaviour {
 	private void AddLine(string value, bool mixed = false) {
 		var i = linenum++;
 		if (i >= inputs.Count) {
-			var input = UI.AddTextbox(container!.panel!, value, (_) => Submit(i), true);
+			var input = Textbox.Create(container!.panel!, true);
 			input.gameObject.name = $"Input {i}";
 			
-			UI.MoveTransform((RectTransform)input.transform, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
-			UI.SetMixed(input, mixed);
+			UI.AttachTransform(input.gameObject, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
 			
 			inputs.Add(input);
 		}
-		else {
+		{
 			var input = inputs[i];
 			input.Set(value, mixed, (_) => Submit(i));
 		}

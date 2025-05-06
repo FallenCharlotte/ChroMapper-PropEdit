@@ -41,4 +41,14 @@ public class Map<TKey> : IEnumerable<KeyValuePair<TKey,string>> {
 	private readonly Dictionary<TKey, string> _dict;
 }
 
+public static class MapExt {
+	public static Map<string?> AddRange(this Map<string?> map, IEnumerable<string> source) {
+		foreach (var item in source) {
+			map.Add(item, item);
+		}
+		
+		return map;
+	}
+}
+
 }

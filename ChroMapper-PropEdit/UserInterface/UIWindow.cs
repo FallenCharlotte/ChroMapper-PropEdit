@@ -35,7 +35,7 @@ public abstract class UIWindow : MonoBehaviour {
 		
 		gameObject.name = $"{title} Window";
 		
-		window = gameObject.AddComponent<Window>().Init(name, title, parent, new Vector2(220, 256));
+		window = gameObject.AddComponent<Window>().Init(title, title, parent, new Vector2(220, 256));
 		window.onShow += OnResize;
 		window.onResize += OnResize;
 		

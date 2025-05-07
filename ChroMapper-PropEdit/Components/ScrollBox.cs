@@ -134,7 +134,7 @@ public class ScrollBox : MonoBehaviour {
 		var target = GetComponentInParent<Window>();
 		//yield return 5;
 		
-		for (var i = 0; i < 5; ++i) {
+		for (var i = 0; i < 10; ++i) {
 			target.GetComponent<RectTransform>().sizeDelta += new Vector2(0.25f, 0);
 			if (TargetScroll != null) {
 				scrollbar!.value = TargetScroll ?? 1;

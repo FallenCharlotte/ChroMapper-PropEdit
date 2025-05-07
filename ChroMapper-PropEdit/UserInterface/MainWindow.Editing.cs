@@ -28,6 +28,7 @@ public partial class MainWindow : UIWindow {
 	private Events.EventType? old_etype = null;
 	private string? old_cetype = null;
 	private bool full_rebuild = true;
+	private bool refresh_frame = false;
 	
 	private void wipe(int skip = 0) {
 		Plugin.Trace($"Wipe after {skip}");
@@ -39,7 +40,18 @@ public partial class MainWindow : UIWindow {
 		}
 	}
 	
-	public void UpdateSelection() { lock(this) {
+	public void TriggerRefresh() {
+		refresh_frame = true;
+	}
+	public void TriggerFullRefresh() {
+		refresh_frame = true;
+		old_type = null;
+	}
+	
+	private void Update() {
+		if (!refresh_frame) return;
+		refresh_frame = false;
+		
 		editing = SelectionController.SelectedObjects.Select(it => it).ToList();
 		Plugin.Trace($"{Time.frameCount} UpdateSelection: {editing.Count}");
 		
@@ -569,7 +581,7 @@ public partial class MainWindow : UIWindow {
 			wipe();
 		}
 		Plugin.Trace($"End UpdateSelection: {old_type}");
-	}}
+	}
 	
 	private void AddAnimations(PropertyType type, bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";

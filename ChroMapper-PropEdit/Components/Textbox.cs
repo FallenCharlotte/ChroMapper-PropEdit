@@ -114,13 +114,10 @@ public class Textbox : Selectable {
 	
 	// This can happen sometimes, not sure why
 	private bool disabledCheck() {
-		// I don't even, what the fuck
-		try {
-			if (isActiveAndEnabled) {
-				return false;
-			}
+		// AAAAAAAAAAAAAAAAAAAAAAAA
+		if (this && isActiveAndEnabled) {
+			return false;
 		}
-		catch (System.Exception) { };
 		EndEditing();
 		return true;
 	}

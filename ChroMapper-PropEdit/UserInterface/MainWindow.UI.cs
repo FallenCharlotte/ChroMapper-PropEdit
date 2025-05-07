@@ -40,11 +40,10 @@ public partial class MainWindow : UIWindow {
 	public override void ToggleWindow() {
 		if (window == null) return;
 		window!.Toggle();
-		old_type = null;
-		UpdateSelection();
+		TriggerFullRefresh();
 	}
 	
-	public void Init(MapEditorUI mapEditorUI) {
+	public override void Init(MapEditorUI mapEditorUI) {
 		base.Init(mapEditorUI, "Prop Editor");
 		
 		{
@@ -64,54 +63,32 @@ public partial class MainWindow : UIWindow {
 		old_type = null;
 		
 		SelectionController.SelectionChangedEvent += UpdateFromSelection;
-#if CHROMPER_11
-		BeatmapActionContainer.ActionCreatedEvent += UpdateFromActionDelayed;
-#else
 		BeatmapActionContainer.ActionCreatedEvent += UpdateFromAction;
-#endif
 		BeatmapActionContainer.ActionUndoEvent += UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent += UpdateFromAction;
 		
-		Plugin.toggle_window?.Enable();
+		Plugin.toggle_window!.performed += OnToggleWindow;
 		
 		bundleInfo = new BundleInfo();
 	}
 	
-	public void Disable() {
+	public void OnDestroy() {
 		SelectionController.SelectionChangedEvent -= UpdateFromSelection;
-#if CHROMPER_11
-		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromActionDelayed;
-#else
 		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromAction;
-#endif
 		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;
-		old_type = null;
-		Plugin.toggle_window?.Disable();
+		Plugin.toggle_window!.performed -= OnToggleWindow;
 	}
 	
 	private void UpdateFromSelection() {
-		UpdateSelection();
+		Plugin.Trace($"{Time.frameCount} UpdateFromSelection");
+		TriggerRefresh();
 	}
 	
 	private void UpdateFromAction(BeatmapAction _) {
-		UpdateSelection();
+		Plugin.Trace($"{Time.frameCount} UpdateFromAction");
+		TriggerRefresh();
 	}
-	
-#if CHROMPER_11
-	// Because Chromper 11 fires ActionCreatedEvent before actually doing the action...
-	private void UpdateFromActionDelayed(BeatmapAction _) {
-		if (window?.isActiveAndEnabled ?? false) {
-			window!.StartCoroutine(WaitUpdate());
-		}
-	}
-	
-	private IEnumerator WaitUpdate() {
-		yield return 1;
-		UpdateSelection();
-		yield break;
-	}
-#endif
 	
 #region Form Fields
 	

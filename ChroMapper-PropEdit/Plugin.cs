@@ -19,9 +19,6 @@ public class Plugin {
 	private void Init() {
 		try {
 			SceneManager.sceneLoaded += SceneLoaded;
-			main = new MainWindow();
-			map_settings = new MapSettingsWindow();
-			plugin_settings = new PluginSettingsWindow();
 			
 			var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
 				.Where(x => x.name == "Node Editor")
@@ -32,8 +29,6 @@ public class Plugin {
 			toggle_window.AddCompositeBinding("ButtonWithOneModifier")
 				.With("Button", "<Keyboard>/n")
 				.With("Modifier", "<Keyboard>/shift");
-			toggle_window.performed += main.OnToggleWindow;
-			toggle_window.Disable();
 			
 			array_insert = map.AddAction("Array Insert", type: InputActionType.Button);
 			array_insert.AddCompositeBinding("ButtonWithOneModifier")
@@ -51,13 +46,9 @@ public class Plugin {
 		if (scene.buildIndex == 3) {
 			// Map Edit
 			var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();
-			main?.Init(mapEditorUI);
-			map_settings?.Init(mapEditorUI);
-			plugin_settings?.Init(mapEditorUI);
-		}
-		else {
-			main?.Disable();
-			map_settings?.Disable();
+			main = UIWindow.Create<MainWindow>(mapEditorUI);
+			map_settings = UIWindow.Create<MapSettingsWindow>(mapEditorUI);
+			plugin_settings = UIWindow.Create<PluginSettingsWindow>(mapEditorUI);
 		}
 	}
 	

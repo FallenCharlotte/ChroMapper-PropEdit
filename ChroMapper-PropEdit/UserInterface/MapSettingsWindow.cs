@@ -45,7 +45,7 @@ public class MapSettingsWindow : UIWindow {
 	}
 #endif
 	
-	public void Init(MapEditorUI mapEditorUI) {
+	public override void Init(MapEditorUI mapEditorUI) {
 		base.Init(mapEditorUI, "Map Settings");
 		scrollbox!.TargetScroll = 1;
 		
@@ -281,7 +281,7 @@ public class MapSettingsWindow : UIWindow {
 		}
 	}
 	
-	public void Disable() {
+	public void OnDestroy() {
 		// Restore any requirement checks that were yoted
 		requirementsAndSuggestions!.Clear();
 		RequirementCheck.RegisterRequirement(new ChromaReq());

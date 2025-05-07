@@ -7,7 +7,7 @@ using ChroMapper_PropEdit.Components;
 namespace ChroMapper_PropEdit.UserInterface {
 
 // Base class for Main and Settings windows
-public abstract class UIWindow {
+public abstract class UIWindow : MonoBehaviour {
 	public Window? window;
 	public ScrollBox? scrollbox;
 	public GameObject? panel;
@@ -21,10 +21,21 @@ public abstract class UIWindow {
 		}
 	}
 	
+	public static T Create<T>(MapEditorUI mapEditorUI) where T : UIWindow {
+		var obj = new GameObject();
+		var uiw = obj.AddComponent<T>();
+		uiw.Init(mapEditorUI);
+		return uiw;
+	}
+	
+	public abstract void Init(MapEditorUI mapEditorUI);
+	
 	public virtual void Init(MapEditorUI mapEditorUI, string title) {
 		var parent = mapEditorUI.MainUIGroup[5].gameObject;
 		
-		window = Window.Create(title, title, parent, new Vector2(220, 256));
+		gameObject.name = $"{title} Window";
+		
+		window = gameObject.AddComponent<Window>().Init(name, title, parent, new Vector2(220, 256));
 		window.onShow += OnResize;
 		window.onResize += OnResize;
 		

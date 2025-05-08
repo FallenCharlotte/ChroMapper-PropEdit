@@ -80,11 +80,6 @@ public class PointDefinitionEditor : MonoBehaviour {
 			ShowNone();
 		}
 		
-		if (tab_dir != 0) {
-			gameObject.NotifyUpOnce("TabDir", (full_value, tab_dir));
-			tab_dir = 0;
-		}
-		
 		return this;
 	}
 	
@@ -109,12 +104,24 @@ public class PointDefinitionEditor : MonoBehaviour {
 		return this;
 	}
 	
+	private void LateUpdate() {
+		if (tab_dir != 0) {
+			if (tab_delay > 0) {
+				--tab_delay;
+				return;
+			}
+			gameObject.NotifyUpOnce("TabDir", (full_value, tab_dir));
+			tab_dir = 0;
+		}
+	}
+	
 	// Redo the tab after changes are processed
 	public void TabDir((Textbox, int) args) {
 		var (textbox, dir) = args;
 		if (textbox.Modified) {
 			if (textbox == full_value) {
 				tab_dir = dir;
+				tab_delay = 1;
 			}
 			textbox.TextInput!.InputField.DeactivateInputField();
 		}
@@ -125,7 +132,7 @@ public class PointDefinitionEditor : MonoBehaviour {
 	
 	void ShowArray() {
 		array_helper!.gameObject.SetActive(true);
-		array_helper.Refresh();
+		array_helper.RefreshNow();
 		dropdown_helper!.transform.parent.gameObject.SetActive(false);
 		SendMessageUpwards("DirtyPanel", SendMessageOptions.DontRequireReceiver);
 	}
@@ -152,6 +159,7 @@ public class PointDefinitionEditor : MonoBehaviour {
 	}
 	
 	int tab_dir = 0;
+	int tab_delay = 0;
 	Textbox? full_value;
 	DropdownButton? helper_selector;
 	ArrayEditor? array_helper;

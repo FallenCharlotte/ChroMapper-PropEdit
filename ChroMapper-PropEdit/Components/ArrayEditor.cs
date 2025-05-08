@@ -63,10 +63,12 @@ public class ArrayEditor : MonoBehaviour {
 	public void Refresh() {
 		refresh_frame = true;
 	}
-	private void LateUpdate() {
-		if (!refresh_frame) return;
+	private void Update() {
+		if (refresh_frame) RefreshNow();
+	}
+	
+	public void RefreshNow() {
 		refresh_frame = false;
-		
 		linenum = 0;
 		
 		var node = _getter!();

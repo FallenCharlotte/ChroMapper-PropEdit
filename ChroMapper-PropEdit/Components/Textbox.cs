@@ -8,7 +8,7 @@ using ChroMapper_PropEdit.UserInterface;
 
 namespace ChroMapper_PropEdit.Components {
 
-public class Textbox : Selectable {
+public class Textbox : MonoBehaviour {
 	public delegate void Setter(string? s);
 	
 	public UITextInput? TextInput;
@@ -79,7 +79,7 @@ public class Textbox : Selectable {
 			.AddEvent("TabDir", (args) => action(((Textbox, int))args));
 	}
 	
-	public override void Select() {
+	public void Select() {
 		TextInput?.InputField.ActivateInputField();
 	}
 	
@@ -97,6 +97,10 @@ public class Textbox : Selectable {
 		tab_next!.performed -= onTabNext;
 		tab_back!.performed -= onTabBack;
 		Plugin.array_insert!.performed -= onInsert;
+	}
+	
+	private void OnDestroy() {
+		EndEditing();
 	}
 	
 	private void onTabNext(InputAction.CallbackContext _) {
@@ -118,6 +122,7 @@ public class Textbox : Selectable {
 		if (this && isActiveAndEnabled) {
 			return false;
 		}
+		Plugin.Trace($"AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA {gameObject.name}");
 		EndEditing();
 		return true;
 	}

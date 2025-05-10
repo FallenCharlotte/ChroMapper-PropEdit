@@ -1,3 +1,13 @@
+v0.11
+	Array insertion!
+	Dropdown for (single) tracks!
+	Remove animations checkbox, add example to gear menu
+	Mixed checkboxes!
+	Automatic scrolling when tabbing!
+	Some fixes for position/rotation options
+	Persistent UI elements so tabing and clicking around actaully works!
+	Tab navigation!
+
 v0.10.3
 	Point definitions learn to share
 

@@ -14,6 +14,7 @@ public class Plugin {
 	public static PluginSettingsWindow? plugin_settings = null;
 	public static InputAction? toggle_window = null;
 	public static InputAction? array_insert = null;
+	public static ExtensionButton? main_button = null;
 	
 	[Init]
 	private void Init() {
@@ -36,6 +37,11 @@ public class Plugin {
 				.With("Modifier", "<Keyboard>/shift");
 			
 			CMInputCallbackInstaller.InputInstance.Enable();
+			
+			main_button = ExtensionButtons.AddButton(
+				UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
+				"Prop Edit",
+				ToggleWindow);
 		}
 		catch (System.Exception e) {
 			Debug.LogException(e);
@@ -62,6 +68,10 @@ public class Plugin {
 #if EXTRA_LOGGING
 		Debug.Log(message);
 #endif
+	}
+	
+	public static void ToggleWindow() {
+		if (main != null) main.ToggleWindow();
 	}
 }
 

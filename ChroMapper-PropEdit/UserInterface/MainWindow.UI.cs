@@ -15,18 +15,10 @@ using ChroMapper_PropEdit.Utils;
 namespace ChroMapper_PropEdit.UserInterface {
 
 public partial class MainWindow : UIWindow {
-	public ExtensionButton? main_button;
 	public List<BaseObject>? editing;
 	
 	public MainWindow() {
 		panels = new Stack<GameObject>();
-	}
-	
-	private void Awake() {
-		main_button = ExtensionButtons.AddButton(
-			UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
-			"Prop Edit",
-			ToggleWindow);
 	}
 	
 	public void OnToggleWindow(InputAction.CallbackContext _) {

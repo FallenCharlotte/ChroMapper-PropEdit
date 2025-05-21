@@ -298,8 +298,8 @@ public partial class MainWindow : UIWindow {
 					Plugin.Trace($"{old_etype} => {new_etype}: {full_rebuild}");
 					old_etype = new_etype;
 					
-					// Light
-					if (events.Where(e => e.IsLightEvent(env)).Count() == editing.Count()) {
+					switch (new_etype) {
+					case Events.EventType.Light:
 						if (Settings.Get(Settings.SplitValue, true)!.AsBool) {
 							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventColor));
 							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventAction));
@@ -329,9 +329,8 @@ public partial class MainWindow : UIWindow {
 							}
 							panels.Pop();
 						}
-					}
-					// Laser Speeds
-					if (events.Where(e => e.IsLaserRotationEvent(env)).Count() == editing.Count()) {
+						break;
+					case Events.EventType.LaserRotation:
 						AddParsed("Speed", Data.GetSet<int>("Value"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserSpeed));
 						AddLine("");
 						
@@ -342,9 +341,8 @@ public partial class MainWindow : UIWindow {
 							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.PreciseSpeed));
 							panels.Pop();
 						}
-					}
-					// Ring Rotation
-					if (events.Where(e => e.Type == (int)EventTypeValue.RingRotation).Count() == editing.Count()) {
+						break;
+					case Events.EventType.RingRotation:
 						AddLine("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							AddExpando(CHROMA_NAME, "Chroma", true);
@@ -362,9 +360,8 @@ public partial class MainWindow : UIWindow {
 							}
 							panels.Pop();
 						}
-					}
-					// Ring Zoom
-					if (events.Where(e => e.Type == (int)EventTypeValue.RingZoom).Count() == editing.Count()) {
+						break;
+					case Events.EventType.RingZoom:
 						AddLine("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 							AddExpando(CHROMA_NAME, "Chroma", true);
@@ -372,14 +369,17 @@ public partial class MainWindow : UIWindow {
 							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));
 							panels.Pop();
 						}
-					}
-					// Boost Color
-					if (events.Where(e => e.IsColorBoostEvent()).Count() == editing.Count()) {
+						break;
+					case Events.EventType.ColorBoost:
 						AddDropdown<int?>("Color Set", Data.GetSet<int>("Value"), Events.BoostSets, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BoostColorSet));
-					}
-					// Lane Rotations
-					if (events.Where(e => e.IsLaneRotationEvent()).Count() == editing.Count()) {
+						break;
+					case Events.EventType.LaneRotation:
 						AddDropdown<int?>("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaneRotation));
+						break;
+						
+					case Events.EventType.Utility:
+						AddParsed("Value", Data.GetSet<int>("Value"), false);
+						break;
 					}
 				}	break;
 				case ObjectType.CustomEvent: {

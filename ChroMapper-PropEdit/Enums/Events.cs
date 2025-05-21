@@ -12,10 +12,14 @@ public static class Events {
 		RingZoom,
 		ColorBoost,
 		LaneRotation,
+		Utility,
 		Unknown
 	};
 	
 	public static EventType GetEventType(BaseEvent e, string env) {
+		if (e.IsUtilityEvent(env) || (env == "GagaEnvironment" && e.IsLaserRotationEvent(env))) {
+			return EventType.Utility;
+		}
 		if (e.IsLightEvent(env)) {
 			return EventType.Light;
 		}

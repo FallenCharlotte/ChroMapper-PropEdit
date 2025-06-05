@@ -39,6 +39,14 @@ git tag "${tag}"
 msbuild
 msbuild /p:DefineConstants="CHROMPER_11"
 
+pushd bin\Debug
+zip "ChroMapper-12-PropEdit ${tag}.zip" Plugins/ChroMapper-PropEdit.dll
+popd
+
+pushd bin\Release
+zip "ChroMapper-11-PropEdit ${tag}.zip" Plugins/ChroMapper-PropEdit.dll
+popd
+
 echo "Check..."
 read || exit
 

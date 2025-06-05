@@ -1,3 +1,8 @@
+v0.12
+	Environment Enhancement editor!
+	Zip packaging
+	Easing affects next transition ;-;
+
 v0.11.2
 	Gaga
 

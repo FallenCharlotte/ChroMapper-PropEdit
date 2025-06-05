@@ -77,6 +77,7 @@ namespace ChroMapper_PropEdit.UserInterface {
 			Brightness,
 			LightID,
 			Easing,
+			V2Easing,
 			LerpType,
 			V2Gradient,
 			V2Duration,
@@ -294,7 +295,8 @@ namespace ChroMapper_PropEdit.UserInterface {
 			{ Tooltip.LegacyEventType, "Changes the color and behaviour of the {0}" },
 			{ Tooltip.Brightness, "Sets the brightness of the {0}. A value of 0 will turn the light off." },
 			{ Tooltip.LightID, "Causes the {0} to only affect the specified ID. Can be an array." },
-			{ Tooltip.Easing, "The easing effect that the {0} should use. Check out \"easings.net\" for visualization examples." },
+			{ Tooltip.Easing, "The easing effect that the {0} should use. Check out \"easings.net\" for visualization examples.\nAffects the next event if it's a transition." },
+			{ Tooltip.V2Easing, "The easing effect that the {0} should use. Check out \"easings.net\" for visualization examples." },
 			{ Tooltip.LerpType, "What color space the transition should be interpolated in." },
 			{ Tooltip.V2Gradient, "Creates a color gradient." },
 			

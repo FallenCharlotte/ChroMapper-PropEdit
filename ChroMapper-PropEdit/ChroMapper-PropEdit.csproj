@@ -17,7 +17,7 @@
     <DebugType>embedded</DebugType>
     <Deterministic>true</Deterministic>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
+    <OutputPath>bin\Dev\Plugins</OutputPath>
     <PathMap>$(MSBuildThisFileDirectory)=ChroMapper-PropEdit/</PathMap>
     <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>

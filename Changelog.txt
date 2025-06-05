@@ -1,3 +1,7 @@
+v0.0.0.0
+	Zip packaging
+	Easing affects next transition ;-;
+
 v0.11.2
 	Gaga
 

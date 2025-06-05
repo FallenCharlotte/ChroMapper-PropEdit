@@ -53,8 +53,10 @@ public abstract class UIWindow : MonoBehaviour {
 		panels.Push(panel!);
 	}
 	
-	public virtual void AddExpando(string name, string label, bool expanded, string tooltip = "") {
-		panels.Push(Collapsible.Create(current_panel ?? panel!, name, label, expanded, tooltip).panel!);
+	public virtual Collapsible AddExpando(string name, string label, bool expanded, string tooltip = "") {
+		var c = Collapsible.Singleton(current_panel ?? panel!, name, label, expanded, tooltip);
+		panels.Push(c.panel!);
+		return c;
 	}
 	
 	public abstract void ToggleWindow();

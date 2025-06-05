@@ -49,6 +49,15 @@ public static class MapExt {
 		
 		return map;
 	}
+	
+	public static Map<string?> AddEnum(this Map<string?> map, System.Type source) {
+		var options = System.Enum.GetNames(source);
+		foreach (var item in options) {
+			map.Add(item, item);
+		}
+		
+		return map;
+	}
 }
 
 }

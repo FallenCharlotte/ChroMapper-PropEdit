@@ -42,6 +42,16 @@ public static class MapSettings {
 		{ "Faster", "Faster" },
 		{ "SuperFast", "Super Fast" },
 	};
+	
+	public static readonly Map<string?> GeometryTypes = new Map<string?> {
+		{ "Sphere", "Sphere" },
+		{ "Capsule", "Capsule" },
+		{ "Cylinder", "Cylinder" },
+		{ "Cube", "Cube" },
+		{ "Plane", "Plane" },
+		{ "Quad", "Quad" },
+		{ "Triangle", "Triangle" }
+	};
 }
 
 }

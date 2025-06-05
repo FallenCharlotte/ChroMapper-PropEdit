@@ -92,11 +92,12 @@ public partial class MainWindow : UIWindow {
 		return existing ?? UI.AddField(current_panel!, title, size, tooltip);
 	}
 	
-	public override void AddExpando(string name, string label, bool expanded, string tooltip = "") {
+	public override Collapsible AddExpando(string name, string label, bool expanded, string tooltip = "") {
 		var expando = ((!full_rebuild)
 			? current_panel!.transform.Find(name)?.GetComponent<Collapsible>()
 			: null) ?? Collapsible.Create(current_panel ?? panel!, name, label, expanded, tooltip);
 		panels.Push(expando.panel!);
+		return expando;
 	}
 	
 	// CustomData node gets removed when value = default

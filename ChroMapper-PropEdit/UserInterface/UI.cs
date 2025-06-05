@@ -171,6 +171,15 @@ public static class UI {
 		return dropdown;
 	}
 	
+	public static UIDropdown SingleDropdown<T>(GameObject parent, T? value, UnityAction<T?> setter, Map<T?> options, bool nullable = false) {
+		if (parent.GetComponentInChildren<UIDropdown>() is UIDropdown drop) {
+			return UI.UpdateDropdown(drop, value, setter, options, nullable);
+		}
+		else {
+			return UI.AddDropdown(parent, value, setter, options, nullable);
+		}
+	}
+	
 	public static UITextInput AddParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
 		return CreateParsed<T>(parent, value, setter).TextInput!;
 	}
@@ -182,7 +191,9 @@ public static class UI {
 	}
 	
 	public static Textbox UpdateParsed<T>(Textbox input, T? value, bool mixed, UnityAction<T?> setter) where T : struct {
-		input.Value = (value != null) ? (string)Convert.ChangeType(value, typeof(string)) : "";
+		input.Value = (value != null)
+			? (string)Convert.ChangeType(value, typeof(string))
+			: "";
 		input.OnChange = (s) => {
 			var table = new System.Data.DataTable();
 			var computed = table.Compute(s, "");
@@ -194,6 +205,15 @@ public static class UI {
 		input.Placeholder = (mixed) ? "Mixed" : "Empty";
 		
 		return input;
+	}
+	
+	public static Textbox SingleParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
+		if (parent.GetComponentInChildren<Textbox>() is Textbox text) {
+			return UpdateParsed(text, value, false, setter);
+		}
+		else {
+			return CreateParsed(parent, value, setter);
+		}
 	}
 	
 	public static Textbox AddTextbox(GameObject parent, string? value, Textbox.Setter setter, bool tall = false) {

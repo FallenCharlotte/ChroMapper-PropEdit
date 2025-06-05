@@ -328,6 +328,13 @@ public static class Data {
 	public static JSONNode? GetNode(JSONNode root, string name) {
 		string[] path = name.Split('.');
 		foreach (string node in path) {
+			/*if (node.EndsWith("]")) {
+				var parts = node.Split('[');
+				var part = parts[0];
+				var ind = int.Parse(parts[1].TrimEnd(']'));
+				root = root[part][ind];
+				continue;
+			}*/
 			if (!(root?.HasKey(node) ?? false)) {
 				return null;
 			}
@@ -336,9 +343,20 @@ public static class Data {
 		return root;
 	}
 	
-	public static JSONNode SetNode(JSONNode root, string name, JSONNode o) {
+	public static JSONNode? SetNode(JSONNode root, string name, JSONNode? o) {
+		if (o == null) {
+			RemoveNode(root, name);
+			return o;
+		}
 		string[] path = name.Split('.');
 		for (int i = 0; i < path.Length - 1; ++i) {
+			/*if (path[i].EndsWith("]")) {
+				var parts = path[i].Split('[');
+				var part = parts[0];
+				var ind = int.Parse(parts[1].TrimEnd(']'));
+				root = root[part][ind];
+				continue;
+			}*/
 			root = root[path[i]];
 		}
 		root[path[path.Length-1]] = o;

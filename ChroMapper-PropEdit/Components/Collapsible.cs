@@ -2,6 +2,7 @@
 using System.Collections;
 
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 
 using ChroMapper_PropEdit.UserInterface;
@@ -12,6 +13,9 @@ public class Collapsible : MonoBehaviour
 {
 	public Toggle? expandToggle;
 	public GameObject? panel;
+	
+	public UnityAction<bool>? OnAnimationComplete;
+	
 	private string? settings_key;
 	private float? height_cache;
 	
@@ -25,6 +29,13 @@ public class Collapsible : MonoBehaviour
 	}
 	public static Collapsible Create(GameObject parent, string name, string label, bool expanded, string tooltip) {
 		return UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip);
+	}
+	public static Collapsible Singleton(GameObject parent, string name, string label, bool expanded, string tooltip) {
+		var go = parent.transform.Find(name)?.GetComponent<Collapsible>();
+		if (go == null) {
+			go = UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip);
+		}
+		return go;
 	}
 	
 	public Collapsible Init(string label, bool expanded, string tooltip = "", bool background = true) {
@@ -160,6 +171,7 @@ public class Collapsible : MonoBehaviour
 		}
 		SendMessageUpwards("DirtyPanel");
 		anim = null;
+		OnAnimationComplete?.Invoke(expanded);
 		yield break;
 	}
 	

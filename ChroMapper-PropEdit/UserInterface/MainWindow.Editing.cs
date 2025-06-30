@@ -439,8 +439,8 @@ public partial class MainWindow : UIWindow {
 						break;
 					
 					case "AssignPlayerToTrack":
-						AddTracks("Tracks", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTrack));
-						AddTextbox("Target", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_target" : "target"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTarget));
+						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTrack));
+						AddDropdown("Target", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_target" : "target"), Events.PlayerTargets, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTarget));
 						break;
 					
 					// Chroma
@@ -631,9 +631,13 @@ public partial class MainWindow : UIWindow {
 	
 	// Unarrayable track
 	private void AddTrack(string? title, (Data.Getter<string?>, Data.Setter<string?>) get_set, string tooltip = "") {
+		// TODO: Needs a custom option with a textbox
+		/*
 		var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent) as CustomEventGridContainer;
 		var tracks = new Map<string?>().AddRange(collection!.EventsByTrack.Keys);
 		AddDropdown(title, get_set, tracks, true, tooltip);
+		*/
+		AddTextbox(title, get_set, false, tooltip);
 	}
 	
 	// Arrayable tracks

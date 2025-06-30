@@ -160,32 +160,42 @@ public class MapSettingsWindow : UIWindow {
 			});
 			UI.MoveTransform((RectTransform)new_pointdefinition_textbox.transform, new Vector2(0, 20), new Vector2(0, 0));
 			
-			environment_panel = AddExpando("Environment Enhancements", "Environment Enhancements", false).panel;
-			var ees = BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements;
-			
-			ee_count = 0;
-			
-			foreach (var ee in ees) {
-				AddEE(ee);
-			}
-			
-			var container = UI.AddField(current_panel!, "", null);
-			var new_ee = UI.AddButton(container, "Add", () => {
-				panels.Push(environment_panel!);
-				BaseEnvironmentEnhancement ee = new BaseEnvironmentEnhancement();
-				ee.ID = "";
-				BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements.Add(ee);
-				AddEE(ee);
-				panels.Pop();
-				container.transform.SetAsLastSibling();
+			// TODO: This is aweful, there needs to be some way to select and selectively edit these
+			var environment_expando = Collapsible.Create(panel!, "_Environment Enhancements", "Environment Enhancements", false, "Edit environemt enhancements.\nWARNING: Can take a VERY long time to load.");
+			environment_expando.expandToggle!.onValueChanged.AddListener(e => {
+				if (e) {
+					InitEEs();
+				}
 			});
-			UI.AttachTransform(new_ee.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-			
-			panels.Pop();
+			environment_panel = environment_expando.panel;
 		}
 		
 		Refresh();
 		UI.RefreshTooltips(panel);
+	}
+	
+	private void InitEEs() {
+		panels.Push(environment_panel!);
+		var ees = BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements;
+		
+		ee_count = 0;
+		
+		foreach (var ee in ees) {
+			AddEE(ee);
+		}
+		
+		var container = UI.AddField(current_panel!, "", null);
+		var new_ee = UI.AddButton(container, "Add", () => {
+			panels.Push(environment_panel!);
+			BaseEnvironmentEnhancement ee = new BaseEnvironmentEnhancement();
+			ee.ID = "";
+			BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements.Add(ee);
+			AddEE(ee);
+			panels.Pop();
+			container.transform.SetAsLastSibling();
+		});
+		UI.AttachTransform(new_ee.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
+		panels.Pop();
 	}
 	
 	private static int ee_count = 0;

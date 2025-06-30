@@ -153,6 +153,13 @@ public static class Events {
 		{"Dissolve Arrow", new string[] { "_dissolveArrow", "dissolveArrow", "[[1,0], [1,0.49]]" }},
 		{"Interactable", new string[] { "_interactable", "interactable", "[[0,0.249], [1,0.25]]" }},
 	};
+	
+	public static readonly Map<string?> PlayerTargets = new Map<string?> {
+		{ "Root", "Root" },
+		{ "Head", "Head" },
+		{ "LeftHand", "Left Hand" },
+		{ "RightHand", "Right Hand" },
+	};
 }
 
 }

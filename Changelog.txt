@@ -1,3 +1,8 @@
+v0.12.1
+	Fix AssignPlayerToTrack
+	Lazy load EEs
+	Textbox for tracks for now
+
 v0.12
 	Environment Enhancement editor!
 	Zip packaging

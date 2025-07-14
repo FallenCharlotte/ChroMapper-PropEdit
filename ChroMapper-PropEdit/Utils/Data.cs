@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -20,17 +21,17 @@ public static class Data {
 	
 #region Getter/setter factories
 	
-	public delegate T Getter<T>(BaseObject o);
-	public delegate void Setter<T>(BaseObject o, T v);
+	public delegate T Getter<T>(object o);
+	public delegate void Setter<T>(object o, T v);
 	
 	public static (Getter<T?>, Setter<T?>) GetSet<T>(string field_name) where T : struct {
 		Getter<T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null) ?? null;
 		Setter<T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {v}); };
 		return (getter, setter);
 	}
-	public static (Getter<T?>, Setter<T?>) GetSetTest<T>(string field_name) {
+	public static (Getter<T?>, Setter<T?>) GetSetNullable<T>(string field_name) {
 		Getter<T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null);
-		Setter<T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {(T)v}); };
+		Setter<T?> setter = (o, v) => { o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object?[] {v}); };
 		return (getter, setter);
 	}
 	
@@ -75,7 +76,7 @@ public static class Data {
 				RemoveNode(root, field_name);
 			}
 			node!.SetMethod.Invoke(o, new object[] { root });
-			o.RefreshCustom();
+			(o as BaseObject)?.RefreshCustom();
 		};
 		return (getter, setter);
 	}
@@ -180,7 +181,7 @@ public static class Data {
 			}
 			root["properties"] = props;
 			(o as BaseCustomEvent)!.Data = root;
-			o.RefreshCustom();
+			(o as BaseObject)?.RefreshCustom();
 		};
 		return (getter, setter);
 	}
@@ -224,13 +225,13 @@ public static class Data {
 	
 	// Create or remove object with default json
 	public static (Getter<bool?>, Setter<bool?>) CustomGetSetNode(string path, string json) {
-		Getter<bool?> getter = (o) => GetNode(o.CustomData, path) != null;
+		Getter<bool?> getter = (o) => GetNode(((BaseObject)o).CustomData, path) != null;
 		Setter<bool?> setter = (o, v) => {
 			if (!(v ?? false)) {
-				RemoveNode(o.CustomData, path);
+				RemoveNode(((BaseObject)o).CustomData, path);
 			}
-			else if (GetNode(o.CustomData, path) == null) {
-				SetNode(o.CustomData, path, JSON.Parse(json));
+			else if (GetNode(((BaseObject)o).CustomData, path) == null) {
+				SetNode(((BaseObject)o).CustomData, path, JSON.Parse(json));
 			}
 		};
 		return (getter, setter);
@@ -238,7 +239,7 @@ public static class Data {
 	
 	public static (Getter<string?>, Setter<string?>) CustomGetSetColor(string field_name) {
 		Getter<string?> getter = (o) => {
-			if (GetNode(o.CustomData, field_name) is JSONNode n) {
+			if (GetNode(((BaseObject)o).CustomData, field_name) is JSONNode n) {
 				var color = n.ReadColor();
 				return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
 			}
@@ -248,14 +249,50 @@ public static class Data {
 		};
 		Setter<string?> setter = (o, v) => {
 			if (string.IsNullOrEmpty(v)) {
-				RemoveNode(o.CustomData, field_name);
+				RemoveNode(((BaseObject)o).CustomData, field_name);
 			}
 			else {
 				ColorUtility.TryParseHtmlString(v, out var color);
 				var jc = new JSONArray();
 				jc.WriteColor(color);
-				SetNode(o.GetOrCreateCustom(), field_name, jc);
+				SetNode(((BaseObject)o).GetOrCreateCustom(), field_name, jc);
 			}
+		};
+		return (getter, setter);
+	}
+	
+	public static (Getter<bool?>, Setter<bool?>) EEGetSetComp(string name) {
+		Data.Getter<bool?> getter = (ee) => (ee as BaseEnvironmentEnhancement)!.Components?.HasKey(name);
+		Data.Setter<bool?> setter = (ee, v) => {
+			if (v == false) {
+				(ee as BaseEnvironmentEnhancement)!.Components?.Remove(name);
+			}
+			else {
+				(ee as BaseEnvironmentEnhancement)!.Components ??= new JSONObject();
+				(ee as BaseEnvironmentEnhancement)!.Components[name] = new JSONObject();
+			}
+		};
+		return (getter, setter);
+	}
+	
+	public static (Getter<float?>, Setter<float?>) V3Component((Getter<Vector3?>, Setter<Vector3?>) get_set, Axis axis) {
+		Getter<float?> getter = (o) => {
+			var v = get_set.Item1(o);
+			return axis switch {
+				Axis.X => v?.x,
+				Axis.Y => v?.y,
+				Axis.Z => v?.z,
+				_ => null,
+			};
+		};
+		Setter<float?> setter = (o, v) => {
+			var old = get_set.Item1(o) ?? new Vector3();
+			switch (axis) {
+			case Axis.X: old.x = v ?? 0; break;
+			case Axis.Y: old.y = v ?? 0; break;
+			case Axis.Z: old.z = v ?? 0; break;
+			};
+			get_set.Item2(o, old);
 		};
 		return (getter, setter);
 	}
@@ -265,7 +302,7 @@ public static class Data {
 #region Editing many objects
 	
 	// Value, Mixed?
-	public static (T?, bool) GetAllOrNothing<T>(IEnumerable<BaseObject> editing, Getter<T?> getter) {
+	public static (T?, bool) GetAllOrNothing<T>(IEnumerable editing, Getter<T?> getter) {
 		var it = editing.GetEnumerator();
 		it.MoveNext();
 		var first = getter(it.Current);
@@ -282,42 +319,71 @@ public static class Data {
 		return (first, false);
 	}
 	
-	public static void UpdateObjects<T>(List<BaseObject> editing, Setter<T?> setter, T? value, bool time = false) {
-		if (time) {
-			var beatmapActions = new List<BeatmapObjectModifiedAction>();
-			foreach (var o in editing!) {
-				var orig = BeatmapFactory.Clone(o);
+	public static void UpdateObjects<T>(IList things, Setter<T?> setter, T? value, bool time = false) {
+		switch (things) {
+		case List<BaseObject> editing:
+			if (time) {
+				var beatmapActions = new List<BeatmapObjectModifiedAction>();
+				foreach (var o in editing!) {
+					var orig = BeatmapFactory.Clone(o);
+					
+					// Based on SelectionController.MoveSelection
+					var collection = BeatmapObjectContainerCollection.GetCollectionForType(o.ObjectType);
+					
+					collection.DeleteObject(o, false, false, "", true, false);
+					
+					setter(o, value);
+					
+					collection.SpawnObject(o, false, true);
+					
+					beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, orig, $"Edited a {o.ObjectType} with Prop Edit.", true));
+				}
 				
-				// Based on SelectionController.MoveSelection
-				var collection = BeatmapObjectContainerCollection.GetCollectionForType(o.ObjectType);
-				
-				collection.DeleteObject(o, false, false, "", true, false);
-				
-				setter(o, value);
-				
-				collection.SpawnObject(o, false, true);
-				
-				beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, orig, $"Edited a {o.ObjectType} with Prop Edit.", true));
+				BeatmapActionContainer.AddAction(
+					new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
+					true);
+				BeatmapObjectContainerCollection.RefreshAllPools();
 			}
-			
-			BeatmapActionContainer.AddAction(
-				new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
-				true);
-			BeatmapObjectContainerCollection.RefreshAllPools();
-		}
-		else {
-			var modified = new List<BaseObject>();
-			var beatmapActions = new List<BeatmapObjectModifiedAction>();
-			foreach (var o in editing!) {
-				var mod = BeatmapFactory.Clone(o);
-				modified.Add(mod);
-				
-				setter(mod, value);
-				mod.RefreshCustom();
+			else {
+				var modified = new List<BaseObject>();
+				var beatmapActions = new List<BeatmapObjectModifiedAction>();
+				foreach (var o in editing!) {
+					var mod = BeatmapFactory.Clone(o);
+					modified.Add(mod);
+					
+					setter(mod, value);
+					mod.RefreshCustom();
+				}
+				BeatmapActionContainer.AddAction(
+					new BeatmapObjectModifiedCollectionAction(modified, editing, $"Edited ({editing.Count()}) objects with Prop Edit."),
+					true);
 			}
-			BeatmapActionContainer.AddAction(
-				new BeatmapObjectModifiedCollectionAction(modified, editing, $"Edited ({editing.Count()}) objects with Prop Edit."),
-				true);
+			break;
+		case List<BaseEnvironmentEnhancement> ehs: {
+			var collection = (CustomEventGridContainer)BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent);
+			// TODO: Custom Action type for undo/redo
+			foreach (var eh in ehs) {
+#if !CHROMPER_11
+				if (collection.LoadedGeometry.ContainsKey(eh)) {
+					GameObject.Destroy(collection.LoadedGeometry[eh]);
+					collection.LoadedGeometry.Remove(eh);
+				}
+#endif
+				setter(eh, value);
+#if !CHROMPER_11
+				collection.AddEnvironmentEnhancement(eh);
+#endif
+			}
+#if CHROMPER_11
+			(BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent) as CustomEventGridContainer)?.LoadAnimationTracks();
+#endif
+			Plugin.map_settings!.Refresh();
+		}	break;
+		default:
+			foreach (var i in things) {
+				setter(i, value);
+			}
+			break;
 		}
 	}
 	

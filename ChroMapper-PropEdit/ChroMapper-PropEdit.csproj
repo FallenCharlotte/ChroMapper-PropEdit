@@ -104,6 +104,7 @@
     <Compile Include="Components\PointDefinitionEditor.cs" />
     <Compile Include="Components\ResizeWindowController.cs" />
     <Compile Include="Components\ScrollBox.cs" />
+    <Compile Include="Components\SelectableList.cs" />
     <Compile Include="Components\Textbox.cs" />
     <Compile Include="Components\Window.cs" />
     <Compile Include="Enums\Events.cs" />
@@ -124,6 +125,7 @@
     <Compile Include="Utils\BundleInfo.cs" />
     <Compile Include="Utils\CustomRequirement.cs" />
     <Compile Include="Utils\Data.cs" />
+    <Compile Include="Utils\Selection.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\EditorIcon.png" />

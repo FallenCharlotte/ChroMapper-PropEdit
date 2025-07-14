@@ -21,19 +21,16 @@ public class Collapsible : MonoBehaviour
 	
 	public bool Expanded {
 		get { return expandToggle!.isOn && anim == null; }
-		set { SetExpanded(value); }
+		set { expandToggle!.isOn = value; }
 	}
 	
-	public static Collapsible Create(GameObject parent, string name, string label, bool expanded) {
-		return Create(parent, name, label, expanded, "");
+	public static Collapsible Create(GameObject parent, string name, string label, bool expanded, string tooltip = "", bool background = true) {
+		return UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip, background);
 	}
-	public static Collapsible Create(GameObject parent, string name, string label, bool expanded, string tooltip) {
-		return UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip);
-	}
-	public static Collapsible Singleton(GameObject parent, string name, string label, bool expanded, string tooltip) {
+	public static Collapsible Singleton(GameObject parent, string name, string label, bool expanded, string tooltip = "", bool background = true) {
 		var go = parent.transform.Find(name)?.GetComponent<Collapsible>();
 		if (go == null) {
-			go = UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip);
+			go = UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip, background);
 		}
 		return go;
 	}
@@ -76,13 +73,14 @@ public class Collapsible : MonoBehaviour
 			expandToggle!.isOn = !expandToggle!.isOn;
 		};
 		{
-			var _label = header.transform.GetChild(0).gameObject;
-			_label.GetComponent<RectTransform>().anchoredPosition += new Vector2(5, 0);
+			var _label_trans = (RectTransform)header.transform.GetChild(0);
+			_label_trans.anchoredPosition += new Vector2(5, 0);
+			_label_trans.anchorMax = new Vector2(0.75f, 1);
 		}
 		if (settings_key != null) {
 			expanded = Settings.Get(settings_key, expanded);
 		}
-		expandToggle = UI.AddCheckbox(header, expanded, SetExpanded);
+		expandToggle = UI.AddCheckbox(header, expanded, SetExpandedInternal);
 		Sprite arrow = UI.GetSprite("ArrowIcon");
 		
 		Image[] images = expandToggle.gameObject.GetComponentsInChildren<Image>();
@@ -175,8 +173,11 @@ public class Collapsible : MonoBehaviour
 		yield break;
 	}
 	
-	public void SetExpanded(bool expanded)
-	{
+	public void SetExpanded(bool expanded) {
+		expandToggle!.isOn = expanded;
+	}
+	
+	private void SetExpandedInternal(bool expanded) {
 		if (isActiveAndEnabled) {
 			if (anim != null) {
 				StopCoroutine(anim);

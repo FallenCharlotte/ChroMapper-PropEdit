@@ -28,13 +28,13 @@ public class Plugin {
 			
 			toggle_window = map.AddAction("Prop Editor", type: InputActionType.Button);
 			toggle_window.AddCompositeBinding("ButtonWithOneModifier")
-				.With("Button", "<Keyboard>/n")
-				.With("Modifier", "<Keyboard>/shift");
+				.With("Modifier", "<Keyboard>/shift")
+				.With("Button", "<Keyboard>/n");
 			
 			array_insert = map.AddAction("Array Insert", type: InputActionType.Button);
 			array_insert.AddCompositeBinding("ButtonWithOneModifier")
-				.With("Button", "<Keyboard>/enter")
-				.With("Modifier", "<Keyboard>/shift");
+				.With("Modifier", "<Keyboard>/shift")
+				.With("Button", "<Keyboard>/enter");
 			
 			CMInputCallbackInstaller.InputInstance.Enable();
 			

@@ -58,6 +58,16 @@ public static class MapExt {
 		
 		return map;
 	}
+	
+	public static Map<int?> AddEnum(this Map<int?> map, System.Type source) {
+		var options = System.Enum.GetNames(source) as IList<string>;
+		var values = System.Enum.GetValues(source) as IList<int>;
+		for (var i = 0; i < values!.Count; ++i) {
+			map.Add(values[i], options[i]);
+		}
+		
+		return map;
+	}
 }
 
 }

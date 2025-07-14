@@ -15,7 +15,7 @@ using ChroMapper_PropEdit.Utils;
 namespace ChroMapper_PropEdit.UserInterface {
 
 public partial class MainWindow : UIWindow {
-	public List<BaseObject>? editing;
+	public IList? editing;
 	
 	public MainWindow() {
 		panels = new Stack<GameObject>();
@@ -55,9 +55,10 @@ public partial class MainWindow : UIWindow {
 			tooltip.TooltipOverride = "Map Settings";
 		}
 		
-		old_type = null;
+		old_otype = null;
 		
-		SelectionController.SelectionChangedEvent += UpdateFromSelection;
+		SelectionController.SelectionChangedEvent += Selection.OnObjectsSelected;
+		Selection.OnSelectionChanged += UpdateFromSelection;
 		BeatmapActionContainer.ActionCreatedEvent += UpdateFromAction;
 		BeatmapActionContainer.ActionUndoEvent += UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent += UpdateFromAction;
@@ -80,8 +81,9 @@ public partial class MainWindow : UIWindow {
 		TriggerRefresh();
 	}
 	
-	private void UpdateFromAction(BeatmapAction _) {
+	private void UpdateFromAction(BeatmapAction? _) {
 		Plugin.Trace($"{Time.frameCount} UpdateFromAction");
+		Selection.OnObjectsSelected();
 		TriggerRefresh();
 	}
 	
@@ -92,10 +94,10 @@ public partial class MainWindow : UIWindow {
 		return existing ?? UI.AddField(current_panel!, title, size, tooltip);
 	}
 	
-	public override Collapsible AddExpando(string name, string label, bool expanded, string tooltip = "") {
+	public override Collapsible AddExpando(string name, string label, bool expanded, string tooltip = "", bool background = true) {
 		var expando = ((!full_rebuild)
 			? current_panel!.transform.Find(name)?.GetComponent<Collapsible>()
-			: null) ?? Collapsible.Create(current_panel ?? panel!, name, label, expanded, tooltip);
+			: null) ?? Collapsible.Create(current_panel ?? panel!, name, label, expanded, tooltip, background);
 		panels.Push(expando.panel!);
 		return expando;
 	}

@@ -24,7 +24,8 @@ public partial class MainWindow : UIWindow {
 	TooltipStrings tooltip = TooltipStrings.Instance;
 	BundleInfo? bundleInfo = null;
 	
-	private ObjectType? old_type = null;
+	private ObjectType? old_otype = null;
+	private SelectionType? old_stype = null;
 	private Events.EventType? old_etype = null;
 	private string? old_cetype = null;
 	private bool full_rebuild = true;
@@ -45,39 +46,50 @@ public partial class MainWindow : UIWindow {
 	}
 	public void TriggerFullRefresh() {
 		refresh_frame = true;
-		old_type = null;
+		old_otype = null;
+	}
+	
+	private bool CheckRefresh(SelectionType new_type, bool force = false) {
+		full_rebuild = false;
+		
+		Plugin.Trace($"{old_stype} => {new_type}");
+		
+		if (force || new_type != old_stype) {
+			wipe();
+			full_rebuild = true;
+		}
+		old_stype = new_type;
+		
+		return full_rebuild;
 	}
 	
 	private void Update() {
 		if (!refresh_frame) return;
 		refresh_frame = false;
 		
-		editing = SelectionController.SelectedObjects.Select(it => it).ToList();
-		Plugin.Trace($"{Time.frameCount} UpdateSelection: {editing.Count}");
-		
-		if (SelectionController.HasSelectedObjects() && editing.Count > 0) {
-			window!.SetTitle($"{editing.Count} Items selected");
+		editing = Selection.Selected;
+		switch (editing) {
+		case List<BaseObject> objects: {
+			window!.SetTitle($"{objects.Count} Items selected");
 			
-			if (editing.GroupBy(o => o.ObjectType).Count() > 1) {
+			if (objects.GroupBy(o => o.ObjectType).Count() > 1) {
 				wipe();
 				UI.AddLabel(panel!, "Unsupported", "Multi-Type Unsupported!", Vector2.zero);
-				old_type = null;
+				old_otype = null;
 				return;
 			}
 			
-			var o = editing.First();
+			var o = objects.First();
 			var type = o.ObjectType;
 			var v2 = BeatSaberSongContainer.Instance.Map.Version[0] == '2';
 			
-			full_rebuild = false;
-			
-			if (type != old_type) {
-				wipe();
-				full_rebuild = true;
+			if (CheckRefresh(SelectionType.Objects, type != old_otype)) {
 				old_etype = null;
 			}
-			Plugin.Trace($"{old_type} => {type}: {full_rebuild}");
-			old_type = type;
+			Plugin.Trace($"{old_otype} => {type}: {full_rebuild}");
+			
+			old_otype = type;
+			old_stype = SelectionType.Objects;
 			
 			panels.Clear();
 			panels.Push(panel!);
@@ -280,7 +292,7 @@ public partial class MainWindow : UIWindow {
 #else
 					var env = BeatSaberSongContainer.Instance.Info.EnvironmentName;
 #endif
-					var events = editing.Select(o => (BaseEvent)o);
+					var events = objects.Select(o => (BaseEvent)o);
 					
 					if (events.GroupBy(e => Events.GetEventType(e, env)).Count() > 1) {
 						wipe(1);
@@ -381,7 +393,7 @@ public partial class MainWindow : UIWindow {
 					}
 				}	break;
 				case ObjectType.CustomEvent: {
-					var events = editing.Select(o => (BaseCustomEvent)o);
+					var events = objects.Select(o => (BaseCustomEvent)o);
 					var f = events.First();
 					
 					var types = events.Select(e => e.Type)
@@ -582,13 +594,69 @@ public partial class MainWindow : UIWindow {
 			if (full_rebuild) {
 				scrollbox!.ScrollTop();
 			}
-		}
-		else {
+		}	break;
+		case List<BaseEnvironmentEnhancement> ees: {
+			window!.SetTitle($"{ees.Count} Items selected");
+			
+			CheckRefresh(SelectionType.EnvironmentEnhancements);
+			
+			AddTextbox("ID", Data.GetSetNullable<string>("ID"), true);
+			AddDropdown("Lookup Method", Data.GetSetNullable<int?>("LookupMethod"), (new Map<int?>()).AddEnum(typeof(EnvironmentLookupMethod)), false);
+			Data.Getter<bool?> dup_get = (ee) => (ee as BaseEnvironmentEnhancement)!.Active?.AsBool ?? null;
+			Data.Setter<bool?> dup_set = (ee, v) => (ee as BaseEnvironmentEnhancement)!.Active = v;
+			AddCheckbox("Active", (dup_get, dup_set), true);
+			AddParsed<int>("Duplicate", Data.GetSetNullable<int?>("Duplicate"));
+			EditVector3("Scale", Data.GetSetNullable<Vector3?>("Scale"));
+			EditVector3("Position", Data.GetSetNullable<Vector3?>("Position"));
+			EditVector3("Local Position", Data.GetSetNullable<Vector3?>("LocalPosition"));
+			EditVector3("Rotation", Data.GetSetNullable<Vector3?>("Rotation"));
+			EditVector3("Local Rotation", Data.GetSetNullable<Vector3?>("LocalRotation"));
+			AddTextbox("Track", Data.GetSetNullable<string?>("Track"));
+			
+			Data.Getter<bool?> geo_get = (ee) => (ee as BaseEnvironmentEnhancement)!.Geometry != null;
+			Data.Setter<bool?> geo_set = (ee, v) => {
+				if (v == false) {
+					(ee as BaseEnvironmentEnhancement)!.Geometry = null;
+				}
+				else {
+					(ee as BaseEnvironmentEnhancement)!.Geometry ??= new JSONObject();
+				}
+			};
+			EEComponent("Geometry", (geo_get, geo_set), () => {
+				AddDropdown("Type", Data.JSONGetSet<string>(typeof(BaseEnvironmentEnhancement), "Geometry", "type"), MapSettings.GeometryTypes, true);
+				var materials = new Map<string?> {
+					//{ "[Create New]", "[Create New]" }
+				};
+				materials.AddRange(BeatSaberSongContainer.Instance.Map.Materials.Keys);
+				AddDropdown("Material", Data.JSONGetSet<string>(typeof(BaseEnvironmentEnhancement), "Geometry", "material"), materials, true);
+				AddCheckbox("Collision", Data.JSONGetSet<bool?>(typeof(BaseEnvironmentEnhancement), "Geometry", "collision"), false);
+			});
+			
+			EEComponent("Light", Data.EEGetSetComp("ILightWithId"), () => {
+				AddParsed("Light ID", Data.GetSetNullable<int?>("LightID"));
+				AddParsed("Light Type", Data.GetSetNullable<int?>("LightType"));
+			});
+			
+			EEComponent("Bloom Fog", Data.EEGetSetComp("BloomFogEnvironment"), () => {
+				AddParsed("Attenuation", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.attenuation"));
+				AddParsed("Offset", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.offset"));
+				AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.startY"));
+				AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.height"));
+			});
+			
+			EEComponent("Tube Bloom Pre Pass Light", Data.EEGetSetComp("TubeBloomPrePassLight"), () => {
+				AddParsed("Color Alpha Multiplier", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "TubeBloomPrePassLight.colorAlphaMultiplier"));
+				AddParsed("Bloom Fog Intensity Multiplier", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "TubeBloomPrePassLight.bloomFogIntensityMultiplier"));
+			});
+		}	break;
+		default:
 			window!.SetTitle("No items selected");
-			old_type = null;
+			old_otype = null;
+			old_stype = null;
 			wipe();
+			break;
 		}
-		Plugin.Trace($"End UpdateSelection: {old_type}");
+		Plugin.Trace($"End UpdateSelection: {old_otype}");
 	}
 	
 	private void AddAnimations(PropertyType type, bool v2) {
@@ -621,11 +689,11 @@ public partial class MainWindow : UIWindow {
 						v = null;
 					}
 					if (v != value) {
-						Data.UpdateObjects<string?>(editing!, setter, v);
+						Data.UpdateObjects<string?>((editing as List<BaseObject>)!, setter, v);
 					}
 				},
 				(v) => {
-					Data.UpdateObjects<bool?>(editing!, default_set, v);
+					Data.UpdateObjects<bool?>((editing as List<BaseObject>)!, default_set, v);
 				});
 		return;
 	}
@@ -789,6 +857,64 @@ public partial class MainWindow : UIWindow {
 			panels.Pop();
 		}
 		panels.Pop();
+	}
+	
+	private void EditVector3(string name, (Data.Getter<Vector3?>, Data.Setter<Vector3?>) get_set) {
+		Data.Getter<string?> getter = (o) => {
+			var value = get_set.Item1(o);
+			return (value != null)
+				? (new JSONArray()).WriteVector3(value ?? new Vector3()).ToString()
+				: "";
+		};
+		Data.Setter<string?> setter = (o, v) => {
+			if (v == null || v == "") {
+				get_set.Item2(o, null);
+				return;
+			}
+			var node = Data.RawToJson(v);
+			if (node is JSONArray vec) {
+				get_set.Item2(o, vec.ReadVector3());
+			}
+		};
+		
+		AddTextbox(name, (getter, setter), true);
+		
+		/* Component version, TODO: combine these two somehow?
+		var (value, mixed) = Data.GetAllOrNothing<Vector3?>(editing!, get_set.Item1);
+		
+		AddExpando("_"+name, name, (value != null || mixed), background: false);
+		AddParsed<float>("X", Data.V3Component(get_set, Axis.X));
+		AddParsed<float>("Y", Data.V3Component(get_set, Axis.Y));
+		AddParsed<float>("Z", Data.V3Component(get_set, Axis.Z));
+		panels.Pop();*/
+	}
+	
+	private void EEComponent(string name, (Data.Getter<bool?>, Data.Setter<bool?>) get_set, System.Action editor) {
+		var checkbox = AddCheckbox(name, get_set, null);
+		
+		var comp_container = Collapsible.Singleton(current_panel!, "_"+name, name, false);
+		
+		panels.Push(comp_container.panel!);
+		editor();
+		panels.Pop();
+		
+		checkbox.onValueChanged.AddListener((v) => {
+			if (v) {
+				comp_container.OnAnimationComplete = null;
+				comp_container.SetExpanded(false);
+				comp_container.gameObject.SetActive(true);
+				comp_container.SetExpanded(true);
+			}
+			else {
+				comp_container.OnAnimationComplete = (v) => {
+					comp_container.gameObject.SetActive(v);
+				};
+				comp_container.SetExpanded(v);
+			}
+		});
+		
+		comp_container.gameObject.SetActive(checkbox.isOn);
+		comp_container.SetExpanded(checkbox.isOn);
 	}
 }
 

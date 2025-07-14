@@ -20,7 +20,8 @@ public class MapSettingsWindow : UIWindow {
 	public GameObject? requirements_panel;
 	public GameObject? settings_panel;
 	public GameObject? pointdefinitions_panel;
-	public GameObject? environment_panel;
+	public SelectableList? environment_list;
+	public SelectableList? materials_list;
 	Textbox? new_pointdefinition_textbox;
 	ArrayEditor? information_editor;
 	ArrayEditor? warnings_editor;
@@ -160,241 +161,28 @@ public class MapSettingsWindow : UIWindow {
 			});
 			UI.MoveTransform((RectTransform)new_pointdefinition_textbox.transform, new Vector2(0, 20), new Vector2(0, 0));
 			
-			// TODO: This is aweful, there needs to be some way to select and selectively edit these
-			var environment_expando = Collapsible.Create(panel!, "_Environment Enhancements", "Environment Enhancements", false, "Edit environemt enhancements.\nWARNING: Can take a VERY long time to load.");
-			environment_expando.expandToggle!.onValueChanged.AddListener(e => {
-				if (e) {
-					InitEEs();
+			AddExpando("Environment Enhancements", "Environment Enhancements", false, "Edit environment enhancements.");
+			environment_list = SelectableList.Create(current_panel!);
+			environment_list.OnSelectionChanged = (ehs) => {
+				if (ehs is List<BaseEnvironmentEnhancement> list) {
+					Selection.OnEEsSelected(list);
 				}
-			});
-			environment_panel = environment_expando.panel;
+			};
+			environment_list.OnCreateItem = () => {
+				var ee = new BaseEnvironmentEnhancement();
+				BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements.Add(ee);
+				Refresh();
+			};
+			Selection.OnSelectionChanged += () => {
+				if (Selection.SelectedType != SelectionType.EnvironmentEnhancements) {
+					environment_list.SetSelection(null);
+				}
+			};
+			panels.Pop();
 		}
 		
 		Refresh();
 		UI.RefreshTooltips(panel);
-	}
-	
-	private void InitEEs() {
-		panels.Push(environment_panel!);
-		var ees = BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements;
-		
-		ee_count = 0;
-		
-		foreach (var ee in ees) {
-			AddEE(ee);
-		}
-		
-		var container = UI.AddField(current_panel!, "", null);
-		var new_ee = UI.AddButton(container, "Add", () => {
-			panels.Push(environment_panel!);
-			BaseEnvironmentEnhancement ee = new BaseEnvironmentEnhancement();
-			ee.ID = "";
-			BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements.Add(ee);
-			AddEE(ee);
-			panels.Pop();
-			container.transform.SetAsLastSibling();
-		});
-		UI.AttachTransform(new_ee.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		panels.Pop();
-	}
-	
-	private static int ee_count = 0;
-	
-	private void AddEE(BaseEnvironmentEnhancement ee) {
-		var lookup_method_type = typeof(EnvironmentLookupMethod);
-		var lookup_methods = new Map<string?>().AddEnum(lookup_method_type);
-		
-		var expo = AddExpando($"_EE ({ee_count})", $"[{ee_count}]", false);
-		var container = UI.AddField(current_panel!, "ID", null);
-		UI.AddTextbox(container, ee.ID, (v) => ee.ID = v);
-		
-		container = UI.AddField(current_panel!, "Lookup Method", null);
-		UI.AddDropdown<string?>(
-			container,
-			ee.LookupMethod.ToString(),
-			(v) => ee.LookupMethod = (EnvironmentLookupMethod)Enum.Parse(lookup_method_type, v),
-			lookup_methods,
-			false);
-		
-		container = UI.AddField(current_panel!, "Active", null);
-		UI.AddCheckbox(container, ee.Active, (v) => ee.Active = v);
-		
-		container = UI.AddField(current_panel!, "Duplicate", null);
-		UI.AddParsed<int>(container, ee.Duplicate, (v) => ee.Duplicate = v);
-		
-		EditVector3("Scale", ee.Scale, (v) => ee.Scale = v);
-		EditVector3("Position", ee.Position, (v) => ee.Position = v);
-		EditVector3("Local Position", ee.LocalPosition, (v) => ee.LocalPosition = v);
-		EditVector3("Rotation", ee.Rotation, (v) => ee.Rotation = v);
-		EditVector3("Local Rotation", ee.LocalRotation, (v) => ee.LocalRotation = v);
-		
-		container = UI.AddField(current_panel!, "Track", null);
-		UI.AddTextbox(container, ee.Track, (v) => ee.Track = v);
-		
-		EEComponent(ee, "Geometry", ee.Geometry != null, (v) => {
-			if (v == false) {
-				ee.Geometry = null;
-			}
-			else {
-				ee.Geometry ??= new JSONObject();
-			}
-		}, (ee) => {
-			EditGeoDropdown(ee, "type", "Type", MapSettings.GeometryTypes);
-			
-			var materials = new Map<string?> {
-				{ "standard", "Standard" }
-			};
-			materials.AddRange(BeatSaberSongContainer.Instance.Map.Materials.Keys);
-			EditGeoDropdown(ee, "material", "Material", materials);
-			
-			var container = SingleLine("Collision");
-			bool value = Data.GetNode(ee.Geometry ?? new JSONObject(), "collision");
-			UnityAction<bool> setter = (v) => {
-				var geo = ee.Geometry ?? new JSONObject();
-				Data.SetNode(geo, "collision", v);
-				ee.Geometry = geo;
-			};
-			if (container.GetComponentInChildren<Toggle>() is Toggle tog) {
-				UI.UpdateCheckbox(tog, value, setter);
-			}
-			else {
-				UI.AddCheckbox(container, value, setter);
-			}
-		});
-		
-		EEComponent(ee, "Light", ee.LightID != null, (v) => {
-			if (v == false) {
-				ee.Components?.Remove("ILightWithId");
-			}
-			else {
-				ee.Components ??= new JSONObject();
-				ee.Components["ILightWithId"] = new JSONObject();
-			}
-		}, (ee) => {
-			var container = SingleLine("Light ID");
-			UI.SingleParsed(container, ee.LightID, (v) => ee.LightID = v);
-			
-			container = SingleLine("Light Type");
-			UI.SingleParsed(container, ee.LightType, (v) => ee.LightType = v);
-		});
-		
-		EEComponent(ee, "Bloom Fog", ee.Components?.HasKey("BloomFogEnvironment") ?? false, (v) => {
-			if (v == false) {
-				ee.Components?.Remove("BloomFogEnvironment");
-			}
-			else {
-				ee.Components ??= new JSONObject();
-				ee.Components["BloomFogEnvironment"] = new JSONObject();
-			}
-		}, (ee) => {
-			var container = SingleLine("Attenuation");
-			UI.SingleParsed<float>(container, Data.GetNode(ee.Components!, "BloomFogEnvironment.attenuation")?.AsFloat, (v) => Data.SetNode(ee.Components!, "BloomFogEnvironment.attenuation", v));
-			
-			container = SingleLine("Offset");
-			UI.SingleParsed<float>(container, Data.GetNode(ee.Components!, "BloomFogEnvironment.offset")?.AsFloat, (v) => Data.SetNode(ee.Components!, "BloomFogEnvironment.offset", v));
-			
-			container = SingleLine("Start Y");
-			UI.SingleParsed<float>(container, Data.GetNode(ee.Components!, "BloomFogEnvironment.startY")?.AsFloat, (v) => Data.SetNode(ee.Components!, "BloomFogEnvironment.startY", v));
-			
-			container = SingleLine("Height");
-			UI.SingleParsed<float>(container, Data.GetNode(ee.Components!, "BloomFogEnvironment.height")?.AsFloat, (v) => Data.SetNode(ee.Components!, "BloomFogEnvironment.height", v));
-		});
-		
-		EEComponent(ee, "Tube Bloom Pre Pass Light", ee.Components?.HasKey("TubeBloomPrePassLight") ?? false, (v) => {
-			if (v == false) {
-				ee.Components?.Remove("TubeBloomPrePassLight");
-			}
-			else {
-				ee.Components ??= new JSONObject();
-				ee.Components["TubeBloomPrePassLight"] = new JSONObject();
-			}
-		}, (ee) => {
-			var container = SingleLine("Color Alpha Multiplier");
-			UI.SingleParsed<float>(container, Data.GetNode(ee.Components!, "TubeBloomPrePassLight.colorAlphaMultiplier")?.AsFloat, (v) => Data.SetNode(ee.Components!, "TubeBloomPrePassLight.colorAlphaMultiplier", v));
-			
-			container = SingleLine("Bloom Fog Intensity Multiplier");
-			UI.SingleParsed<float>(container, Data.GetNode(ee.Components!, "TubeBloomPrePassLight.bloomFogIntensityMultiplier")?.AsFloat, (v) => Data.SetNode(ee.Components!, "TubeBloomPrePassLight.bloomFogIntensityMultiplier", v));
-		});
-		
-		container = UI.AddField(current_panel!, "", null);
-		var delete = UI.AddButton(container, "Delete", () => {
-			BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements.Remove(ee);
-			expo.OnAnimationComplete = (v) => {
-				GameObject.Destroy(expo.gameObject);
-			};
-			expo.SetExpanded(false);
-		});
-		UI.AttachTransform(delete.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		
-		panels.Pop();
-		++ee_count;
-	}
-	
-	private delegate void ComponentEditor(BaseEnvironmentEnhancement ee);
-	
-	private void EEComponent(BaseEnvironmentEnhancement ee, string name, bool exists, Action<bool> setter, ComponentEditor editor) {
-		var container = UI.AddField(current_panel!, name, null);
-		var comp_container = Collapsible.Create(current_panel!, "_"+name, name, true);
-		UI.AddCheckbox(container, exists, (v) => {
-			setter(v);
-			
-			panels.Push(comp_container.panel!);
-			editor(ee);
-			panels.Pop();
-			
-			if (v) {
-				comp_container.OnAnimationComplete = null;
-				comp_container.SetExpanded(false);
-				comp_container.gameObject.SetActive(true);
-				comp_container.SetExpanded(true);
-			}
-			else {
-				comp_container.OnAnimationComplete = (v) => {
-					comp_container.gameObject.SetActive(v);
-				};
-				comp_container.SetExpanded(v);
-			}
-		});
-		panels.Push(comp_container.panel!);
-		editor(ee);
-		panels.Pop();
-		comp_container.gameObject.SetActive(exists);
-	}
-	
-	private GameObject SingleLine(string name) {
-		return current_panel!.transform.Find(name)?.gameObject
-			?? UI.AddField(current_panel!, name, null);
-	}
-	
-	private void EditVector3(string name, Vector3? value, Action<Vector3?> setter) {
-		var container = UI.AddField(current_panel!, name, null);
-		var value_text = (value != null)
-			? (new JSONArray()).WriteVector3(value ?? new Vector3()).ToString()
-			: "";
-		UI.AddTextbox(container, value_text, (v) => {
-			if (v == null || v == "") {
-				setter(null);
-				return;
-			}
-			var node = Data.RawToJson(v);
-			if (node is JSONArray vec) {
-				setter(vec.ReadVector3());
-			}
-		}, true);
-	}
-	
-	private void EditGeoDropdown(BaseEnvironmentEnhancement ee, string prop, string label, Map<string?> options) {
-		var container = SingleLine(label);
-		UI.SingleDropdown(
-			container,
-			Data.GetNode(ee.Geometry ?? new JSONObject(), prop),
-			(v) => {
-				var geo = ee.Geometry ?? new JSONObject();
-				Data.SetNode(geo, prop, v);
-				ee.Geometry = geo;
-			},
-			options,
-			true);
 	}
 	
 	private void AddDropdown<T>(string name, string path, Map<T?> options, string tooltip = "") {
@@ -413,7 +201,6 @@ public class MapSettingsWindow : UIWindow {
 			}
 		}, options, true);
 	}
-	
 	
 	private void AddParsed<T>(string name, string path, string tooltip = "") where T : struct {
 		path = $"_settings.{prefix}.{path}";
@@ -591,6 +378,17 @@ public class MapSettingsWindow : UIWindow {
 			
 			new_pointdefinition_textbox!.transform.SetSiblingIndex(pointdefinitions_panel.transform.childCount);
 			new_pointdefinition_textbox!.Value = "";
+		}
+		
+		if (environment_list != null) {
+			var ees = BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements;
+			environment_list.SetItems(ees, (i, ee) => {
+				var name = (ee.Geometry != null)
+					? $"{(string)ee.Geometry["type"]}"
+					: $"{ee.ID}";
+				return $"{i}: {name}";
+			});
+			environment_list.SetSelection(Selection.Selected as List<BaseEnvironmentEnhancement>);
 		}
 	}
 	

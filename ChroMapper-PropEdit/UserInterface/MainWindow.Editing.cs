@@ -567,6 +567,16 @@ public partial class MainWindow : UIWindow {
 				case ObjectType.BpmChange:
 					AddParsed("BPM", Data.GetSet<float>("Bpm"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BPMChange));
 					break;
+#if !CHROMPER_11
+				case ObjectType.NJSEvent: {
+					Data.Getter<bool?> getter = (o) => ((BaseNJSEvent)o).UsePrevious == 1;
+					Data.Setter<bool?> setter = (o, v) => { ((BaseNJSEvent)o).UsePrevious = (v ?? false) ? 1 : 0; };
+					AddCheckbox("Use Previous", (getter, setter), null);
+					AddParsed("Relative NJS", Data.GetSet<float>("RelativeNJS"));
+					AddDropdown("Easing", Data.GetSet<int>("Easing"), Events.NJSEasings, false);
+					break;
+				}
+#endif
 			}
 			UI.RefreshTooltips(panel);
 			if (full_rebuild) {

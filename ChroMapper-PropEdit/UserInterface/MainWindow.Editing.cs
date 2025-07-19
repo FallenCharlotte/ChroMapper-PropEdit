@@ -649,6 +649,49 @@ public partial class MainWindow : UIWindow {
 				AddParsed("Bloom Fog Intensity Multiplier", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "TubeBloomPrePassLight.bloomFogIntensityMultiplier"));
 			});
 		}	break;
+		case List<BaseMaterial> mats: {
+			window!.SetTitle($"{mats.Count} Items selected");
+			
+			CheckRefresh(SelectionType.Materials);
+			
+			System.Func<Color?, string?> gc = (c) => 
+				(new JSONArray())
+					.WriteColor(c ?? Color.white);
+			System.Func<string?, Color?> sc = (s) => JSON.Parse(s).ReadColor();
+			AddTextbox("Color", Data.Add(Data.GetSetNullable<Color?>("Color"), (gc, sc)), true);
+			AddDropdown("Shader", Data.GetSetNullable<string>("Shader"), MapSettings.Shaders, false);
+			AddTextbox("Track", Data.GetSetNullable<string?>("Track"), false, "Assign the material to a track, allowing you to animate the color.");
+			
+			var (getter, setter) = Data.GetSetNullable<List<string>>("ShaderKeywords");
+			
+			var (value, mixed) = Data.GetAllOrNothing<List<string>>(editing!, getter);
+			
+			Plugin.Trace($"{value?.Count ?? -1} {mixed}");
+			
+			ArrayEditor.Getter arr_get = () => {
+				if (mixed) return null;
+				var arr = new JSONArray();
+				foreach (var keyword in value!) {
+					arr.Add(keyword);
+				}
+				return arr;
+			};
+			
+			ArrayEditor.Setter arr_set = (JSONArray node) => {
+				var arr = new List<string>();
+				foreach (var keyword in node) {
+					arr.Add(keyword.Value);
+				}
+				Data.UpdateObjects<List<string>>(editing!, setter, arr);
+				// Don't have real actions yet
+				UpdateFromAction(null);
+			};
+			
+			ArrayEditor
+				.Singleton(current_panel!, "Shader Keywords", "By default, each shader has its default keywords. This allows overwriting the keywords of the shader.")
+				.Set((arr_get, arr_set), false);
+			
+		}	break;
 		default:
 			window!.SetTitle("No items selected");
 			old_otype = null;

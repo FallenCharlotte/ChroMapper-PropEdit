@@ -173,9 +173,24 @@ public class MapSettingsWindow : UIWindow {
 				BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements.Add(ee);
 				Refresh();
 			};
+			panels.Pop();
+			
+			AddExpando("Materials", "Materials", false, "Materials used by geometry");
+			materials_list = SelectableList.Create(current_panel!);
+			materials_list.OnSelectionChanged = (ees) => {
+				if (ees is List<BaseMaterial> list) {
+					Selection.OnMatsSelected(list);
+				}
+			};
+			materials_list.OnCreateItem = () => {
+				PersistentUI.Instance.ShowInputBox("New material's name:", HandleAddMaterial, "NewMaterial");
+			};
 			Selection.OnSelectionChanged += () => {
 				if (Selection.SelectedType != SelectionType.EnvironmentEnhancements) {
 					environment_list.SetSelection(null);
+				}
+				if (Selection.SelectedType != SelectionType.Materials) {
+					materials_list.SetSelection(null);
 				}
 			};
 			panels.Pop();
@@ -183,6 +198,16 @@ public class MapSettingsWindow : UIWindow {
 		
 		Refresh();
 		UI.RefreshTooltips(panel);
+	}
+	
+	private void HandleAddMaterial(string name) {
+		if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name)) return;
+		
+		var mat = new BaseMaterial();
+		mat.Shader = "Standard";
+		mat.ShaderKeywords = new List<string>();
+		BeatSaberSongContainer.Instance.Map.Materials.Add(name, mat);
+		Refresh();
 	}
 	
 	private void AddDropdown<T>(string name, string path, Map<T?> options, string tooltip = "") {
@@ -389,6 +414,14 @@ public class MapSettingsWindow : UIWindow {
 				return $"{i}: {name}";
 			});
 			environment_list.SetSelection(Selection.Selected as List<BaseEnvironmentEnhancement>);
+		}
+		
+		if (materials_list != null) {
+			var mats = BeatSaberSongContainer.Instance.Map.Materials;
+			var keys = mats.Keys.ToList();
+			materials_list.SetItems(mats.Values.ToList(), (i, mat) => {
+				return keys[i];
+			});
 		}
 	}
 	

@@ -297,6 +297,13 @@ public static class Data {
 		return (getter, setter);
 	}
 	
+	public static (Getter<TOutput?>, Setter<TOutput?>) Add<TInput, TOutput>((Getter<TInput?>, Setter<TInput?>) get_set, (System.Func<TInput?, TOutput?>, System.Func<TOutput?, TInput?>) conv) {
+		Getter<TOutput?> getter = (o) => conv.Item1(get_set.Item1(o));
+		Setter<TOutput?> setter = (o, v) => get_set.Item2(o, conv.Item2(v));
+		
+		return (getter, setter);
+	}
+	
 #endregion
 	
 #region Editing many objects

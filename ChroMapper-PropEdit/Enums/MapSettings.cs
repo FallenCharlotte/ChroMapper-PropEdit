@@ -52,6 +52,19 @@ public static class MapSettings {
 		{ "Quad", "Quad" },
 		{ "Triangle", "Triangle" }
 	};
+	
+	public static readonly Map<string?> Shaders = new() {
+		{ "Standard", "Standard" },
+		{ "OpaqueLight", "OpaqueLight" },
+		{ "TransparentLight", "TransparentLight" },
+		{ "Glowing", "Glowing" },
+		{ "BaseWater", "BaseWater" },
+		{ "BTSPillar", "BTSPillar" },
+		{ "BillieWater", "BillieWater" },
+		{ "WaterfallMirror", "WaterfallMirror" },
+		{ "InterscopeConcrete", "InterscopeConcrete" },
+		{ "InterscopeCar", "InterscopeCar" },
+	};
 }
 
 }

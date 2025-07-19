@@ -84,16 +84,21 @@ public class Textbox : MonoBehaviour {
 	}
 	
 	private void StartEditing() {
+		last_selected = this;
 		CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 		CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
+		Plugin.Trace("StartEditing");
 		tab_next!.performed += onTabNext;
 		tab_back!.performed += onTabBack;
 		Plugin.array_insert!.performed += onInsert;
 	}
 	
 	private void EndEditing() {
-		CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-		CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+		if (last_selected == this) {
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+		}
+		Plugin.Trace($"EndEditing: {last_selected == this}");
 		tab_next!.performed -= onTabNext;
 		tab_back!.performed -= onTabBack;
 		Plugin.array_insert!.performed -= onInsert;
@@ -131,6 +136,8 @@ public class Textbox : MonoBehaviour {
 	
 	private static InputAction? tab_next = null;
 	private static InputAction? tab_back = null;
+	
+	private static Textbox? last_selected = null;
 	
 	// Stop textbox input from triggering actions, copied from the node editor
 	

@@ -405,7 +405,7 @@ public class MapSettingsWindow : UIWindow {
 			var ees = BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements;
 			environment_list.SetItems(ees, (i, ee) => {
 				var name = (ee.Geometry != null)
-					? $"{(string)ee.Geometry["type"]}"
+					? $"{(string)ee.Geometry["type"]} {ee.Track}"
 					: $"{ee.ID}";
 				return $"{i}: {name}";
 			});

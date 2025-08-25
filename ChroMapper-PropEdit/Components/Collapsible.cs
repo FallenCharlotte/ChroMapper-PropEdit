@@ -24,7 +24,12 @@ public class Collapsible : MonoBehaviour
 		set { expandToggle!.isOn = value; }
 	}
 	
-	public static Collapsible Create(GameObject parent, string name, string label, bool expanded, string tooltip = "", bool background = true) {
+	// PaulMapper
+	public static Collapsible Create(GameObject parent, string name, string label, bool expanded) {
+		return Create(parent, name, label, expanded, "", true);
+	}
+	
+	public static Collapsible Create(GameObject parent, string name, string label, bool expanded, string tooltip, bool background = true) {
 		return UI.AddChild(parent, name).AddComponent<Collapsible>().Init(label, expanded, tooltip, background);
 	}
 	public static Collapsible Singleton(GameObject parent, string name, string label, bool expanded, string tooltip = "", bool background = true) {

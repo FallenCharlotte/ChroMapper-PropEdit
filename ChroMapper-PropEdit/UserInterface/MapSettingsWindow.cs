@@ -6,6 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+using Beatmap.Base;
 using Beatmap.Base.Customs;
 using Beatmap.Enums;
 
@@ -33,15 +34,6 @@ public class MapSettingsWindow : UIWindow {
 	public Dictionary<string, Type> default_reqchecks = new Dictionary<string, Type>();
 	public HashSet<RequirementCheck>? requirementsAndSuggestions;
 	
-#if CHROMPER_11
-	private JSONNode GetGustomData() {
-		return BeatSaberSongContainer.Instance.DifficultyData.GetOrCreateCustomData();
-	}
-	
-	private BeatSaberSong.DifficultyBeatmap DifficultyInfo() {
-		return BeatSaberSongContainer.Instance.DifficultyData;
-	}
-#else
 	private JSONNode GetGustomData() {
 		return BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData;
 	}
@@ -49,7 +41,6 @@ public class MapSettingsWindow : UIWindow {
 	private Beatmap.Info.InfoDifficulty DifficultyInfo() {
 		return BeatSaberSongContainer.Instance.MapDifficultyInfo;
 	}
-#endif
 	
 	public override void Init(MapEditorUI mapEditorUI) {
 		base.Init(mapEditorUI, "Map Settings");
@@ -165,7 +156,16 @@ public class MapSettingsWindow : UIWindow {
 			environment_list = SelectableList.Create(current_panel!);
 			environment_list.OnSelectionChanged = (ehs) => {
 				if (ehs is List<BaseEnvironmentEnhancement> list) {
-					Selection.OnEEsSelected(list);
+					if (typeof(BaseEnvironmentEnhancement).IsSubclassOf(typeof(BaseObject))) {
+						SelectionController.DeselectAll();
+						foreach (var eh in list) {
+							SelectionController.Select((BaseObject)(object)eh, true, true, false);
+						}
+						Selection.OnObjectsSelected();
+					}
+					else {
+						Selection.OnEEsSelected(list);
+					}
 				}
 			};
 			environment_list.OnCreateItem = () => {
@@ -308,9 +308,7 @@ public class MapSettingsWindow : UIWindow {
 		{ "NoodleExtensionsReq", "Noodle Extensions" },
 		{ "CinemaReq", "Cinema" },
 		{ "SoundExtensionsReq", "Sound Extensions" },
-#if !CHROMPER_11
-		{ "VivifyReq", "Vivify"},
-#endif
+		{ "VivifyReq", "Vivify" },
 	};
 	
 	private void AddReqField(string name, bool force, string reqcheck = "") {
@@ -339,9 +337,7 @@ public class MapSettingsWindow : UIWindow {
 		RequirementCheck.RegisterRequirement(new NoodleExtensionsReq());
 		RequirementCheck.RegisterRequirement(new CinemaReq());
 		RequirementCheck.RegisterRequirement(new SoundExtensionsReq());
-#if !CHROMPER_11
 		RequirementCheck.RegisterRequirement(new VivifyReq());
-#endif
 	}
 	
 	private void SetForced(string name, bool force) {

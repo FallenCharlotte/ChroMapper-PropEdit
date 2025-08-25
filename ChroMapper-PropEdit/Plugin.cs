@@ -49,12 +49,17 @@ public class Plugin {
 	}
 	
 	private void SceneLoaded(Scene scene, LoadSceneMode mode) {
-		if (scene.buildIndex == 3) {
-			// Map Edit
-			var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();
-			main = UIWindow.Create<MainWindow>(mapEditorUI);
-			map_settings = UIWindow.Create<MapSettingsWindow>(mapEditorUI);
-			plugin_settings = UIWindow.Create<PluginSettingsWindow>(mapEditorUI);
+		try {
+			if (scene.buildIndex == 3) {
+				// Map Edit
+				var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();
+				main = UIWindow.Create<MainWindow>(mapEditorUI);
+				map_settings = UIWindow.Create<MapSettingsWindow>(mapEditorUI);
+				plugin_settings = UIWindow.Create<PluginSettingsWindow>(mapEditorUI);
+			}
+		}
+		catch (System.Exception e) {
+			Debug.LogException(e);
 		}
 	}
 	

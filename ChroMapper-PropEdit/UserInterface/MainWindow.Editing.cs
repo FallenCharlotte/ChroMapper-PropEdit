@@ -81,7 +81,7 @@ public partial class MainWindow : UIWindow {
 			
 			var o = objects.First();
 			var type = o.ObjectType;
-			var v2 = BeatSaberSongContainer.Instance.Map.Version[0] == '2';
+			var v2 = global::Settings.Instance.MapVersion == 2;
 			
 			if (CheckRefresh(SelectionType.Objects, type != old_otype)) {
 				old_etype = null;
@@ -287,11 +287,7 @@ public partial class MainWindow : UIWindow {
 					
 					break;
 				case ObjectType.Event: {
-#if CHROMPER_11
-					var env = BeatSaberSongContainer.Instance.Song.EnvironmentName;
-#else
 					var env = BeatSaberSongContainer.Instance.Info.EnvironmentName;
-#endif
 					var events = objects.Select(o => (BaseEvent)o);
 					
 					if (events.GroupBy(e => Events.GetEventType(e, env)).Count() > 1) {
@@ -579,16 +575,16 @@ public partial class MainWindow : UIWindow {
 				case ObjectType.BpmChange:
 					AddParsed("BPM", Data.GetSet<float>("Bpm"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BPMChange));
 					break;
-#if !CHROMPER_11
 				case ObjectType.NJSEvent: {
 					Data.Getter<bool?> getter = (o) => ((BaseNJSEvent)o).UsePrevious == 1;
 					Data.Setter<bool?> setter = (o, v) => { ((BaseNJSEvent)o).UsePrevious = (v ?? false) ? 1 : 0; };
 					AddCheckbox("Use Previous", (getter, setter), null);
 					AddParsed("Relative NJS", Data.GetSet<float>("RelativeNJS"));
 					AddDropdown("Easing", Data.GetSet<int>("Easing"), Events.NJSEasings, false);
-					break;
-				}
-#endif
+				}	break;
+				case (ObjectType)11/*ObjectType.EnvironmentEnhancement*/: {
+					HandleEEs(objects.ConvertAll(it => (BaseEnvironmentEnhancement)(object)it));
+				}	break;
 			}
 			UI.RefreshTooltips(panel);
 			if (full_rebuild) {
@@ -596,58 +592,7 @@ public partial class MainWindow : UIWindow {
 			}
 		}	break;
 		case List<BaseEnvironmentEnhancement> ees: {
-			window!.SetTitle($"{ees.Count} Items selected");
-			
-			CheckRefresh(SelectionType.EnvironmentEnhancements);
-			
-			AddTextbox("ID", Data.GetSetNullable<string>("ID"), true);
-			AddDropdown("Lookup Method", Data.GetSetNullable<int?>("LookupMethod"), (new Map<int?>()).AddEnum(typeof(EnvironmentLookupMethod)), false);
-			Data.Getter<bool?> dup_get = (ee) => (ee as BaseEnvironmentEnhancement)!.Active?.AsBool ?? null;
-			Data.Setter<bool?> dup_set = (ee, v) => (ee as BaseEnvironmentEnhancement)!.Active = v;
-			AddCheckbox("Active", (dup_get, dup_set), true);
-			AddParsed<int>("Duplicate", Data.GetSetNullable<int?>("Duplicate"));
-			EditVector3("Scale", Data.GetSetNullable<Vector3?>("Scale"));
-			EditVector3("Position", Data.GetSetNullable<Vector3?>("Position"));
-			EditVector3("Local Position", Data.GetSetNullable<Vector3?>("LocalPosition"));
-			EditVector3("Rotation", Data.GetSetNullable<Vector3?>("Rotation"));
-			EditVector3("Local Rotation", Data.GetSetNullable<Vector3?>("LocalRotation"));
-			AddTextbox("Track", Data.GetSetNullable<string?>("Track"));
-			
-			Data.Getter<bool?> geo_get = (ee) => (ee as BaseEnvironmentEnhancement)!.Geometry != null;
-			Data.Setter<bool?> geo_set = (ee, v) => {
-				if (v == false) {
-					(ee as BaseEnvironmentEnhancement)!.Geometry = null;
-				}
-				else {
-					(ee as BaseEnvironmentEnhancement)!.Geometry ??= new JSONObject();
-				}
-			};
-			EEComponent("Geometry", (geo_get, geo_set), () => {
-				AddDropdown("Type", Data.JSONGetSet<string>(typeof(BaseEnvironmentEnhancement), "Geometry", "type"), MapSettings.GeometryTypes, true);
-				var materials = new Map<string?> {
-					//{ "[Create New]", "[Create New]" }
-				};
-				materials.AddRange(BeatSaberSongContainer.Instance.Map.Materials.Keys);
-				AddDropdown("Material", Data.JSONGetSet<string>(typeof(BaseEnvironmentEnhancement), "Geometry", "material"), materials, true);
-				AddCheckbox("Collision", Data.JSONGetSet<bool?>(typeof(BaseEnvironmentEnhancement), "Geometry", "collision"), false);
-			});
-			
-			EEComponent("Light", Data.EEGetSetComp("ILightWithId"), () => {
-				AddParsed("Light ID", Data.GetSetNullable<int?>("LightID"));
-				AddParsed("Light Type", Data.GetSetNullable<int?>("LightType"));
-			});
-			
-			EEComponent("Bloom Fog", Data.EEGetSetComp("BloomFogEnvironment"), () => {
-				AddParsed("Attenuation", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.attenuation"));
-				AddParsed("Offset", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.offset"));
-				AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.startY"));
-				AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.height"));
-			});
-			
-			EEComponent("Tube Bloom Pre Pass Light", Data.EEGetSetComp("TubeBloomPrePassLight"), () => {
-				AddParsed("Color Alpha Multiplier", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "TubeBloomPrePassLight.colorAlphaMultiplier"));
-				AddParsed("Bloom Fog Intensity Multiplier", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "TubeBloomPrePassLight.bloomFogIntensityMultiplier"));
-			});
+			HandleEEs(ees);
 		}	break;
 		case List<BaseMaterial> mats: {
 			window!.SetTitle($"{mats.Count} Items selected");
@@ -702,6 +647,61 @@ public partial class MainWindow : UIWindow {
 		Plugin.Trace($"End UpdateSelection: {old_otype}");
 	}
 	
+	private void HandleEEs(List<BaseEnvironmentEnhancement> ees) {
+		window!.SetTitle($"{ees.Count} Items selected");
+		
+		CheckRefresh(SelectionType.EnvironmentEnhancements);
+		
+		AddTextbox("ID", Data.GetSetNullable<string>("ID"), true);
+		AddDropdown("Lookup Method", Data.GetSetNullable<int?>("LookupMethod"), (new Map<int?>()).AddEnum(typeof(EnvironmentLookupMethod)), false);
+		Data.Getter<bool?> dup_get = (ee) => (ee as BaseEnvironmentEnhancement)!.Active?.AsBool ?? null;
+		Data.Setter<bool?> dup_set = (ee, v) => (ee as BaseEnvironmentEnhancement)!.Active = v;
+		AddCheckbox("Active", (dup_get, dup_set), true);
+		AddParsed<int>("Duplicate", Data.GetSetNullable<int?>("Duplicate"));
+		EditVector3("Scale", Data.GetSetNullable<Vector3?>("Scale"));
+		EditVector3("Position", Data.GetSetNullable<Vector3?>("Position"));
+		EditVector3("Local Position", Data.GetSetNullable<Vector3?>("LocalPosition"));
+		EditVector3("Rotation", Data.GetSetNullable<Vector3?>("Rotation"));
+		EditVector3("Local Rotation", Data.GetSetNullable<Vector3?>("LocalRotation"));
+		AddTextbox("Track", Data.GetSetNullable<string?>("Track"));
+		
+		Data.Getter<bool?> geo_get = (ee) => (ee as BaseEnvironmentEnhancement)!.Geometry != null;
+		Data.Setter<bool?> geo_set = (ee, v) => {
+			if (v == false) {
+				(ee as BaseEnvironmentEnhancement)!.Geometry = null;
+			}
+			else {
+				(ee as BaseEnvironmentEnhancement)!.Geometry ??= new JSONObject();
+			}
+		};
+		EEComponent("Geometry", (geo_get, geo_set), () => {
+			AddDropdown("Type", Data.JSONGetSet<string>(typeof(BaseEnvironmentEnhancement), "Geometry", "type"), MapSettings.GeometryTypes, true);
+			var materials = new Map<string?> {
+				//{ "[Create New]", "[Create New]" }
+			};
+			materials.AddRange(BeatSaberSongContainer.Instance.Map.Materials.Keys);
+			AddDropdown("Material", Data.JSONGetSet<string>(typeof(BaseEnvironmentEnhancement), "Geometry", "material"), materials, true);
+			AddCheckbox("Collision", Data.JSONGetSet<bool?>(typeof(BaseEnvironmentEnhancement), "Geometry", "collision"), false);
+		});
+		
+		EEComponent("Light", Data.EEGetSetComp("ILightWithId"), () => {
+			AddParsed("Light ID", Data.GetSetNullable<int?>("LightID"));
+			AddParsed("Light Type", Data.GetSetNullable<int?>("LightType"));
+		});
+		
+		EEComponent("Bloom Fog", Data.EEGetSetComp("BloomFogEnvironment"), () => {
+			AddParsed("Attenuation", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.attenuation"));
+			AddParsed("Offset", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.offset"));
+			AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.startY"));
+			AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.height"));
+		});
+		
+		EEComponent("Tube Bloom Pre Pass Light", Data.EEGetSetComp("TubeBloomPrePassLight"), () => {
+			AddParsed("Color Alpha Multiplier", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "TubeBloomPrePassLight.colorAlphaMultiplier"));
+			AddParsed("Bloom Fog Intensity Multiplier", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "TubeBloomPrePassLight.bloomFogIntensityMultiplier"));
+		});
+	}
+	
 	private void AddAnimations(PropertyType type, bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
 		
@@ -720,7 +720,7 @@ public partial class MainWindow : UIWindow {
 		var (value, mixed) = Data.GetAllOrNothing(editing!, getter);
 		
 		PointDefinitionEditor
-				.Singleton(
+			.Singleton(
 				current_panel!,
 				name,
 				tooltip)

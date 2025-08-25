@@ -353,7 +353,6 @@ public static class Data {
 			}
 			else {
 				var modified = new List<BaseObject>();
-				var beatmapActions = new List<BeatmapObjectModifiedAction>();
 				foreach (var o in editing!) {
 					var mod = BeatmapFactory.Clone(o);
 					modified.Add(mod);
@@ -366,32 +365,26 @@ public static class Data {
 					true);
 			}
 			break;
+#if true
 		case List<BaseEnvironmentEnhancement> ehs: {
-			var collection = (CustomEventGridContainer)BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent);
-			// TODO: Custom Action type for undo/redo
-			foreach (var eh in ehs) {
-#if !CHROMPER_11
-				if (collection.LoadedGeometry.ContainsKey(eh)) {
-					GameObject.Destroy(collection.LoadedGeometry[eh]);
-					collection.LoadedGeometry.Remove(eh);
-				}
-#endif
-				setter(eh, value);
-#if !CHROMPER_11
-				collection.AddEnvironmentEnhancement(eh);
-#endif
-			}
-#if CHROMPER_11
-			(BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent) as CustomEventGridContainer)?.LoadAnimationTracks();
-#endif
-			Plugin.map_settings!.Refresh();
+			BasicEditEEs(ehs, setter, value);
 		}	break;
+#endif
 		default:
 			foreach (var i in things) {
 				setter(i, value);
 			}
 			break;
 		}
+	}
+	
+	// Needs to be a separate function to avoid method missing errors
+	private static void BasicEditEEs<T>(List<BaseEnvironmentEnhancement> ehs, Setter<T?> setter, T? value) {
+		foreach (var eh in ehs) {
+			setter(eh, value);
+		}
+		(BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent) as CustomEventGridContainer)?.LoadAnimationTracks();
+		Plugin.map_settings!.Refresh();
 	}
 	
 #endregion
@@ -452,13 +445,8 @@ public static class Data {
 	public static Color GetColor(BaseEvent e) {
 		return (e.CustomColor ?? (e.Value switch {
 			0 => Color.clear,
-#if CHROMPER_11
-			(>= 1) and (<= 4) => BeatSaberSongContainer.Instance.DifficultyData.EnvColorRight ?? BeatSaberSong.DefaultRightColor,
-			(>= 5) and (<= 8) => BeatSaberSongContainer.Instance.DifficultyData.EnvColorLeft ?? BeatSaberSong.DefaultLeftColor,
-#else
 			(>= 1) and (<= 4) => BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomEnvColorRight ?? LoadInitialMap.Platform.DefaultColors.BlueColor,
 			(>= 5) and (<= 8) => BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomEnvColorLeft ?? LoadInitialMap.Platform.DefaultColors.RedColor,
-#endif
 			(>= 9) => Color.white,
 			_ => Color.clear,
 		}));

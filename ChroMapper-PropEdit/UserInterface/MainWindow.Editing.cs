@@ -582,17 +582,14 @@ public partial class MainWindow : UIWindow {
 					AddParsed("Relative NJS", Data.GetSet<float>("RelativeNJS"));
 					AddDropdown("Easing", Data.GetSet<int>("Easing"), Events.NJSEasings, false);
 				}	break;
-				case (ObjectType)11/*ObjectType.EnvironmentEnhancement*/: {
-					HandleEEs(objects.ConvertAll(it => (BaseEnvironmentEnhancement)(object)it));
+				case ObjectType.EnvironmentEnhancement: {
+					HandleEEs(objects);
 				}	break;
 			}
 			UI.RefreshTooltips(panel);
 			if (full_rebuild) {
 				scrollbox!.ScrollTop();
 			}
-		}	break;
-		case List<BaseEnvironmentEnhancement> ees: {
-			HandleEEs(ees);
 		}	break;
 		case List<BaseMaterial> mats: {
 			window!.SetTitle($"{mats.Count} Items selected");
@@ -647,7 +644,7 @@ public partial class MainWindow : UIWindow {
 		Plugin.Trace($"End UpdateSelection: {old_otype}");
 	}
 	
-	private void HandleEEs(List<BaseEnvironmentEnhancement> ees) {
+	private void HandleEEs(List<BaseObject> ees) {
 		window!.SetTitle($"{ees.Count} Items selected");
 		
 		CheckRefresh(SelectionType.EnvironmentEnhancements);

@@ -364,26 +364,12 @@ public static class Data {
 					true);
 			}
 			break;
-#if true
-		case List<BaseEnvironmentEnhancement> ehs: {
-			BasicEditEEs(ehs, setter, value);
-		}	break;
-#endif
 		default:
 			foreach (var i in things) {
 				setter(i, value);
 			}
 			break;
 		}
-	}
-	
-	// Needs to be a separate function to avoid method missing errors
-	private static void BasicEditEEs<T>(List<BaseEnvironmentEnhancement> ehs, Setter<T?> setter, T? value) {
-		foreach (var eh in ehs) {
-			setter(eh, value);
-		}
-		(BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent) as CustomEventGridContainer)?.LoadAnimationTracks();
-		Plugin.map_settings!.Refresh();
 	}
 	
 #endregion

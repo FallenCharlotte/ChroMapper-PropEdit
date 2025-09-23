@@ -19,6 +19,15 @@ public class Plugin {
 	[Init]
 	private void Init() {
 		try {
+			var chromper_ver = new System.Version(Application.version);
+			if (chromper_ver.Minor < 13) {
+				Debug.LogError("This PropEdit version requires ChroMapper 0.13.x! Please install the correct version.");
+				return;
+			}
+			else if (chromper_ver.Minor > 13) {
+				Debug.LogError("This PropEdit version has only been tested on ChroMapper 0.13.x! There may be problems, good luck!");
+			}
+			
 			SceneManager.sceneLoaded += SceneLoaded;
 			
 			var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps

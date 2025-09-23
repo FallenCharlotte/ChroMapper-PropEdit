@@ -156,16 +156,11 @@ public class MapSettingsWindow : UIWindow {
 			environment_list = SelectableList.Create(current_panel!);
 			environment_list.OnSelectionChanged = (ehs) => {
 				if (ehs is List<BaseEnvironmentEnhancement> list) {
-					if (typeof(BaseEnvironmentEnhancement).IsSubclassOf(typeof(BaseObject))) {
-						SelectionController.DeselectAll();
-						foreach (var eh in list) {
-							SelectionController.Select((BaseObject)(object)eh, true, true, false);
-						}
-						Selection.OnObjectsSelected();
+					SelectionController.DeselectAll();
+					foreach (var eh in list) {
+						SelectionController.Select((BaseObject)(object)eh, true, true, false);
 					}
-					else {
-						Selection.OnEEsSelected(list);
-					}
+					Selection.OnObjectsSelected();
 				}
 			};
 			environment_list.OnCreateItem = () => {

@@ -25,10 +25,6 @@ public class Selection {
 	
 	public static void OnObjectsSelected() {
 		if (refreshing) return;
-		// Working around a stupid chromper 12 bug that fires OnSelectionChanged on every right-click ;-;
-		if (SelectedType != SelectionType.Objects && !SelectionController.HasSelectedObjects()) {
-			return;
-		}
 		SelectedType = SelectionType.Objects;
 		Selected = SelectionController.HasSelectedObjects()
 			? SelectionController.SelectedObjects.Select(it => it).ToList()

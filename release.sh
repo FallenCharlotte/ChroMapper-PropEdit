@@ -39,7 +39,7 @@ git tag "${tag}"
 msbuild
 
 pushd ChroMapper-PropEdit/bin/Dev
-zip "ChroMapper-12-PropEdit ${tag}.zip" Plugins/ChroMapper-PropEdit.dll
+zip "ChroMapper-13-PropEdit ${tag}.zip" Plugins/ChroMapper-PropEdit.dll
 popd
 
 echo "Check..."

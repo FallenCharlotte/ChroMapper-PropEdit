@@ -168,6 +168,7 @@ public class MapSettingsWindow : UIWindow {
 				BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements.Add(ee);
 				Refresh();
 			};
+			SelectionController.SelectionChangedEvent += UpdateSelectedEEs;
 			panels.Pop();
 			
 			AddExpando("Materials", "Materials", false, "Materials used by geometry");
@@ -237,6 +238,14 @@ public class MapSettingsWindow : UIWindow {
 				Data.SetNode(GetGustomData(), path, Data.CreateConvertFunc<T, SimpleJSON.JSONNode>()((T)v));
 			}
 		});
+	}
+	
+	private void UpdateSelectedEEs() {
+		var ees = SelectionController.SelectedObjects
+			.Select(it => it as BaseEnvironmentEnhancement)
+			.Where(it => it != null)
+			.ToList();
+		environment_list!.SetSelection(ees, false);
 	}
 	
 	private string prefix = "";
@@ -333,6 +342,7 @@ public class MapSettingsWindow : UIWindow {
 		RequirementCheck.RegisterRequirement(new CinemaReq());
 		RequirementCheck.RegisterRequirement(new SoundExtensionsReq());
 		RequirementCheck.RegisterRequirement(new VivifyReq());
+		SelectionController.SelectionChangedEvent -= UpdateSelectedEEs;
 	}
 	
 	private void SetForced(string name, bool force) {

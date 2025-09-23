@@ -63,7 +63,7 @@ public class SelectableList : MonoBehaviour {
 		}
 	}
 	
-	public void SetSelection(IList? items) {
+	public void SetSelection(IList? items, bool send_event = true) {
 		refreshing = true;
 		
 		foreach (var toggle in toggles) {
@@ -103,7 +103,9 @@ public class SelectableList : MonoBehaviour {
 		
 		refreshing = false;
 		
-		OnSelectionChanged?.Invoke(items);
+		if (send_event) {
+			OnSelectionChanged?.Invoke(items);
+		}
 	}
 	
 	protected virtual void AddItem<T>(string label) {

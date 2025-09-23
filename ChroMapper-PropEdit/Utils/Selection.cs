@@ -36,12 +36,13 @@ public class Selection {
 		SpecialType(SelectionType.PointDefinitions, sel);
 	}
 	
-	public static void OnEEsSelected(List<BaseEnvironmentEnhancement> sel) {
-		SpecialType(SelectionType.EnvironmentEnhancements, sel);
-	}
-	
 	public static void OnMatsSelected(List<BaseMaterial> sel) {
 		SpecialType(SelectionType.Materials, sel);
+	}
+	
+	public static void OnDeselectAll() {
+		SelectedType = SelectionType.None;
+		Selected = null;
 	}
 	
 	private static void SpecialType<T>(SelectionType type, List<T> sel) {

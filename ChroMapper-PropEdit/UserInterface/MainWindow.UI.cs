@@ -74,6 +74,7 @@ public partial class MainWindow : UIWindow {
 		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;
 		Plugin.toggle_window!.performed -= OnToggleWindow;
+		Selection.OnDeselectAll();
 	}
 	
 	private void UpdateFromSelection() {

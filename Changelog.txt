@@ -1,3 +1,9 @@
+0.13
+	Chromper 13
+	Materials!
+	Environment enhancements in main window!
+	VNJS!
+
 v0.12.1
 	Fix AssignPlayerToTrack
 	Lazy load EEs

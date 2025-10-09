@@ -449,15 +449,26 @@ public static class Data {
 		return Expression.Lambda<System.Func<TInput, TOutput>>(convert, source).Compile();
 	}
 	
-	private static Regex? MATH_REG = null;
+	private static Regex? NOT_MATH_REG = null;
 	
 	public static JSONNode? RawToJson(string raw) {
-		MATH_REG ??= new Regex(@"(?<!""{1}.*)(?:\(?\s*[\d\.]+\)?\s*[\-+/*]\s*)+[\d\.]+\s*\)?");
+		NOT_MATH_REG ??= new Regex(@"[""a-zA-Z]");
 		var table = new System.Data.DataTable();
-		var maths = MATH_REG.Matches(raw);
-		foreach (Match math in maths) {
-			var computed = table.Compute(math.Value, "");
-			raw = raw.Replace(math.Value, computed.ToString());
+		var parts = raw.Split(',');
+		
+		foreach (var part in parts) {
+			if (!NOT_MATH_REG.IsMatch(part)) {
+				try {
+					var computed = table.Compute(part, "");
+					Plugin.Trace($"[Raw] `{part}` = {computed}");
+					var at = raw.IndexOf(part);
+					raw = raw.Substring(0, at) + computed.ToString() + raw.Substring(at + part.Length);
+				}
+				catch (Exception) { };
+			}
+			else {
+				Plugin.Trace($"Is not math: {part}");
+			}
 		}
 		
 		JSONNode n;

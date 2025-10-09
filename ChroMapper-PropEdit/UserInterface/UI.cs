@@ -200,6 +200,7 @@ public static class UI {
 			T? converted = (computed == System.DBNull.Value)
 				? null
 				: (T)Convert.ChangeType(computed, typeof(T));
+			Plugin.Trace($"`{s}` => {converted}");
 			setter(converted);
 		};
 		input.Placeholder = (mixed) ? "Mixed" : "Empty";

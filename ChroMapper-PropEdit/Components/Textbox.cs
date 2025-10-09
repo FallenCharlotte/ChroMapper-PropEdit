@@ -58,6 +58,9 @@ public class Textbox : MonoBehaviour {
 			if (s != _value) {
 				OnChange!(s);
 			}
+			else {
+				Plugin.Trace($"No change! {_value} => {s}");
+			}
 		});
 		TextInput.InputField.onDeselect.AddListener((_) => {
 			EndEditing();

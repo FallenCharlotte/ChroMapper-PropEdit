@@ -1,3 +1,6 @@
+v0.13.1
+	Turns out detecting not math is easier that detecting math
+
 0.13
 	Chromper 13
 	Materials!

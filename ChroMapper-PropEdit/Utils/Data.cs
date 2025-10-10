@@ -452,9 +452,9 @@ public static class Data {
 	private static Regex? NOT_MATH_REG = null;
 	
 	public static JSONNode? RawToJson(string raw) {
-		NOT_MATH_REG ??= new Regex(@"[""a-zA-Z]");
+		NOT_MATH_REG ??= new Regex(@"[""a-zA-Z\[\]]");
 		var table = new System.Data.DataTable();
-		var parts = raw.Split(',');
+		var parts = raw.Split(new Char[] {',', '[', ']'});
 		
 		foreach (var part in parts) {
 			if (!NOT_MATH_REG.IsMatch(part)) {

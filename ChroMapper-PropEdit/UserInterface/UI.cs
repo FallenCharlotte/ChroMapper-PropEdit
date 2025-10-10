@@ -313,6 +313,9 @@ public static class UI {
 	{
 		return t.gameObject.AddComponent<T>().GetCopyOf(toAdd);
 	}
+	public static T SingleComponent<T>(this GameObject go) where T : Component {
+		return go.GetComponent<T>() ?? go.AddComponent<T>();
+	}
 	public static string GetPath(this GameObject go) {
 		var trans = go.transform;
 		string path = "";

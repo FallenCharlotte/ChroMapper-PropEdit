@@ -1,3 +1,6 @@
+v0.13.3
+	Fix being unable to input hex colors
+
 v0.13.2
 	Fix a bug I made while fixing a bug I made
 

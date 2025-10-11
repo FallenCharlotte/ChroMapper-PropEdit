@@ -739,12 +739,7 @@ public partial class MainWindow : UIWindow {
 	}
 	
 	private void AddColor(string label, string key, string tooltip = "") {
-		if (Settings.Get(Settings.ColorHex, true)) {
-			AddTextbox(label, Data.CustomGetSetColor(key), false, tooltip);
-		}
-		else {
-			AddTextbox(label, Data.CustomGetSetRaw(key), true, tooltip);
-		}
+		AddTextbox(label, Data.CustomGetSetColor(key), false, tooltip);
 	}
 	
 	// Unarrayable track

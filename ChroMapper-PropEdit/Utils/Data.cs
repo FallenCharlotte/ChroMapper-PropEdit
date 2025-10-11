@@ -240,8 +240,13 @@ public static class Data {
 	public static (Getter<string?>, Setter<string?>) CustomGetSetColor(string field_name) {
 		Getter<string?> getter = (o) => {
 			if (GetNode(((BaseObject)o).CustomData, field_name) is JSONNode n) {
-				var color = n.ReadColor();
-				return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
+				if (Settings.Get(Settings.ColorHex, true)) {
+					var color = n.ReadColor();
+					return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
+				}
+				else {
+					return JsonToRaw(n);
+				}
 			}
 			else {
 				return null;
@@ -251,12 +256,20 @@ public static class Data {
 			if (string.IsNullOrEmpty(v)) {
 				RemoveNode(((BaseObject)o).CustomData, field_name);
 			}
-			else {
+			else if (v![0] == '#') {
 				ColorUtility.TryParseHtmlString(v, out var color);
+				Plugin.Trace($"{v} => {color}");
 				var jc = new JSONArray();
 				jc.WriteColor(color);
 				SetNode(((BaseObject)o).GetOrCreateCustom(), field_name, jc);
 			}
+			else {
+				var n = RawToJson(v);
+				if (n != null) {
+					SetNode(((BaseObject)o).CustomData, field_name, n);
+				}
+			}
+			(o as BaseObject)?.RefreshCustom();
 		};
 		return (getter, setter);
 	}

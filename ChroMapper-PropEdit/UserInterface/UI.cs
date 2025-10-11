@@ -195,13 +195,18 @@ public static class UI {
 			? (string)Convert.ChangeType(value, typeof(string))
 			: "";
 		input.OnChange = (s) => {
-			var table = new System.Data.DataTable();
-			var computed = table.Compute(s, "");
-			T? converted = (computed == System.DBNull.Value)
-				? null
-				: (T)Convert.ChangeType(computed, typeof(T));
-			Plugin.Trace($"`{s}` => {converted}");
-			setter(converted);
+			try {
+				var table = new System.Data.DataTable();
+				var computed = table.Compute(s, "");
+				T? converted = (computed == System.DBNull.Value)
+					? null
+					: (T)Convert.ChangeType(computed, typeof(T));
+				Plugin.Trace($"`{s}` => {converted}");
+				setter(converted);
+			}
+			catch (System.Exception) {
+				Debug.LogError($"Invalid expression: `{s}`");
+			}
 		};
 		input.Placeholder = (mixed) ? "Mixed" : "Empty";
 		

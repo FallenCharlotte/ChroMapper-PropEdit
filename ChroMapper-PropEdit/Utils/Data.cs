@@ -365,18 +365,43 @@ public static class Data {
 				BeatmapObjectContainerCollection.RefreshAllPools();
 			}
 			else {
+				bool ees = false;
 				var modified = new List<BaseObject>();
 				foreach (var o in editing!) {
-					var mod = BeatmapFactory.Clone(o);
-					modified.Add(mod);
-					
-					setter(mod, value);
-					
-					Plugin.Trace($"{o.ToJson()} => {mod.ToJson()}");
+					// Work around chromapper bug where all edits to any environment enhancement gets applied to [0]
+					if (o is BaseEnvironmentEnhancement eh) {
+						ees = true;
+						Plugin.Trace("Funky workaround!");
+						var collection = (GeometryGridContainer)BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.EnvironmentEnhancement);
+						
+						GameObject.DestroyImmediate(collection.LoadedContainers[eh].gameObject);
+						collection.LoadedContainers.Remove(eh);
+						collection.ObjectsWithContainers.Remove(eh);
+						SelectionController.Deselect(o, false);
+						
+						setter(o, value);
+					}
+					else {
+						var mod = BeatmapFactory.Clone(o);
+						modified.Add(mod);
+						
+						setter(mod, value);
+						
+						Plugin.Trace($"{o.ToJson()} => {mod.ToJson()}");
+					}
 				}
-				BeatmapActionContainer.AddAction(
-					new BeatmapObjectModifiedCollectionAction(modified, editing, $"Edited ({editing.Count()}) objects with Prop Edit."),
-					true);
+				if (ees) {
+					var collection = (GeometryGridContainer)BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.EnvironmentEnhancement);
+					collection.RefreshPool(true);
+					foreach (var o in editing!) {
+						SelectionController.Select(o, true, false, false);
+					}
+				}
+				else {
+					BeatmapActionContainer.AddAction(
+						new BeatmapObjectModifiedCollectionAction(modified, editing, $"Edited ({modified.Count()}) objects with Prop Edit."),
+						true);
+				}
 			}
 			break;
 		default:

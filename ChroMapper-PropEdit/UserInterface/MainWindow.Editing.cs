@@ -166,7 +166,7 @@ public partial class MainWindow : UIWindow {
 					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Y));
 					AddDropdown<int?>("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.CutDirection));
 					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Multiplier));
-					AddDropdown<int?>("Mid-Anchor Mode ", Data.GetSet<int>("MidAnchorMode"), Notes.MidAnchorModes, false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.MidAnchorMode));
+					AddDropdown<int?>("Mid-Anchor Mode", Data.GetSet<int>("MidAnchorMode"), Notes.MidAnchorModes, false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.MidAnchorMode));
 					AddLine("");
 					
 					var s = (o as BaseSlider)!;

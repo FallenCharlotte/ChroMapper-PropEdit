@@ -1,3 +1,6 @@
+v0.13.5
+	Workaround chromapper environment enhancement bug
+
 v0.13.4
 	Arc Mid-Anchor Mode
 

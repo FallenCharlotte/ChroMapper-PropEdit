@@ -26,7 +26,7 @@ public class Plugin {
 				return;
 			}
 			else if (chromper_ver.Minor > 13) {
-				Debug.LogError("This PropEdit version has only been tested on ChroMapper 0.13.x! There may be problems, good luck!");
+				Debug.LogWarning("This PropEdit version has only been tested on ChroMapper 0.13.x! There may be problems, good luck!");
 			}
 			
 			SceneManager.sceneLoaded += SceneLoaded;

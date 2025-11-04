@@ -374,9 +374,11 @@ public static class Data {
 						Plugin.Trace("Funky workaround!");
 						var collection = (GeometryGridContainer)BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.EnvironmentEnhancement);
 						
-						GameObject.DestroyImmediate(collection.LoadedContainers[eh].gameObject);
-						collection.LoadedContainers.Remove(eh);
-						collection.ObjectsWithContainers.Remove(eh);
+						if (collection.LoadedContainers.ContainsKey(eh)) {
+							GameObject.DestroyImmediate(collection.LoadedContainers[eh].gameObject);
+							collection.LoadedContainers.Remove(eh);
+							collection.ObjectsWithContainers.Remove(eh);
+						}
 						SelectionController.Deselect(o, false);
 						
 						setter(o, value);
@@ -396,6 +398,7 @@ public static class Data {
 					foreach (var o in editing!) {
 						SelectionController.Select(o, true, false, false);
 					}
+					Plugin.map_settings!.Refresh();
 				}
 				else {
 					BeatmapActionContainer.AddAction(

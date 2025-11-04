@@ -371,6 +371,8 @@ public static class Data {
 					modified.Add(mod);
 					
 					setter(mod, value);
+					
+					Plugin.Trace($"{o.ToJson()} => {mod.ToJson()}");
 				}
 				BeatmapActionContainer.AddAction(
 					new BeatmapObjectModifiedCollectionAction(modified, editing, $"Edited ({editing.Count()}) objects with Prop Edit."),

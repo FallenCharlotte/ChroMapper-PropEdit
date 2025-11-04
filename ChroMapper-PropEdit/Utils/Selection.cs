@@ -23,6 +23,10 @@ public class Selection {
 	
 	public static Action? OnSelectionChanged;
 	
+	public static void Reset() {
+		OnSelectionChanged = null;
+	}
+	
 	public static void OnObjectsSelected() {
 		if (refreshing) return;
 		SelectedType = SelectionType.Objects;
@@ -47,7 +51,9 @@ public class Selection {
 	
 	private static void SpecialType<T>(SelectionType type, List<T> sel) {
 		refreshing = true;
-		SelectionController.DeselectAll();
+		if (SelectionController.HasSelectedObjects()) {
+			SelectionController.DeselectAll();
+		}
 		SelectedType = type;
 		Selected = sel;
 		refreshing = false;

@@ -34,6 +34,8 @@ public class MapSettingsWindow : UIWindow {
 	public Dictionary<string, Type> default_reqchecks = new Dictionary<string, Type>();
 	public HashSet<RequirementCheck>? requirementsAndSuggestions;
 	
+	private bool selection_lock = false;
+	
 	private JSONNode GetGustomData() {
 		return BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomData;
 	}
@@ -141,7 +143,7 @@ public class MapSettingsWindow : UIWindow {
 			panels.Pop();
 		}
 		
-		if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
+		if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
 			pointdefinitions_panel = Collapsible.Create(panel!, "Point Definitions", "Point Definitions", false).panel;
 			new_pointdefinition_textbox = UI.AddTextbox(pointdefinitions_panel!, "", (v) => {
 				if (!string.IsNullOrEmpty(v)) {
@@ -156,15 +158,20 @@ public class MapSettingsWindow : UIWindow {
 			environment_list = SelectableList.Create(current_panel!);
 			environment_list.OnSelectionChanged = (ehs) => {
 				if (ehs is List<BaseEnvironmentEnhancement> list) {
+					selection_lock = true;
+					Plugin.Trace("Environment List Selection Changed");
 					SelectionController.DeselectAll();
 					foreach (var eh in list) {
-						SelectionController.Select((BaseObject)(object)eh, true, true, false);
+						SelectionController.Select((BaseObject)(object)eh, true, true, true);
 					}
+					selection_lock = false;
 					Selection.OnObjectsSelected();
 				}
 			};
 			environment_list.OnCreateItem = () => {
 				var ee = new BaseEnvironmentEnhancement();
+				ee.ID = "Foo";
+				ee.LookupMethod = EnvironmentLookupMethod.Contains;
 				BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements.Add(ee);
 				Refresh();
 			};
@@ -182,9 +189,6 @@ public class MapSettingsWindow : UIWindow {
 				PersistentUI.Instance.ShowInputBox("New material's name:", HandleAddMaterial, "NewMaterial");
 			};
 			Selection.OnSelectionChanged += () => {
-				if (Selection.SelectedType != SelectionType.EnvironmentEnhancements) {
-					environment_list.SetSelection(null);
-				}
 				if (Selection.SelectedType != SelectionType.Materials) {
 					materials_list.SetSelection(null);
 				}
@@ -194,6 +198,14 @@ public class MapSettingsWindow : UIWindow {
 		
 		Refresh();
 		UI.RefreshTooltips(panel);
+		
+		BeatmapActionContainer.ActionCreatedEvent += UpdateFromAction;
+		BeatmapActionContainer.ActionUndoEvent += UpdateFromAction;
+		BeatmapActionContainer.ActionRedoEvent += UpdateFromAction;
+	}
+	
+	private void UpdateFromAction(BeatmapAction? _) {
+		Refresh();
 	}
 	
 	private void HandleAddMaterial(string name) {
@@ -241,6 +253,8 @@ public class MapSettingsWindow : UIWindow {
 	}
 	
 	private void UpdateSelectedEEs() {
+		if (selection_lock) return;
+		Plugin.Trace("UpdateSelectedEEs");
 		var ees = SelectionController.SelectedObjects
 			.Select(it => it as BaseEnvironmentEnhancement)
 			.Where(it => it != null)
@@ -343,6 +357,9 @@ public class MapSettingsWindow : UIWindow {
 		RequirementCheck.RegisterRequirement(new SoundExtensionsReq());
 		RequirementCheck.RegisterRequirement(new VivifyReq());
 		SelectionController.SelectionChangedEvent -= UpdateSelectedEEs;
+		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromAction;
+		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
+		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;
 	}
 	
 	private void SetForced(string name, bool force) {
@@ -371,6 +388,7 @@ public class MapSettingsWindow : UIWindow {
 	}
 	
 	public void Refresh() {
+		Plugin.Trace("MapSettingsWindow Refresh");
 		foreach (var r in requirements) {
 			r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(DifficultyInfo(), BeatSaberSongContainer.Instance.Map)));
 		}
@@ -414,7 +432,7 @@ public class MapSettingsWindow : UIWindow {
 					: $"{ee.ID}";
 				return $"{i}: {name}";
 			});
-			environment_list.SetSelection(Selection.Selected as List<BaseEnvironmentEnhancement>);
+			UpdateSelectedEEs();
 		}
 		
 		if (materials_list != null) {

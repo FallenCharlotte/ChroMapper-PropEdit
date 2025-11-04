@@ -71,7 +71,8 @@ public class SelectableList : MonoBehaviour {
 		}
 		
 		if (items == null) {
-			Plugin.Trace("Deselecting all");
+			Plugin.Trace($"{transform.parent.parent.gameObject.name} Deselecting all");
+			//Plugin.StackTrace();
 			selectionStart = selectionEnd = -1;
 			refreshing = false;
 			return;

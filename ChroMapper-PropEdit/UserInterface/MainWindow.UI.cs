@@ -69,7 +69,8 @@ public partial class MainWindow : UIWindow {
 	}
 	
 	public void OnDestroy() {
-		SelectionController.SelectionChangedEvent -= UpdateFromSelection;
+		SelectionController.SelectionChangedEvent -= Selection.OnObjectsSelected;
+		Selection.OnSelectionChanged -= UpdateFromSelection;
 		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromAction;
 		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;

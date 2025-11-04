@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Runtime.CompilerServices; 
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
@@ -61,6 +62,7 @@ public class Plugin {
 		try {
 			if (scene.buildIndex == 3) {
 				// Map Edit
+				Utils.Selection.Reset();
 				var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();
 				main = UIWindow.Create<MainWindow>(mapEditorUI);
 				map_settings = UIWindow.Create<MapSettingsWindow>(mapEditorUI);
@@ -78,9 +80,17 @@ public class Plugin {
 	}
 	
 	// For extra debug logging that shouldn't be included in releases
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void Trace(object message) {
 #if EXTRA_LOGGING
 		Debug.Log(message);
+#endif
+	}
+	
+	[MethodImpl(MethodImplOptions.AggressiveInlining)]
+	public static void StackTrace() {
+#if EXTRA_LOGGING
+		Debug.Log(new System.Diagnostics.StackTrace(true));
 #endif
 	}
 	

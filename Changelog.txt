@@ -1,3 +1,6 @@
+v0.13.6
+	Make the fix work for non-geometry as well
+
 v0.13.5
 	Workaround chromapper environment enhancement bug
 

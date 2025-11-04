@@ -1,3 +1,6 @@
+v0.13.4
+	Arc Mid-Anchor Mode
+
 v0.13.3
 	Fix being unable to input hex colors
 

@@ -65,6 +65,7 @@ namespace ChroMapper_PropEdit.UserInterface {
 			Link,
 			Multiplier,
 			TailMultiplier,
+			MidAnchorMode,
 			Slices,
 			Squish,
 			Duration,
@@ -278,6 +279,7 @@ namespace ChroMapper_PropEdit.UserInterface {
 			
 			// Arcs
 			{ Tooltip.Multiplier, "The magnitude of the curve approaching the {0} respectively.\nIf the Cut Direction is set to \"Any\", this value is ignored." },
+			{ Tooltip.MidAnchorMode, "A value that determines how the arc curves from the head/tail to the midpoint of the arc."},
 			
 			// Chains
 			{ Tooltip.Slices, "How many segments the {0} is made of. The head counts as a segment" },

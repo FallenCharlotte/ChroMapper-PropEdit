@@ -23,6 +23,12 @@ public static class Notes {
 		{7, "DownRight"},
 		{8, "Any"},
 	};
+	
+	public static readonly Map<int?> MidAnchorModes = new Map<int?> {
+		{0, "Straight"},
+		{1, "Clockwise"},
+		{2, "Counter-Clockwise"},
+	};
 }
 
 }

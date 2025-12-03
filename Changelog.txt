@@ -1,3 +1,9 @@
+v0.13.7
+	Clamp windows to the screen!
+	Fix for v2 position
+	Fix incorrect tooltip
+	Fix tail coordinates
+
 v0.13.6
 	Make the fix work for non-geometry as well
 

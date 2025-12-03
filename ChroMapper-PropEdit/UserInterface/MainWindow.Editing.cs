@@ -182,7 +182,7 @@ public partial class MainWindow : UIWindow {
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.NJS));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.SpawnOffset));
 						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Coordinates));
+						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Coordinates));
 						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Rotation));
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.LocalRotation));
 						if (v2) {
@@ -225,7 +225,7 @@ public partial class MainWindow : UIWindow {
 						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.NJS));
 						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.SpawnOffset));
 						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.Coordinates));
+						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true, tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.Coordinates));
 						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Rotation));
 						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.LocalRotation));
 						AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Fake));

@@ -108,10 +108,25 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 		if (settings == null) {
 			return;
 		}
-		GetComponent<RectTransform>().anchoredPosition =
-			new Vector2(settings["x"].AsFloat, settings["y"].AsFloat);
-		GetComponent<RectTransform>().sizeDelta =
-			new Vector2(settings["w"].AsInt,   settings["h"].AsInt);
+		float x = settings["x"].AsFloat,
+		      y = settings["y"].AsFloat;
+		int w = settings["w"].AsInt,
+		    h = settings["h"].AsInt;
+		
+		var screen_size = (transform.parent as RectTransform)!.sizeDelta;
+		
+		float max_x = (screen_size.x - w) / 2.0f;
+		float max_y = (screen_size.y - h) / 2.0f;
+		
+		Plugin.Trace($"Clamp x: {x} {max_x}");
+		Plugin.Trace($"Clamp y: {y} {max_y}");
+		
+		x = Mathf.Clamp(x, -max_x, max_x);
+		y = Mathf.Clamp(y, -max_y, max_y);
+		
+		var t = (transform as RectTransform)!;
+		t.anchoredPosition = new Vector2(x, y);
+		t.sizeDelta = new Vector2(w, h);
 	}
 	
 	private void PosSave() {

@@ -1,3 +1,6 @@
+v0.13.8
+	Bugfix: Yeet empty objects and arrays
+
 v0.13.7
 	Clamp windows to the screen!
 	Fix for v2 position

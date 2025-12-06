@@ -98,7 +98,7 @@ public static class Data {
 		};
 		Setter<string?> setter = (o, v) => {
 			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
-			if (string.IsNullOrEmpty(v)) {
+			if (string.IsNullOrEmpty(v) || v == "{}" || v == "[]") {
 				RemoveNode(root, field_name);
 			}
 			else {

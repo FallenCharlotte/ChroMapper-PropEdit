@@ -26,36 +26,68 @@ public class Plugin {
 				return;
 			}
 			else if (chromper_ver.Minor > 13) {
-				Debug.LogWarning("This PropEdit version has only been tested on ChroMapper 0.13.x! There may be problems, good luck!");
+				var bypass =  Settings.Get("BypassVersion");
+				if (bypass == false) {
+					Debug.Log("Not loading PropEdit on incompatible version!");
+					return;
+				}
+				if (bypass == null) {
+					// Can't use ShowDialogBox because the signature changes ;-;
+					var dialog = PersistentUI.Instance.CreateNewDialogBox().WithNoTitle();
+					dialog.AddComponent<TextComponent>().WithInitialValue("This PropEdit version has only been tested on ChroMapper 0.13.x! There will be problems and you should probably switch to stable, check for an update, or remove it! Do you want to try to run it anyways?");
+					dialog.AddFooterButton(() => {
+						Settings.Set("BypassVersion", false);
+						Debug.Log("Not loading PropEdit on incompatible version!");
+					}, "No");
+					dialog.AddFooterButton(() => {
+						Debug.Log("PropEdit version check bypassed!");
+						DoInit();
+					}, "Yes");
+					dialog.AddFooterButton(() => {
+						Settings.Set("BypassVersion", true);
+						Debug.Log("PropEdit version check bypassed!");
+						DoInit();
+					}, "Always");
+					dialog.Open();
+					
+					return;
+				}
+				else {
+					Debug.Log("PropEdit version check bypassed!");
+				}
 			}
 			
-			SceneManager.sceneLoaded += SceneLoaded;
-			
-			var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
-				.Where(x => x.name == "Node Editor")
-				.FirstOrDefault();
-			CMInputCallbackInstaller.InputInstance.Disable();
-			
-			toggle_window = map.AddAction("Prop Editor", type: InputActionType.Button);
-			toggle_window.AddCompositeBinding("ButtonWithOneModifier")
-				.With("Modifier", "<Keyboard>/shift")
-				.With("Button", "<Keyboard>/n");
-			
-			array_insert = map.AddAction("Array Insert", type: InputActionType.Button);
-			array_insert.AddCompositeBinding("ButtonWithOneModifier")
-				.With("Modifier", "<Keyboard>/shift")
-				.With("Button", "<Keyboard>/enter");
-			
-			CMInputCallbackInstaller.InputInstance.Enable();
-			
-			main_button = ExtensionButtons.AddButton(
-				UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
-				"Prop Edit",
-				ToggleWindow);
+			DoInit();
 		}
 		catch (System.Exception e) {
 			Debug.LogException(e);
 		}
+	}
+	
+	private void DoInit() {
+		SceneManager.sceneLoaded += SceneLoaded;
+		
+		var map = CMInputCallbackInstaller.InputInstance.asset.actionMaps
+			.Where(x => x.name == "Node Editor")
+			.FirstOrDefault();
+		CMInputCallbackInstaller.InputInstance.Disable();
+		
+		toggle_window = map.AddAction("Prop Editor", type: InputActionType.Button);
+		toggle_window.AddCompositeBinding("ButtonWithOneModifier")
+			.With("Modifier", "<Keyboard>/shift")
+			.With("Button", "<Keyboard>/n");
+		
+		array_insert = map.AddAction("Array Insert", type: InputActionType.Button);
+		array_insert.AddCompositeBinding("ButtonWithOneModifier")
+			.With("Modifier", "<Keyboard>/shift")
+			.With("Button", "<Keyboard>/enter");
+		
+		CMInputCallbackInstaller.InputInstance.Enable();
+		
+		main_button = ExtensionButtons.AddButton(
+			UI.LoadSprite("ChroMapper_PropEdit.Resources.Icon.png"),
+			"Prop Edit",
+			ToggleWindow);
 	}
 	
 	private void SceneLoaded(Scene scene, LoadSceneMode mode) {

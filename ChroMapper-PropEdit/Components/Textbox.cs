@@ -87,24 +87,30 @@ public class Textbox : MonoBehaviour {
 	}
 	
 	private void StartEditing() {
-		last_selected = this;
 		CMInputCallbackInstaller.DisableActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 		CMInputCallbackInstaller.DisableActionMaps(typeof(UI), ActionMapsDisabled);
 		Plugin.Trace("StartEditing");
 		tab_next!.performed += onTabNext;
 		tab_back!.performed += onTabBack;
 		Plugin.array_insert!.performed += onInsert;
+		++editing_counter;
+		CheckEnd();
 	}
 	
 	private void EndEditing() {
-		if (last_selected == this) {
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
-			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
-		}
-		Plugin.Trace($"EndEditing: {last_selected == this}");
+		--editing_counter;
+		CheckEnd();
+		Plugin.Trace($"EndEditing: {editing_counter}");
 		tab_next!.performed -= onTabNext;
 		tab_back!.performed -= onTabBack;
 		Plugin.array_insert!.performed -= onInsert;
+	}
+	
+	private void CheckEnd() {
+		if (editing_counter == 0) {
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
+			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
+		}
 	}
 	
 	private void OnDestroy() {
@@ -140,7 +146,7 @@ public class Textbox : MonoBehaviour {
 	private static InputAction? tab_next = null;
 	private static InputAction? tab_back = null;
 	
-	private static Textbox? last_selected = null;
+	private static int editing_counter = 0;
 	
 	// Stop textbox input from triggering actions, copied from the node editor
 	

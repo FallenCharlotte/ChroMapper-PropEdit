@@ -63,7 +63,7 @@ public class Textbox : MonoBehaviour {
 			}
 		});
 		TextInput.InputField.onDeselect.AddListener((_) => {
-			EndEditing();
+			FinishEditing();
 		});
 		
 		return this;
@@ -97,17 +97,21 @@ public class Textbox : MonoBehaviour {
 		CheckEnd();
 	}
 	
-	private void EndEditing() {
+	private void FinishEditing() {
 		--editing_counter;
+		Plugin.Trace($"FinishEditing: {editing_counter}");
+		EndEditing();
+	}
+	
+	private void EndEditing() {
 		CheckEnd();
-		Plugin.Trace($"EndEditing: {editing_counter}");
 		tab_next!.performed -= onTabNext;
 		tab_back!.performed -= onTabBack;
 		Plugin.array_insert!.performed -= onInsert;
 	}
 	
 	private void CheckEnd() {
-		if (editing_counter == 0) {
+		if (editing_counter <= 0) {
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
 		}

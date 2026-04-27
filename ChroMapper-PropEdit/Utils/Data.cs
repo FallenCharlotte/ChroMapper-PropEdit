@@ -473,8 +473,13 @@ public static class Data {
 	public static Color GetColor(BaseEvent e) {
 		return (e.CustomColor ?? (e.Value switch {
 			0 => Color.clear,
+#if CHROMPER_13
 			(>= 1) and (<= 4) => BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomEnvColorRight ?? LoadInitialMap.Platform.DefaultColors.BlueColor,
 			(>= 5) and (<= 8) => BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomEnvColorLeft ?? LoadInitialMap.Platform.DefaultColors.RedColor,
+#else
+			(>= 1) and (<= 4) => BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomEnvColorRight ?? DefaultColors.Right,
+			(>= 5) and (<= 8) => BeatSaberSongContainer.Instance.MapDifficultyInfo.CustomEnvColorLeft ?? DefaultColors.Left,
+#endif
 			(>= 9) => Color.white,
 			_ => Color.clear,
 		}));

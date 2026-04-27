@@ -19,7 +19,7 @@ namespace ChroMapper_PropEdit.UserInterface {
 public static class UI {
 	public static GameObject AddChild(GameObject parent, string name, params System.Type[] components) {
 		var obj = new GameObject(name, components);
-		obj.transform.SetParent(parent.transform);
+		obj.transform.SetParent(parent.transform, false);
 		return obj;
 	}
 	
@@ -204,8 +204,9 @@ public static class UI {
 				Plugin.Trace($"`{s}` => {converted}");
 				setter(converted);
 			}
-			catch (System.Exception) {
-				Debug.LogError($"Invalid expression: `{s}`");
+			catch (System.Exception e) {
+				Debug.LogError($"Invalid expression? `{s}`");
+				Debug.LogException(e);
 			}
 		};
 		input.Placeholder = (mixed) ? "Mixed" : "Empty";

@@ -95,7 +95,7 @@ public class Plugin {
 			if (scene.buildIndex == 3) {
 				// Map Edit
 				Utils.Selection.Reset();
-				var mapEditorUI = Object.FindObjectOfType<MapEditorUI>();
+				var mapEditorUI = (MapEditorUI)Object.FindFirstObjectByType(typeof(MapEditorUI));
 				main = UIWindow.Create<MainWindow>(mapEditorUI);
 				map_settings = UIWindow.Create<MapSettingsWindow>(mapEditorUI);
 				plugin_settings = UIWindow.Create<PluginSettingsWindow>(mapEditorUI);

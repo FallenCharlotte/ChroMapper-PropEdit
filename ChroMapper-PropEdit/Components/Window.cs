@@ -26,7 +26,7 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 	
 	public Window Init(string name, string title, GameObject parent, Vector2 size) {
 		var canvas = parent.GetComponent<Canvas>();
-		transform.parent = parent.transform;
+		transform.SetParent(parent.transform, false);
 		settings_key = $"{name}_window";
 		// Window Drag
 		gameObject.AddComponent<DragWindowController>().Init(canvas, PosSave);

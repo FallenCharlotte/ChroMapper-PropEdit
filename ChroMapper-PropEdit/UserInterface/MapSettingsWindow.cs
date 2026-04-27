@@ -175,7 +175,11 @@ public class MapSettingsWindow : UIWindow {
 				BeatSaberSongContainer.Instance.Map.EnvironmentEnhancements.Add(ee);
 				Refresh();
 			};
+#if CHROMPER_13
 			SelectionController.SelectionChangedEvent += UpdateSelectedEEs;
+#else
+			SelectionController.OnSelectionChanged += UpdateSelectedEEs;
+#endif
 			panels.Pop();
 			
 			AddExpando("Materials", "Materials", false, "Materials used by geometry");
@@ -199,9 +203,15 @@ public class MapSettingsWindow : UIWindow {
 		Refresh();
 		UI.RefreshTooltips(panel);
 		
+#if CHROMPER_13
 		BeatmapActionContainer.ActionCreatedEvent += UpdateFromAction;
 		BeatmapActionContainer.ActionUndoEvent += UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent += UpdateFromAction;
+#else
+		BeatmapActionContainer.OnActionCreated += UpdateFromAction;
+		BeatmapActionContainer.OnActionUndo += UpdateFromAction;
+		BeatmapActionContainer.OnActionRedo += UpdateFromAction;
+#endif
 	}
 	
 	private void UpdateFromAction(BeatmapAction? _) {
@@ -356,10 +366,15 @@ public class MapSettingsWindow : UIWindow {
 		RequirementCheck.RegisterRequirement(new CinemaReq());
 		RequirementCheck.RegisterRequirement(new SoundExtensionsReq());
 		RequirementCheck.RegisterRequirement(new VivifyReq());
-		SelectionController.SelectionChangedEvent -= UpdateSelectedEEs;
+#if CHROMPER_13
 		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromAction;
 		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;
+#else
+		BeatmapActionContainer.OnActionCreated -= UpdateFromAction;
+		BeatmapActionContainer.OnActionUndo -= UpdateFromAction;
+		BeatmapActionContainer.OnActionRedo -= UpdateFromAction;
+#endif
 	}
 	
 	private void SetForced(string name, bool force) {

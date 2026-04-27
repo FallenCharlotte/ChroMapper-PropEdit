@@ -57,11 +57,18 @@ public partial class MainWindow : UIWindow {
 		
 		old_otype = null;
 		
-		SelectionController.SelectionChangedEvent += Selection.OnObjectsSelected;
 		Selection.OnSelectionChanged += UpdateFromSelection;
+#if CHROMPER_13
+		SelectionController.SelectionChangedEvent += Selection.OnObjectsSelected;
 		BeatmapActionContainer.ActionCreatedEvent += UpdateFromAction;
 		BeatmapActionContainer.ActionUndoEvent += UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent += UpdateFromAction;
+#else
+		SelectionController.OnSelectionChanged += Selection.OnObjectsSelected;
+		BeatmapActionContainer.OnActionCreated += UpdateFromAction;
+		BeatmapActionContainer.OnActionUndo += UpdateFromAction;
+		BeatmapActionContainer.OnActionRedo += UpdateFromAction;
+#endif
 		
 		Plugin.toggle_window!.performed += OnToggleWindow;
 		
@@ -69,11 +76,18 @@ public partial class MainWindow : UIWindow {
 	}
 	
 	public void OnDestroy() {
-		SelectionController.SelectionChangedEvent -= Selection.OnObjectsSelected;
 		Selection.OnSelectionChanged -= UpdateFromSelection;
+#if CHROMPER_13
+		SelectionController.SelectionChangedEvent -= Selection.OnObjectsSelected;
 		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromAction;
 		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
 		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;
+#else
+		SelectionController.OnSelectionChanged -= Selection.OnObjectsSelected;
+		BeatmapActionContainer.OnActionCreated -= UpdateFromAction;
+		BeatmapActionContainer.OnActionUndo -= UpdateFromAction;
+		BeatmapActionContainer.OnActionRedo -= UpdateFromAction;
+#endif
 		Plugin.toggle_window!.performed -= OnToggleWindow;
 		Selection.OnDeselectAll();
 	}

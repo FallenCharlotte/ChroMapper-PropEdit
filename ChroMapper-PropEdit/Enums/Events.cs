@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 
 using Beatmap.Base;
+using Beatmap.Enums;
 
 namespace ChroMapper_PropEdit.Enums {
 
@@ -17,19 +18,21 @@ public static class Events {
 	};
 	
 	public static EventType GetEventType(BaseEvent e, string env) {
-		if (e.IsUtilityEvent(env) || (env == "GagaEnvironment" && e.IsLaserRotationEvent(env))) {
+		var typeName = System.Enum.GetName(typeof(EventTypeValue), e.Type);
+		if (   (e.Type >= (int)EventTypeValue.UtilityEvent0 && e.Type <= (int)EventTypeValue.UtilityEvent3)
+		    || (env == "GagaEnvironment" && typeName.EndsWith("LaserRotation"))) {
 			return EventType.Utility;
 		}
-		if (e.IsLightEvent(env)) {
+		if (typeName.EndsWith("Lights") || typeName.EndsWith("Lasers")) {
 			return EventType.Light;
 		}
-		if (e.IsLaserRotationEvent(env)) {
+		if (typeName.EndsWith("LaserRotation")) {
 			return EventType.LaserRotation;
 		}
 		if (e.Type == (int)Beatmap.Enums.EventTypeValue.RingRotation) {
 			return EventType.RingRotation;
 		}
-		if (e.IsRingZoomEvent(env)) {
+		if (e.Type == (int)Beatmap.Enums.EventTypeValue.RingZoom) {
 			return EventType.RingZoom;
 		}
 		if (e.IsColorBoostEvent()) {

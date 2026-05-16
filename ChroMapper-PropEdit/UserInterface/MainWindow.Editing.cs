@@ -600,9 +600,12 @@ public partial class MainWindow : UIWindow {
 			CheckRefresh(SelectionType.Materials);
 			
 			System.Func<Color?, string?> gc = (c) => 
-				(new JSONArray())
-					.WriteColor(c ?? Color.white);
-			System.Func<string?, Color?> sc = (s) => JSON.Parse(s).ReadColor();
+					(c == null)
+						? ""
+						: (new JSONArray())
+							.WriteColor(c ?? Color.white) // microslop can't make the damn ! operator work
+							.ToString();
+			System.Func<string?, Color?> sc = (s) => Data.RawToJson(s ?? "")?.ReadColor();
 			AddTextbox("Color", Data.Add(Data.GetSetNullable<Color?>("Color"), (gc, sc)), true);
 			AddDropdown("Shader", Data.GetSetNullable<string>("Shader"), MapSettings.Shaders, false);
 			AddTextbox("Track", Data.GetSetNullable<string?>("Track"), false, "Assign the material to a track, allowing you to animate the color.");

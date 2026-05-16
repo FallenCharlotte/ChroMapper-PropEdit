@@ -115,7 +115,9 @@ public class Plugin {
 	[MethodImpl(MethodImplOptions.AggressiveInlining)]
 	public static void Trace(object message) {
 #if EXTRA_LOGGING
-		Debug.Log(message);
+		var st = new System.Diagnostics.StackTrace(true);
+		var caller = st.GetFrame(1);
+		Debug.Log($"{caller.GetFileName()}:{caller.GetFileLineNumber()} {message}");
 #endif
 	}
 	

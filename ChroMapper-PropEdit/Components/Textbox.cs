@@ -101,7 +101,7 @@ public class Textbox : MonoBehaviour {
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), new[] { typeof(CMInput.INodeEditorActions) });
 			CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(UI), ActionMapsDisabled);
 		}
-		Plugin.Trace($"EndEditing: {last_selected == this}");
+		Plugin.Trace("EndEditing: " + (last_selected == this ? "True" : "False"));
 		tab_next!.performed -= onTabNext;
 		tab_back!.performed -= onTabBack;
 		Plugin.array_insert!.performed -= onInsert;

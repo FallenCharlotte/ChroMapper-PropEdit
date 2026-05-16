@@ -340,7 +340,7 @@ public static class Data {
 	}
 	
 	public static void UpdateObjects<T>(IList things, Setter<T?> setter, T? value, bool time = false) {
-		switch (things) {
+		try { switch (things) {
 		case List<BaseObject> editing:
 			if (time) {
 				var beatmapActions = new List<BeatmapObjectModifiedAction>();
@@ -411,7 +411,12 @@ public static class Data {
 			foreach (var i in things) {
 				setter(i, value);
 			}
+			Debug.LogWarning($"{things.Count} items edited directly with PropEdit, undo/redo will not work for these!");
 			break;
+		} }
+		catch (Exception e) {
+			Debug.LogError("Error editing objects with PropEdit!");
+			Debug.LogException(e);
 		}
 	}
 	

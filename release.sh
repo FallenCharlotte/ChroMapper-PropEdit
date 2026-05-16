@@ -36,10 +36,15 @@ git add $PROJECT/Properties/AssemblyInfo.cs $PROJECT/manifest.json "$CHANGELOG"
 git commit -m "${tag}"
 git tag "${tag}"
 
-msbuild
+dotnet build
+dotnet build -p:DefineConstants="CHROMPER_13"
+
+pushd ChroMapper-PropEdit/bin/Stable
+zip "ChroMapper-13-PropEdit ${tag}.zip" Plugins/ChroMapper-PropEdit.dll
+popd
 
 pushd ChroMapper-PropEdit/bin/Dev
-zip "ChroMapper-13-PropEdit ${tag}.zip" Plugins/ChroMapper-PropEdit.dll
+zip "ChroMapper-14-PropEdit ${tag}.zip" Plugins/ChroMapper-PropEdit.dll
 popd
 
 echo "Check..."

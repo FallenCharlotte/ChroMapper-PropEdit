@@ -387,6 +387,9 @@ public partial class MainWindow : UIWindow {
 					case Events.EventType.Utility:
 						AddParsed("Value", Data.GetSet<int>("Value"), false);
 						break;
+					default:
+						Debug.LogError($"Unhandled event type: {new_etype}");
+						break;
 					}
 				}	break;
 				case ObjectType.CustomEvent: {
@@ -588,6 +591,21 @@ public partial class MainWindow : UIWindow {
 				case ObjectType.EnvironmentEnhancement: {
 					HandleEEs(objects);
 				}	break;
+#if !CHROMPER_13
+				case ObjectType.GLSColor:
+				case ObjectType.GLSRotation:
+				case ObjectType.GLSTranslation:
+				case ObjectType.GLSEvent: {
+					//AddParsed("Color", Data.GetSet<int>("Color"), false, "Test");
+					//AddParsed("Brightness", Data.GetSet<float>("Brightness"), false, "Test");
+					
+					wipe();
+					UI.AddLabel(panel!, "Unsupported", "GLS Unsupported!", Vector2.zero);
+				}	break;
+#endif
+				default:
+					Debug.LogError($"Unhandled object type: {type}");
+					break;
 			}
 			UI.RefreshTooltips(panel);
 			if (full_rebuild) {

@@ -1,3 +1,8 @@
+v0.13.9
+	Basic chromper 14 support, no GLS editing yet
+	In-your-face incombatibility warning
+	Fix material color editing
+
 v0.13.8
 	Bugfix: Yeet empty objects and arrays
 

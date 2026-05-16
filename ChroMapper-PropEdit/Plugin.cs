@@ -17,37 +17,51 @@ public class Plugin {
 	public static InputAction? array_insert = null;
 	public static ExtensionButton? main_button = null;
 	
+#if CHROMPER_13
+	const bool DEV = false;
+	const int TARGET_VER = 13;
+#else
+	const bool DEV = true;
+	const int TARGET_VER = 14;
+#endif
+	
 	[Init]
 	private void Init() {
 		try {
 			var chromper_ver = new System.Version(Application.version);
-			if (chromper_ver.Minor < 13) {
-				Debug.LogError("This PropEdit version requires ChroMapper 0.13.x! Please install the correct version.");
-				return;
-			}
-			else if (chromper_ver.Minor > 13) {
+			
+			Plugin.Trace($"{chromper_ver.Minor} vs {TARGET_VER}");
+			
+			if (chromper_ver.Minor != TARGET_VER) {
 				var bypass =  Settings.Get("BypassVersion");
+				// Allow testing in uncharted territory
+				bool allowBypass = DEV && (chromper_ver.Minor > TARGET_VER);
+				
 				if (bypass == false) {
 					Debug.Log("Not loading PropEdit on incompatible version!");
 					return;
 				}
-				if (bypass == null) {
-					// Can't use ShowDialogBox because the signature changes ;-;
+				if (bypass == null || !allowBypass) {
 					var dialog = PersistentUI.Instance.CreateNewDialogBox().WithNoTitle();
-					dialog.AddComponent<TextComponent>().WithInitialValue("This PropEdit version has only been tested on ChroMapper 0.13.x! There will be problems and you should probably switch to stable, check for an update, or remove it! Do you want to try to run it anyways?");
-					dialog.AddFooterButton(() => {
-						Settings.Set("BypassVersion", false);
-						Debug.Log("Not loading PropEdit on incompatible version!");
-					}, "No");
-					dialog.AddFooterButton(() => {
-						Debug.Log("PropEdit version check bypassed!");
-						DoInit();
-					}, "Yes");
-					dialog.AddFooterButton(() => {
-						Settings.Set("BypassVersion", true);
-						Debug.Log("PropEdit version check bypassed!");
-						DoInit();
-					}, "Always");
+					dialog.AddComponent<TextComponent>().WithInitialValue($"This PropEdit is made for ChroMapper v0.{TARGET_VER}.x! Please install the correct version." + (allowBypass ? " Do you want to try to run it anyways?" : ""));
+					if (allowBypass) {
+						dialog.AddFooterButton(() => {
+							Settings.Set("BypassVersion", false);
+							Debug.Log("Not loading PropEdit on incompatible version!");
+						}, "No");
+						dialog.AddFooterButton(() => {
+							Debug.Log("PropEdit version check bypassed!");
+							DoInit();
+						}, "Yes");
+						dialog.AddFooterButton(() => {
+							Settings.Set("BypassVersion", true);
+							Debug.Log("PropEdit version check bypassed!");
+							DoInit();
+						}, "Always");
+					}
+					else {
+						dialog.AddFooterButton(() => {}, "Okay");
+					}
 					dialog.Open();
 					
 					return;

@@ -406,6 +406,8 @@ public static class Data {
 						true);
 				}
 			}
+			// Need to refresh Selection.Selected
+			Selection.OnObjectsSelected();
 			break;
 		default:
 			foreach (var i in things) {

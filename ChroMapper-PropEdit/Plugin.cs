@@ -43,7 +43,7 @@ public class Plugin {
 				}
 				if (bypass == null || !allowBypass) {
 					var dialog = PersistentUI.Instance.CreateNewDialogBox().WithNoTitle();
-					dialog.AddComponent<TextComponent>().WithInitialValue($"This PropEdit is made for ChroMapper v0.{TARGET_VER}.x! Please install the correct version." + (allowBypass ? " Do you want to try to run it anyways?" : ""));
+					dialog.AddComponent<TextComponent>().WithInitialValue($"This build of PropEdit is made for ChroMapper v0.{TARGET_VER}.x! Please install the correct version. (For this version of ChroMapper, you want the ChroMapper-{chromper_ver.Minor}-PropEdit.xxx.zip)" + (allowBypass ? " Do you want to try to run it anyways?" : ""));
 					if (allowBypass) {
 						dialog.AddFooterButton(() => {
 							Settings.Set("BypassVersion", false);

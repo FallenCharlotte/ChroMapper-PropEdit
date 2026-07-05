@@ -90,7 +90,8 @@
     <Compile Include="Settings.cs" />
     <Compile Include="Components\AxisMovement.cs" />
     <Compile Include="Components\DragWindowController.cs" />
-    <Compile Include="Components\PositionGizmo.cs" />
+    <Compile Include="Components\Gizmo.cs" />
+    <Compile Include="Components\IAxisKnob.cs" />
     <Compile Include="Components\ScrollToTop.cs" />
     <Compile Include="Enums\Events.cs" />
     <Compile Include="Enums\Map.cs" />

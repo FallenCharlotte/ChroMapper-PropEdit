@@ -12,10 +12,13 @@ using  ChroMapper_PropEdit.UserInterface;
 
 namespace ChroMapper_PropEdit.Components {
 
-public class PositionGizmo : MonoBehaviour {
+public class Gizmo<T> : Component where T : IAxisKnob {
 	public event Action onDragBegin;
 	public event Action<Vector3> onDragMove;
 	public event Action onDragEnd;
+	
+	public Dictionary<Axis, T> knobs;
+	public PrimitiveType knob_shape = PrimitiveType.Cube;
 	
 	public bool ball_visible {
 		get { return _ball; }
@@ -40,16 +43,17 @@ public class PositionGizmo : MonoBehaviour {
 	}
 	
 	private void AddAxis(Axis axis, Vector3 pos, Vector3 rot) {
-		GameObject cyl = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-		cyl.transform.parent = this.gameObject.transform;
-		cyl.transform.localPosition = pos;
-		cyl.transform.localEulerAngles = rot;
-		cyl.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
-		var am = cyl.AddComponent<AxisMovement>();
+		GameObject knob = GameObject.CreatePrimitive(knob_shape);
+		knob.transform.parent = this.gameObject.transform;
+		knob.transform.localPosition = pos;
+		knob.transform.localEulerAngles = rot;
+		knob.transform.localScale = new Vector3(0.3f, 0.3f, 0.3f);
+		var am = knob.AddComponent<T>();
 		am.axis = axis;
 		am.onDragBegin += OnDragBegin;
 		am.onDragMove += OnDragMove;
 		am.onDragEnd += OnDragEnd;
+		knobs[axis] = am;
 	}
 	
 	void OnDragBegin() {

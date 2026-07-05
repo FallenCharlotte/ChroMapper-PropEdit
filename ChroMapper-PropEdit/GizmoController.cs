@@ -14,8 +14,7 @@ using ChroMapper_PropEdit.Components;
 namespace ChroMapper_PropEdit {
 
 public class GizmoController {
-	public GameObject position_gizmo_go;
-	public PositionGizmo position_gizmo;
+	public Gizmo<AxisMovement> position_gizmo;
 	
 	public InputAction translate_keybind;
 	
@@ -37,9 +36,10 @@ public class GizmoController {
 	}
 	
 	public void Init() {
-		position_gizmo_go = new GameObject("Position Gizmo");
+		var position_gizmo_go = new GameObject("Position Gizmo");
 		position_gizmo_go.SetActive(false);
-		position_gizmo = position_gizmo_go.AddComponent<PositionGizmo>();
+		position_gizmo = position_gizmo_go.AddComponent<Gizmo<AxisMovement>>();
+		position_gizmo.knob_shape = PrimitiveType.Cylinder;
 		
 		position_gizmo.onDragBegin += OnTranslateBegin;
 		position_gizmo.onDragMove  += OnTranslateMove;
@@ -59,35 +59,35 @@ public class GizmoController {
 	
 	public void UpdateSelection() {
 		editing = SelectionController.SelectedObjects.Where(o => o is BaseGrid).Select(it => (BaseGrid)it).ToList();
-		if (position_gizmo_go.activeSelf && editing.Count() > 0) {
+		if (position_gizmo.gameObject.activeSelf && editing.Count() > 0) {
 			ShowTranslate();
 		}
 		else {
-			position_gizmo_go.SetActive(false);
+			position_gizmo.gameObject.SetActive(false);
 		}
 	}
 	
 	void ToggleTranslate(InputAction.CallbackContext _) {
-		if (!position_gizmo_go.activeSelf && editing.Count() > 0) {
+		if (!position_gizmo.gameObject.activeSelf && editing.Count() > 0) {
 			ShowTranslate();
 		}
 		else {
-			position_gizmo_go.SetActive(false);
+			position_gizmo.gameObject.SetActive(false);
 		}
 	}
 	
 	void ShowTranslate() {
-		position_gizmo_go.SetActive(true);
+		position_gizmo.gameObject.SetActive(true);
 		var o = editing.First();
 		
 		var collection = BeatmapObjectContainerCollection.GetCollectionForType(o.ObjectType);
 		collection.LoadedContainers.TryGetValue(o, out var container);
 		
 		var atsc = UnityEngine.Object.FindObjectOfType<AudioTimeSyncController>();
-		position_gizmo_go.transform.parent = container.gameObject.transform.parent;
-		position_gizmo_go.transform.position = container.gameObject.transform.position;
+		position_gizmo.gameObject.transform.parent = container.gameObject.transform.parent;
+		position_gizmo.gameObject.transform.position = container.gameObject.transform.position;
 		// Window snapping be silly
-		position_gizmo_go.transform.rotation = Quaternion.Euler(0, container.gameObject.transform.rotation.eulerAngles.y, 0);
+		position_gizmo.gameObject.transform.rotation = Quaternion.Euler(0, container.gameObject.transform.rotation.eulerAngles.y, 0);
 		//position_gizmo.ball_visible = (editing.Count() > 1);
 	}
 	
@@ -115,7 +115,7 @@ public class GizmoController {
 			d.o.Time = pos.z / EditorScaleController.EditorScale;
 			d.con?.UpdateGridPosition();
 		}
-		position_gizmo_go.transform.localPosition += delta;
+		position_gizmo.gameObject.transform.localPosition += delta;
 	}
 	
 	void OnTranslateEnd() {

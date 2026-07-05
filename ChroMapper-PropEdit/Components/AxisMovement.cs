@@ -9,19 +9,8 @@ using Beatmap.Enums;
 
 namespace ChroMapper_PropEdit.Components {
 
-public class AxisMovement : MonoBehaviour
-{
-	// onMove(delta)
-	public event Action onDragBegin;
-	public event Action<Vector3> onDragMove;
-	public event Action onDragEnd;
-	
-	public Axis axis;
-	
+public class AxisMovement : IAxisKnob {
 	private Plane _plane;
-	
-	private Vector3 _prev;
-	private Vector3 _axisv;
 	
 	public AxisMovement() { }
 	
@@ -38,7 +27,7 @@ public class AxisMovement : MonoBehaviour
 		CMInputCallbackInstaller.ClearDisabledActionMaps(typeof(AxisMovement), ActionMapsDisabled);
 	}
 	
-	void OnMouseDown() {
+	protected override void OnMouseDown() {
 		// Get with axis line and facing the camera
 		var cd = (Camera.main.transform.position - this.gameObject.transform.position);
 		// The axis part of the normal needs to be 0
@@ -47,22 +36,19 @@ public class AxisMovement : MonoBehaviour
 		_plane = new Plane(normal, this.gameObject.transform.position);
 		if (axis_pos() is Vector3 pos) {
 			_prev = pos;
-			onDragBegin?.Invoke();
+			base.OnMouseDown();
 		}
 	}
 	
-	void OnMouseDrag() {
+	protected override void OnMouseDrag() {
 		if (axis_pos() is Vector3 pos) {
-			onDragMove?.Invoke(pos - _prev);
+			delta = pos - _prev;
+			base.OnMouseDrag();
 			_prev = pos;
 		}
 	}
 	
-	void OnMouseUp() {
-		onDragEnd?.Invoke();
-	}
-	
-	private Vector3? axis_pos() {
+	protected override Vector3? axis_pos() {
 		var ray = Camera.main.ScreenPointToRay(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
 		float depth = 0;
 		if (_plane.Raycast(ray, out depth)) {
@@ -72,6 +58,9 @@ public class AxisMovement : MonoBehaviour
 		}
 		return null;
 	}
+	
+	private Vector3 _axisv;
+	private Vector3 _prev;
 	
 	private readonly System.Type[] ActionMapsDisabled = {
 		typeof(CMInput.IPlacementControllersActions)

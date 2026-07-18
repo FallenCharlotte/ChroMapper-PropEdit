@@ -38,9 +38,11 @@ public static class Events {
 		if (e.IsColorBoostEvent()) {
 			return EventType.ColorBoost;
 		}
+#if CHROMPER_13
 		if (e.IsLaneRotationEvent()) {
 			return EventType.LaneRotation;
 		}
+#endif
 		UnityEngine.Debug.LogError($"Unknown event type {e.Type} at beat {e.JsonTime}!");
 		return EventType.Unknown;
 	}

@@ -343,7 +343,11 @@ public static class Data {
 		try { switch (things) {
 		case List<BaseObject> editing:
 			if (time) {
+#if CHROMPER_13
 				var beatmapActions = new List<BeatmapObjectModifiedAction>();
+#else
+				var beatmapActions = new List<BeatmapObjectUpdatedAction>();
+#endif
 				foreach (var o in editing!) {
 					var orig = BeatmapFactory.Clone(o);
 					
@@ -356,7 +360,11 @@ public static class Data {
 					
 					collection.SpawnObject(o, false, true);
 					
+#if CHROMPER_13
 					beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, orig, $"Edited a {o.ObjectType} with Prop Edit.", true));
+#else
+					beatmapActions.Add(new BeatmapObjectUpdatedAction(o, orig, $"Edited a {o.ObjectType} with Prop Edit.", true));
+#endif
 				}
 				
 				BeatmapActionContainer.AddAction(

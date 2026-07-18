@@ -99,7 +99,7 @@ public partial class MainWindow : UIWindow {
 				: tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BeatEvent));
 			
 			switch (type) {
-				case ObjectType.Note:
+				case ObjectType.Note: {
 					var note = (o as BaseNote)!;
 					AddParsed("X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.X));
 					AddParsed("Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Y));
@@ -151,7 +151,7 @@ public partial class MainWindow : UIWindow {
 						panels.Pop();
 					}
 					
-					break;
+				}	break;
 				case ObjectType.CustomNote:
 					AddLine("Wow, a custom note! How did you do this?");
 					break;
@@ -244,7 +244,7 @@ public partial class MainWindow : UIWindow {
 					}
 					
 				}	break;
-				case ObjectType.Obstacle:
+				case ObjectType.Obstacle: {
 					var ob = (o as BaseObstacle)!;
 					AddParsed("Duration", Data.GetSet<float>("Duration"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Duration));
 					if (v2) {
@@ -286,7 +286,7 @@ public partial class MainWindow : UIWindow {
 						panels.Pop();
 					}
 					
-					break;
+				}	break;
 				case ObjectType.Event: {
 					var env = BeatSaberSongContainer.Instance.Info.EnvironmentName;
 					var events = objects.Select(o => (BaseEvent)o);
@@ -588,6 +588,11 @@ public partial class MainWindow : UIWindow {
 					AddParsed("Relative NJS", Data.GetSet<float>("RelativeNJS"));
 					AddDropdown("Easing", Data.GetSet<int>("Easing"), Events.NJSEasings, false);
 				}	break;
+#if !CHROMPER_13
+				case ObjectType.RotationEvent: {
+					AddParsed("Rotation", Data.GetSet<float>("Rotation"), false, "Rotation in degrees");
+				}	break;
+#endif
 				case ObjectType.EnvironmentEnhancement: {
 					HandleEEs(objects);
 				}	break;

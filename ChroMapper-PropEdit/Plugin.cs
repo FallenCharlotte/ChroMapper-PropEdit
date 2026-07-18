@@ -106,13 +106,9 @@ public class Plugin {
 	
 	private void SceneLoaded(Scene scene, LoadSceneMode mode) {
 		try {
+			// Map Edit
 			if (scene.buildIndex == 3) {
-				// Map Edit
-				Utils.Selection.Reset();
-				var mapEditorUI = (MapEditorUI)Object.FindFirstObjectByType(typeof(MapEditorUI));
-				main = UIWindow.Create<MainWindow>(mapEditorUI);
-				map_settings = UIWindow.Create<MapSettingsWindow>(mapEditorUI);
-				plugin_settings = UIWindow.Create<PluginSettingsWindow>(mapEditorUI);
+				InitWindow();
 			}
 		}
 		catch (System.Exception e) {
@@ -143,7 +139,23 @@ public class Plugin {
 	}
 	
 	public static void ToggleWindow() {
-		if (main != null) main.ToggleWindow();
+		if (main == null) {
+			Plugin.Trace("Rescue attempt!");
+			InitWindow();
+		}
+		main?.ToggleWindow();
+	}
+	
+	private static void InitWindow() {
+		Utils.Selection.Reset();
+		var mapEditorUI = (MapEditorUI)Object.FindFirstObjectByType(typeof(MapEditorUI));
+		if (mapEditorUI == null) {
+			main = null;
+			return;
+		}
+		main = UIWindow.Create<MainWindow>(mapEditorUI);
+		map_settings = UIWindow.Create<MapSettingsWindow>(mapEditorUI);
+		plugin_settings = UIWindow.Create<PluginSettingsWindow>(mapEditorUI);
 	}
 }
 

@@ -23,6 +23,7 @@ public partial class MainWindow : UIWindow {
 	public readonly string NOODLE_NAME = "Noodle Extensions";
 	TooltipStrings tooltip = TooltipStrings.Instance;
 	BundleInfo? bundleInfo = null;
+	Enums.Map<int?>? EventLanes;
 	
 	private ObjectType? old_otype = null;
 	private SelectionType? old_stype = null;
@@ -306,6 +307,11 @@ public partial class MainWindow : UIWindow {
 					}
 					Plugin.Trace($"{old_etype} => {new_etype}: {full_rebuild}");
 					old_etype = new_etype;
+					
+					var lanes = GetEventLanes();
+					if (lanes != null) {
+						AddDropdown<int?>("Type", Data.GetSet<int>("Type"), lanes, false);
+					}
 					
 					switch (new_etype) {
 					case Events.EventType.Light:
@@ -979,6 +985,39 @@ public partial class MainWindow : UIWindow {
 		
 		comp_container.gameObject.SetActive(checkbox.isOn);
 		comp_container.SetExpanded(checkbox.isOn);
+	}
+	
+	private Enums.Map<int?>? GetEventLanes() {
+		if (EventLanes == null) {
+			var _etlabels = (CreateEventTypeLabels)Object.FindFirstObjectByType(typeof(CreateEventTypeLabels));
+#if CHROMPER_13
+			EventLanes = new();
+			
+			for (int i = 0; i <= _etlabels.MaxLaneId(); ++i) {
+				var type = _etlabels.LaneIdToEventType(i);
+				
+				var lane = _etlabels.LayerInstantiate.transform.parent.GetChild(type + 1);
+				var textMesh = lane.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+				
+				Plugin.Trace($"{i} {type} {textMesh?.text}");
+				
+				EventLanes.Add(type, textMesh?.text ?? "");
+			}
+#else
+			var context = (BeatmapRuntimeContext)Object.FindFirstObjectByType(typeof(BeatmapRuntimeContext));
+			
+			var entries = context?.TracksDefinition?.Basic?.ToList() ?? null;
+			
+			if (entries == null) return null;
+			
+			EventLanes = new();
+			
+			for (int i = 0; i < entries.Count; ++i) {
+				EventLanes.Add(entries[i].Value.Type, entries[i].Value.Name);
+			}
+#endif
+		}
+		return EventLanes;
 	}
 }
 

@@ -389,12 +389,10 @@ public partial class MainWindow : UIWindow {
 					case Events.EventType.LaneRotation:
 						AddDropdown<int?>("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaneRotation));
 						break;
-						
-					case Events.EventType.Utility:
-						AddParsed("Value", Data.GetSet<int>("Value"), false);
-						break;
 					default:
-						Debug.LogError($"Unhandled event type: {new_etype}");
+						AddParsed("Value", Data.GetSet<int>("Value"), false);
+						AddParsed("FloatValue", Data.GetSet<float>("FloatValue"), false);
+						//Debug.LogError($"Unhandled event type: {new_etype}");
 						break;
 					}
 				}	break;

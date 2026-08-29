@@ -18,6 +18,7 @@ public static class Events {
 	};
 	
 	public static EventType GetEventType(BaseEvent e, string env) {
+#if CHROMPER_13
 		var typeName = System.Enum.GetName(typeof(EventTypeValue), e.Type);
 		if (   (e.Type >= (int)EventTypeValue.UtilityEvent0 && e.Type <= (int)EventTypeValue.UtilityEvent3)
 		    || (env == "GagaEnvironment" && typeName.EndsWith("LaserRotation"))) {
@@ -38,12 +39,37 @@ public static class Events {
 		if (e.IsColorBoostEvent()) {
 			return EventType.ColorBoost;
 		}
-#if CHROMPER_13
 		if (e.IsLaneRotationEvent()) {
 			return EventType.LaneRotation;
 		}
+		
+		UnityEngine.Debug.LogError($"Unknown event type {typeName} ({e.Type}) at beat {e.JsonTime}!");
+#else
+		var context = (BeatmapRuntimeContext)UnityEngine.Object.FindFirstObjectByType(typeof(BeatmapRuntimeContext));
+		var kind = context.TracksDefinition.GetBasicOrDefault(e.Type).Kind;
+		var components = context.TracksDefinition.GetBasicOrDefault(e.Type).Components;
+		
+		Plugin.Trace($"Type: {e.Type}, Kind: {kind}, Components: {components}");
+		
+		if (components.HasFlag(BasicEventComponent.RingRotation)) {
+			return EventType.RingRotation;
+		}
+		if (components.HasFlag(BasicEventComponent.RingZoom)) {
+			return EventType.RingZoom;
+		}
+		if (components.HasFlag(BasicEventComponent.LightRotation)) {
+			return EventType.LaserRotation;
+		}
+		
+		if (kind == BasicEventKind.Lights) {
+			return EventType.Light;
+		}
+		if (kind == BasicEventKind.Toggle) {
+			return EventType.ColorBoost;
+		}
+		
+		UnityEngine.Debug.LogError($"Unknown event type (Type: {e.Type}, Kind: {kind}, Components: {components}) at beat {e.JsonTime}!");
 #endif
-		UnityEngine.Debug.LogError($"Unknown event type {e.Type} at beat {e.JsonTime}!");
 		return EventType.Unknown;
 	}
 	
@@ -168,8 +194,8 @@ public static class Events {
 	};
 	
 	public static readonly Map<int?> BoostSets = new Map<int?> {
-		{0, "Main"},
-		{1, "Boost"}
+		{0, "Off"},
+		{1, "On"}
 	};
 	
 	public static readonly Map<int?> LaneRotaions = new Map<int?> {

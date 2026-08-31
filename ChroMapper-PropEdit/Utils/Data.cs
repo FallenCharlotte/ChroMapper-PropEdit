@@ -1,436 +1,14 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using SimpleJSON;
 
 using Beatmap.Base;
-using Beatmap.Base.Customs;
-using Beatmap.Enums;
-using Beatmap.Helper;
-using Beatmap.Shared;
-
-using ChroMapper_PropEdit.Enums;
 
 namespace ChroMapper_PropEdit.Utils {
 
 public static class Data {
-	
-#region Getter/setter factories
-	
-	public delegate T Getter<T>(object o);
-	public delegate void Setter<T>(object o, T v);
-	
-	public static (Getter<T?>, Setter<T?>) GetSet<T>(string field_name) where T : struct {
-		Getter<T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null) ?? null;
-		Setter<T?> setter = (o, v) => { if (v != null) o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object[] {v}); };
-		return (getter, setter);
-	}
-	public static (Getter<T?>, Setter<T?>) GetSetNullable<T>(string field_name) {
-		Getter<T?> getter = (o) => (T?)o.GetType().GetProperty(field_name).GetMethod.Invoke(o, null);
-		Setter<T?> setter = (o, v) => { o.GetType().GetProperty(field_name).SetMethod.Invoke(o, new object?[] {v}); };
-		return (getter, setter);
-	}
-	
-	// Very cursed value split: subtract 1 then mask
-	public static (Getter<int?>, Setter<int?>) GetSetSplitValue(int mask) {
-		Getter<int?> getter = (o) => {
-			int i = ((BaseEvent)o).Value;
-			return (i == 0)
-				? 0b1111
-				: (i - 1) & mask & 0b1111;
-		};
-		Setter<int?> setter = (o, v) => {
-			if (v is int value) {
-				int i = ((BaseEvent)o).Value;
-				// I'm sorry
-				((BaseEvent)o).Value = ((((i - (i == 0 ? 0 : 1)) & (~mask)) | (value)) + 1) & 0b1111;
-			}
-		};
-		return (getter, setter);
-	}
-	
-	public static (Getter<T?>, Setter<T?>) JSONGetSet<T>(System.Type type, string node_name, string field_name) {
-		var node = type.GetProperty(node_name);
-		if (node == null) {
-			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
-		}
-		Getter<T?> getter = (o) => {
-			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
-			if (GetNode(root, field_name) is JSONNode n) {
-				return CreateConvertFunc<JSONNode, T>()(n);
-			}
-			else {
-				return default!;
-			}
-		};
-		Setter<T?> setter = (o, v) => {
-			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
-			if (v is T value) {
-				SetNode(root, field_name, CreateConvertFunc<T, SimpleJSON.JSONNode>()(value));
-			}
-			else {
-				RemoveNode(root, field_name);
-			}
-			node!.SetMethod.Invoke(o, new object[] { root });
-			(o as BaseObject)?.RefreshCustom();
-		};
-		return (getter, setter);
-	}
-	
-	// We love raw JSON dumps :3
-	public static (Getter<string?>, Setter<string?>) JSONGetSetRaw(System.Type type, string node_name, string field_name) {
-		var node = type.GetProperty(node_name);
-		if (node == null) {
-			Debug.LogError($"Node {node_name} not found in type {type.FullName}!");
-		}
-		Getter<string?> getter = (o) => {
-			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
-			if (GetNode(root, field_name) is JSONNode n) {
-				return JsonToRaw(n);
-			}
-			else {
-				return null;
-			}
-		};
-		Setter<string?> setter = (o, v) => {
-			var root = (SimpleJSON.JSONNode)node!.GetMethod.Invoke(o, null) ?? new SimpleJSON.JSONObject();
-			if (string.IsNullOrEmpty(v) || v == "{}" || v == "[]") {
-				RemoveNode(root, field_name);
-			}
-			else {
-				var n = RawToJson(v!);
-				if (n != null) {
-					SetNode(root, field_name, n);
-				}
-			}
-			node.SetMethod.Invoke(o, new object[] { root });
-		};
-		return (getter, setter);
-	}
-	
-	public static (Getter<T?>, Setter<T?>) CustomGetSet<T>(string field_name) {
-		return JSONGetSet<T?>(typeof(BaseObject), "CustomData", field_name);
-	}
-	
-	public static (Getter<string?>, Setter<string?>) CustomGetSetRaw(string field_name) {
-		return JSONGetSetRaw(typeof(BaseObject), "CustomData", field_name);
-	}
-	
-	public static (Getter<string?>, Setter<string?>) PropertyGetSetRaw(string prop_name, string type) {
-		return PropertyGetSetPart(prop_name, "value", (JsonToRaw, RawToJson), type);
-	}
-	
-	public static (Getter<string?>, Setter<string?>) PropertyGetSetPart(string? prop_name, string part) {
-		return PropertyGetSetPart(prop_name, part, (CreateConvertFunc<JSONNode, string?>(), CreateConvertFunc<string, JSONNode?>()));
-	}
-	
-	public static (Getter<string?>, Setter<string?>) PropertyGetSetPart(string? prop_name, string part, (System.Func<JSONNode, string?>, System.Func<string, JSONNode?>) part_get_set, string? default_type = null) {
-		Getter<string?> getter = (o) => {
-			if (prop_name == null) {
-				return null;
-			}
-			var root = (o as BaseCustomEvent)!.Data ?? new SimpleJSON.JSONObject();
-			if (GetNode(root, "properties") is JSONArray props) {
-				foreach (var prop in props.Children) {
-					if ((string)prop.AsObject["id"] == prop_name) {
-						return part_get_set.Item1(prop.AsObject[part]);
-					}
-				}
-				return null;
-			}
-			else {
-				return null;
-			}
-		};
-		Setter<string?> setter = (o, v) => {
-			var root = (o as BaseCustomEvent)!.Data ?? new SimpleJSON.JSONObject();
-			var props = GetNode(root, "properties")?.AsArray ?? new JSONArray();
-			if (prop_name == null) {
-				prop_name = v;
-			}
-			if (prop_name == null) {
-				return;
-			}
-			JSONObject? _prop = null;
-			foreach (var prop in props.Children) {
-				if (prop.AsObject["id"] == prop_name) {
-					_prop = prop.AsObject;
-					break;
-				}
-			}
-			if (_prop == null) {
-				_prop = new JSONObject();
-				_prop["id"] = prop_name;
-				if (default_type != null) {
-					_prop["type"] = default_type;
-				}
-				props.Add(_prop);
-			}
-			if (string.IsNullOrEmpty(v)) {
-				props.Remove((JSONNode)_prop);
-			}
-			else {
-				var n = part_get_set.Item2(v!);
-				if (n != null) {
-					SetNode(_prop, part, n);
-				}
-			}
-			root["properties"] = props;
-			(o as BaseCustomEvent)!.Data = root;
-			(o as BaseObject)?.RefreshCustom();
-		};
-		return (getter, setter);
-	}
-	
-	// Create and delete gradient
-	public static (Getter<bool?>, Setter<bool?>) GetSetGradient() {
-		Getter<bool?> getter = (o) => ((BaseEvent)o).CustomLightGradient != null;
-		Setter<bool?> setter = (o, v) => { if (o is BaseEvent e) {
-			if (!(v ?? false)) {
-				if (e.CustomLightGradient != null) {
-					var jc = new JSONArray();
-					jc.WriteColor(e.CustomLightGradient.StartColor);
-					e.CustomData[e.CustomKeyColor] = jc;
-				}
-				e.CustomData?.Remove(e.CustomKeyLightGradient);
-			}
-			else if (e.CustomLightGradient == null) {
-				var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.Event) as EventGridContainer;
-				
-				var next = collection?.AllLightEvents[e.Type]
-					?.Where(n => (n.JsonTime > e.JsonTime))
-					?.FirstOrDefault();
-				
-				Color begin = GetColor(e);
-				Color end = (next != null) ? GetColor(next) : begin;
-				
-				float duration = (next != null) ? (next.JsonTime - e.JsonTime) : 1;
-				
-				e.GetOrCreateCustom()[e.CustomKeyLightGradient] = (new ChromaLightGradient(begin, end, duration)).ToJson();
-				e.CustomData.Remove(e.CustomKeyColor);
-			}
-		}};
-		return (getter, setter);
-	}
-	
-	// Create and delete animation
-	public static (Getter<bool?>, Setter<bool?>) GetSetAnimation(bool v2) {
-		string animation_key = v2 ? "_animation" : "animation";
-		return CustomGetSetNode(animation_key, "{}");
-	}
-	
-	// Create or remove object with default json
-	public static (Getter<bool?>, Setter<bool?>) CustomGetSetNode(string path, string json) {
-		Getter<bool?> getter = (o) => GetNode(((BaseObject)o).CustomData, path) != null;
-		Setter<bool?> setter = (o, v) => {
-			if (!(v ?? false)) {
-				RemoveNode(((BaseObject)o).CustomData, path);
-			}
-			else if (GetNode(((BaseObject)o).CustomData, path) == null) {
-				SetNode(((BaseObject)o).CustomData, path, JSON.Parse(json));
-			}
-		};
-		return (getter, setter);
-	}
-	
-	public static (Getter<string?>, Setter<string?>) CustomGetSetColor(string field_name) {
-		Getter<string?> getter = (o) => {
-			if (GetNode(((BaseObject)o).CustomData, field_name) is JSONNode n) {
-				if (Settings.Get(Settings.ColorHex, true)) {
-					var color = n.ReadColor();
-					return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
-				}
-				else {
-					return JsonToRaw(n);
-				}
-			}
-			else {
-				return null;
-			}
-		};
-		Setter<string?> setter = (o, v) => {
-			if (string.IsNullOrEmpty(v)) {
-				RemoveNode(((BaseObject)o).CustomData, field_name);
-			}
-			else if (v![0] == '#') {
-				ColorUtility.TryParseHtmlString(v, out var color);
-				Plugin.Trace($"{v} => {color}");
-				var jc = new JSONArray();
-				jc.WriteColor(color);
-				SetNode(((BaseObject)o).GetOrCreateCustom(), field_name, jc);
-			}
-			else {
-				var n = RawToJson(v);
-				if (n != null) {
-					SetNode(((BaseObject)o).CustomData, field_name, n);
-				}
-			}
-			(o as BaseObject)?.RefreshCustom();
-		};
-		return (getter, setter);
-	}
-	
-	public static (Getter<bool?>, Setter<bool?>) EEGetSetComp(string name) {
-		Data.Getter<bool?> getter = (ee) => (ee as BaseEnvironmentEnhancement)!.Components?.HasKey(name);
-		Data.Setter<bool?> setter = (ee, v) => {
-			if (v == false) {
-				(ee as BaseEnvironmentEnhancement)!.Components?.Remove(name);
-			}
-			else {
-				(ee as BaseEnvironmentEnhancement)!.Components ??= new JSONObject();
-				(ee as BaseEnvironmentEnhancement)!.Components[name] = new JSONObject();
-			}
-		};
-		return (getter, setter);
-	}
-	
-	public static (Getter<float?>, Setter<float?>) V3Component((Getter<Vector3?>, Setter<Vector3?>) get_set, Axis axis) {
-		Getter<float?> getter = (o) => {
-			var v = get_set.Item1(o);
-			return axis switch {
-				Axis.X => v?.x,
-				Axis.Y => v?.y,
-				Axis.Z => v?.z,
-				_ => null,
-			};
-		};
-		Setter<float?> setter = (o, v) => {
-			var old = get_set.Item1(o) ?? new Vector3();
-			switch (axis) {
-			case Axis.X: old.x = v ?? 0; break;
-			case Axis.Y: old.y = v ?? 0; break;
-			case Axis.Z: old.z = v ?? 0; break;
-			};
-			get_set.Item2(o, old);
-		};
-		return (getter, setter);
-	}
-	
-	public static (Getter<TOutput?>, Setter<TOutput?>) Add<TInput, TOutput>((Getter<TInput?>, Setter<TInput?>) get_set, (System.Func<TInput?, TOutput?>, System.Func<TOutput?, TInput?>) conv) {
-		Getter<TOutput?> getter = (o) => conv.Item1(get_set.Item1(o));
-		Setter<TOutput?> setter = (o, v) => get_set.Item2(o, conv.Item2(v));
-		
-		return (getter, setter);
-	}
-	
-#endregion
-	
-#region Editing many objects
-	
-	// Value, Mixed?
-	public static (T?, bool) GetAllOrNothing<T>(IEnumerable editing, Getter<T?> getter) {
-		var it = editing.GetEnumerator();
-		it.MoveNext();
-		var first = getter(it.Current);
-		while (it.MoveNext()) {
-			T? v = getter(it.Current);
-			if (v == null && first == null)
-				continue;
-			if (!(v?.Equals(first) ?? false)) {
-				first = default!;
-				return (first, true);
-			}
-		}
-		
-		return (first, false);
-	}
-	
-	public static void UpdateObjects<T>(IList things, Setter<T?> setter, T? value, bool time = false) {
-		try { switch (things) {
-		case List<BaseObject> editing:
-			if (time) {
-#if CHROMPER_13
-				var beatmapActions = new List<BeatmapObjectModifiedAction>();
-#else
-				var beatmapActions = new List<BeatmapObjectUpdatedAction>();
-#endif
-				foreach (var o in editing!) {
-					var orig = BeatmapFactory.Clone(o);
-					
-					// Based on SelectionController.MoveSelection
-					var collection = BeatmapObjectContainerCollection.GetCollectionForType(o.ObjectType);
-					
-					collection.DeleteObject(o, false, false, "", true, false);
-					
-					setter(o, value);
-					
-					collection.SpawnObject(o, false, true);
-					
-#if CHROMPER_13
-					beatmapActions.Add(new BeatmapObjectModifiedAction(o, o, orig, $"Edited a {o.ObjectType} with Prop Edit.", true));
-#else
-					beatmapActions.Add(new BeatmapObjectUpdatedAction(o, orig, $"Edited a {o.ObjectType} with Prop Edit.", true));
-#endif
-				}
-				
-				BeatmapActionContainer.AddAction(
-					new ActionCollectionAction(beatmapActions, true, false, $"Edited ({editing.Count()}) objects with Prop Edit."),
-					true);
-				BeatmapObjectContainerCollection.RefreshAllPools();
-			}
-			else {
-				bool ees = false;
-				var modified = new List<BaseObject>();
-				foreach (var o in editing!) {
-					// Work around chromapper bug where all edits to any environment enhancement gets applied to [0]
-					if (o is BaseEnvironmentEnhancement eh) {
-						ees = true;
-						Plugin.Trace("Funky workaround!");
-						var collection = (GeometryGridContainer)BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.EnvironmentEnhancement);
-						
-						if (collection.LoadedContainers.ContainsKey(eh)) {
-							GameObject.DestroyImmediate(collection.LoadedContainers[eh].gameObject);
-							collection.LoadedContainers.Remove(eh);
-							collection.ObjectsWithContainers.Remove(eh);
-						}
-						SelectionController.Deselect(o, false);
-						
-						setter(o, value);
-					}
-					else {
-						var mod = BeatmapFactory.Clone(o);
-						modified.Add(mod);
-						
-						setter(mod, value);
-						
-						Plugin.Trace($"{o.ToJson()} => {mod.ToJson()}");
-					}
-				}
-				if (ees) {
-					var collection = (GeometryGridContainer)BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.EnvironmentEnhancement);
-					collection.RefreshPool(true);
-					foreach (var o in editing!) {
-						SelectionController.Select(o, true, false, false);
-					}
-					Plugin.map_settings!.Refresh();
-				}
-				else {
-					BeatmapActionContainer.AddAction(
-						new BeatmapObjectModifiedCollectionAction(modified, editing, $"Edited ({modified.Count()}) objects with Prop Edit."),
-						true);
-				}
-			}
-			// Need to refresh Selection.Selected
-			Selection.OnObjectsSelected();
-			break;
-		default:
-			foreach (var i in things) {
-				setter(i, value);
-			}
-			Debug.LogWarning($"{things.Count} items edited directly with PropEdit, undo/redo will not work for these!");
-			break;
-		} }
-		catch (Exception e) {
-			Debug.LogError("Error editing objects with PropEdit!");
-			Debug.LogException(e);
-		}
-	}
-	
-#endregion
 	
 #region JSON utils
 	
@@ -502,6 +80,81 @@ public static class Data {
 	
 #region Converters
 	
+	private class TextParserConverter<T> : IConverter<T?, string?>  where T : struct {
+		public string Forwards(T? input)
+			=> (input != null)
+				? (string)Convert.ChangeType(input, typeof(string))
+				: "";
+		// Can throw: catch should be in the textbox setter
+		public T? Backwards(string? input) {
+			var table = new System.Data.DataTable();
+			var computed = table.Compute(input, "");
+			T? converted = (computed == System.DBNull.Value)
+				? null
+				: (T)Convert.ChangeType(computed, typeof(T));
+			//Plugin.Trace($"`{input}` => {converted}");
+			return converted;
+		}
+	}
+	public static IConverter<T?, string?> TextParser<T>() where T : struct => new TextParserConverter<T>();
+	
+	public class JSONValueConv<T> : IConverter<JSONNode?, T?> {
+		public T? Forwards(JSONNode? node)
+			=> (node == null)
+				? default(T)!
+				: Data.CreateConvertFunc<JSONNode, T>()(node);
+		public JSONNode? Backwards(T? v)
+			=> (v == null)
+				? null
+				: Data.CreateConvertFunc<T, SimpleJSON.JSONNode>()(v);
+	}
+	public static JSONValueConv<T> JSONValue<T>() => new();
+	
+	public class JSONRawConv : IConverter<JSONNode?, string?> {
+		public string? Forwards(JSONNode? node) {
+			return (node == null)
+				? null
+				: node.ToString();
+		}
+		public JSONNode? Backwards(string? value) {
+			if (string.IsNullOrEmpty(value) || value == "{}" || value == "[]") {
+				return null;
+			}
+			return RawToJson(value!);
+		}
+	}
+	public static JSONRawConv JSONRaw() => new();
+	
+	public class JSONColorCoverter : IConverter<JSONNode?, string?> {
+		public string? Forwards(JSONNode? node) {
+			if (node == null) {
+				return null;
+			}
+			if (Settings.Get(Settings.ColorHex, true)) {
+				var color = node.ReadColor();
+				return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
+			}
+			else {
+				return node.ToString();
+			}
+		}
+		public JSONNode? Backwards(string? str) {
+			if (string.IsNullOrEmpty(str)) {
+				return null;
+			}
+			else if (str![0] == '#') {
+				ColorUtility.TryParseHtmlString(str, out var color);
+				var jc = new JSONArray();
+				jc.WriteColor(color);
+				return jc;
+			}
+			else {
+				return RawToJson(str);
+			}
+		}
+	}
+	public static JSONColorCoverter JSONColor() => new();
+	
 	// https://stackoverflow.com/a/32037899
 	public static System.Func<TInput, TOutput> CreateConvertFunc<TInput, TOutput>()
 	{
@@ -523,14 +176,14 @@ public static class Data {
 			if (!NOT_MATH_REG.IsMatch(part)) {
 				try {
 					var computed = table.Compute(part, "");
-					Plugin.Trace($"[Raw] `{part}` = {computed}");
+					//Plugin.Trace($"[Raw] `{part}` = {computed}");
 					var at = raw.IndexOf(part);
 					raw = raw.Substring(0, at) + computed.ToString() + raw.Substring(at + part.Length);
 				}
 				catch (Exception) { };
 			}
 			else {
-				Plugin.Trace($"Is not math: {part}");
+				//Plugin.Trace($"Is not math: {part}");
 			}
 		}
 		
@@ -555,18 +208,6 @@ public static class Data {
 		
 		Debug.LogWarning($"Couldn't interpret \"{raw}\" as JSON");
 		return null;
-	}
-	
-	public static string? JsonToRaw(JSONNode node) {
-		return node.ToString();
-	}
-	
-	public static JSONNode StringJson(string value) {
-		return new JSONString(value);
-	}
-	
-	public static string? JsonString(JSONNode node) {
-		return (string?)(node as JSONString);
 	}
 	
 #endregion

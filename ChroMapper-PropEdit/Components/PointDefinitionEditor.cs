@@ -22,9 +22,12 @@ public class PointDefinitionEditor : MonoBehaviour {
 		return pde;
 	}
 	
-	public PointDefinitionEditor Set(string? value, bool mixed, Textbox.Setter setter, UnityAction<bool>? default_setter = null) {
+	public PointDefinitionEditor Set(IAccessor<string?> accessor, UnityAction<bool?>? default_setter = null) {
 		full_value!.gameObject.SetActive(true);
 		helper_selector!.gameObject.SetActive(true);
+		
+		var value = accessor.Get();
+		var mixed = accessor.IsMixed();
 		
 		var types = new List<string>() {
 			"Point Definition Type:",
@@ -55,20 +58,21 @@ public class PointDefinitionEditor : MonoBehaviour {
 			}
 		}, UI.LoadSprite("ChroMapper_PropEdit.Resources.Settings.png"));
 		
-		full_value!.Set(value, mixed, setter);
+		full_value!.Set(value, mixed, accessor.Set);
 		
-		ArrayEditor.Getter arr_get = () => {
-			return (Data.RawToJson(value ?? "") as JSONArray) ?? new JSONArray();
-		};
-		ArrayEditor.Setter arr_set = (JSONArray node) => setter(node.ToString());
-		array_helper!.Set((arr_get, arr_set), true);
+		var arr_accessor = new Accessor<JSONNode?>(
+			() => (Data.RawToJson(value ?? "") as JSONArray),
+			(node) => accessor.Set(node?.ToString())
+		);
+		
+		array_helper!.Set(arr_accessor + ArrayEditor.JsonConverter(true));
 		
 		var pds = new Map<string?>();
 		foreach (var pd in BeatSaberSongContainer.Instance.Map.PointDefinitions.Keys) {
 			pds.Add($"\"{pd}\"", pd);
 		}
 		
-		UI.UpdateDropdown(dropdown_helper!, value, (v) => setter(v), pds, true);
+		UI.UpdateDropdown(dropdown_helper!, value, (v) => accessor.Set(v), pds, true);
 		
 		if ((value?.StartsWith("[") ?? false && array_helper!.gameObject.activeInHierarchy == false)) {
 			ShowArray();

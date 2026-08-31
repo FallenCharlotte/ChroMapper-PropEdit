@@ -11,11 +11,20 @@ using UnityEngine.UI;
 
 using ChroMapper_PropEdit.Components;
 using ChroMapper_PropEdit.Enums;
+using ChroMapper_PropEdit.Utils;
 
 using Convert = System.Convert;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
+/**
+ * Naming scheme consistency:
+ * 
+ * The UI module will have AddComponent, CreateComponent, UpdateComponent, SingleComponent
+ *   - AddComponent is a combined Create + Update
+ * 
+ * Specific windows will have EditComponent() functions specific to their needs
+ */
 public static class UI {
 	public static GameObject AddChild(GameObject parent, string name, params System.Type[] components) {
 		var obj = new GameObject(name, components);
@@ -180,51 +189,17 @@ public static class UI {
 		}
 	}
 	
+	// Backported for PaulMapper
 	public static UITextInput AddParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
-		return CreateParsed<T>(parent, value, setter).TextInput!;
-	}
-	public static Textbox CreateParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
-		var input = Textbox.Create(parent);
-		UI.AttachTransform(input.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
-		
-		return UpdateParsed<T>(input, value, false, setter);
-	}
-	
-	public static Textbox UpdateParsed<T>(Textbox input, T? value, bool mixed, UnityAction<T?> setter) where T : struct {
-		input.Value = (value != null)
-			? (string)Convert.ChangeType(value, typeof(string))
-			: "";
-		input.OnChange = (s) => {
-			try {
-				var table = new System.Data.DataTable();
-				var computed = table.Compute(s, "");
-				T? converted = (computed == System.DBNull.Value)
-					? null
-					: (T)Convert.ChangeType(computed, typeof(T));
-				Plugin.Trace($"`{s}` => {converted}");
-				setter(converted);
-			}
-			catch (System.Exception e) {
-				Debug.LogError($"Invalid expression? `{s}`");
-				Debug.LogException(e);
-			}
-		};
-		input.Placeholder = (mixed) ? "Mixed" : "Empty";
-		
-		return input;
-	}
-	
-	public static Textbox SingleParsed<T>(GameObject parent, T? value, UnityAction<T?> setter) where T : struct {
-		if (parent.GetComponentInChildren<Textbox>() is Textbox text) {
-			return UpdateParsed(text, value, false, setter);
-		}
-		else {
-			return CreateParsed(parent, value, setter);
-		}
+		var accessor = new Accessor<T?>(
+			() => value,
+			(v) => setter(v)
+		) + Data.TextParser<T>();
+		return AddTextbox(parent, accessor.Get(), accessor.Set, false).TextInput!;
 	}
 	
 	public static Textbox AddTextbox(GameObject parent, string? value, Textbox.Setter setter, bool tall = false) {
-		var input = Textbox.Create(parent, tall);
+		var input = Components.Textbox.Create(parent, tall);
 		UI.AttachTransform(input.gameObject, new Vector2(0, 0), new Vector2(0, 0), new Vector2(0.5f, 0), new Vector2(1, 1));
 		
 		return input.Set(value, false, setter);
@@ -280,6 +255,7 @@ public static class UI {
 	}
 	
 	public static void RefreshTooltips(GameObject? root) {
+		Plugin.Trace($"RefreshTooltips: {root}");
 		if (root == null)
 			return;
 		

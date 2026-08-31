@@ -9,16 +9,9 @@ using SimpleJSON;
 
 namespace ChroMapper_PropEdit.Components {
 
-// TODO: More generic getter/setter, the raw toggle is jank and not flexible enough
-
 public class ArrayEditor : MonoBehaviour {
 	
-	public delegate JSONArray? Getter();
-	public delegate void Setter(JSONArray v);
-	// Return raw json
-	public Getter? _getter = null;
-	public Setter? _setter = null;
-	bool raw = false;
+	public IAccessor<List<string>?>? accessor = null;
 	bool self_refresh = false;
 	
 	public ArrayEditor() {
@@ -34,13 +27,12 @@ public class ArrayEditor : MonoBehaviour {
 		return ae;
 	}
 	
-	public static ArrayEditor Create(GameObject parent, string title, (Getter, Setter) get_set, bool raw = false, string tooltip = "") {
-		return Singleton(parent, title, tooltip).Set(get_set, raw, true);
+	public static ArrayEditor Create(GameObject parent, string title, IAccessor<List<string>?> accessor, string tooltip = "") {
+		return Singleton(parent, title, tooltip).Set(accessor, true);
 	}
 	
-	public ArrayEditor Set((Getter, Setter) get_set, bool raw = false, bool self_refresh = false) {
-		(_getter, _setter) = get_set;
-		this.raw = raw;
+	public ArrayEditor Set(IAccessor<List<string>?> accessor, bool self_refresh = false) {
+		this.accessor = accessor;
 		this.self_refresh = self_refresh;
 		Refresh();
 		return this;
@@ -71,20 +63,17 @@ public class ArrayEditor : MonoBehaviour {
 		refresh_frame = false;
 		linenum = 0;
 		
-		var node = _getter!();
+		var (node, mixed) = accessor!.Get2();
 		
 		if (node == null) {
-			AddLine("", true);
+			AddLine("", mixed);
 		}
 		else {
 			foreach (var item in node) {
 				if (linenum == insert) {
 					AddLine("");
 				}
-				var line = (raw)
-					? item.Value.ToString().Replace(",", ", ")
-					: (string)item.Value;
-				AddLine(line);
+				AddLine(item);
 			}
 			
 			AddLine("");
@@ -121,15 +110,15 @@ public class ArrayEditor : MonoBehaviour {
 		
 		var lines = inputs.Select(it => it.Value).ToArray();
 		
-		var node = new JSONArray();
+		var node = new List<string>();
 		
 		foreach (var line in lines) {
 			if (line != "") {
-				node.Add("", raw ? Data.RawToJson(line) : line);
+				node.Add(line);
 			}
 		}
 		
-		_setter!(node);
+		accessor!.Set(node);
 		
 		// This exists purely to make the info and warning field simpler
 		if (self_refresh) {
@@ -154,7 +143,7 @@ public class ArrayEditor : MonoBehaviour {
 			var input = Textbox.Create(container!.panel!, true);
 			input.gameObject.name = $"Input {i}";
 			
-			UI.AttachTransform(input.gameObject, new Vector2(0, raw ? 22 : 20), new Vector2(0, 0));
+			UI.AttachTransform(input.gameObject, new Vector2(0, 22), new Vector2(0, 0));
 			
 			inputs.Add(input);
 		}
@@ -164,21 +153,28 @@ public class ArrayEditor : MonoBehaviour {
 		}
 	}
 	
-	public static (Getter, Setter) NodePathGetSet(JSONNode root, string path) {
-		Getter getter = () => {
-			return Data.GetNode(root, path)?.AsArray ?? new JSONArray();
-		};
-		Setter setter = (JSONArray v) => {
-			if (v.Count == 0) {
-				Data.RemoveNode(root, path);
+	public static Converter<JSONNode?, List<string>?> JsonConverter(bool raw = false) => new(
+			(node) => {
+				var list = new List<string>();
+				switch (node) {
+					case JSONArray arr:
+						foreach (var line in arr) list.Add(raw ? line.Value.ToString() : (string)line.Value);
+						break;
+					case JSONString s:
+						list.Add(s);
+						break;
+					default:
+						return null;
+				}
+				return list;
+			},
+			(list) => {
+				if (list == null) return null;
+				var node = new JSONArray();
+				foreach (var line in list) node.Add("", raw ? Data.RawToJson(line) : line);
+				return node;
 			}
-			else {
-				Data.SetNode(root, path, v);
-			}
-		};
-		
-		return (getter, setter);
-	}
+		);
 	
 	// Redo the tab after changes are processed
 	public void TabDir((Textbox, int) args) {

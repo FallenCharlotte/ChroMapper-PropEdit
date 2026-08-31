@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using ChroMapper_PropEdit.Components;
+using ChroMapper_PropEdit.Utils;
 
 namespace ChroMapper_PropEdit.UserInterface {
 
@@ -53,7 +54,25 @@ public abstract class UIWindow : MonoBehaviour {
 		panels.Push(panel!);
 	}
 	
-	public virtual Collapsible AddExpando(string name, string label, bool expanded, string tooltip = "", bool background = true) {
+	public virtual Toggle EditCheckbox(string label, IAccessor<bool> accessor, string tooltip = "") {
+		var container = UI.AddField(current_panel!, label, null, tooltip);
+		return UI.AddCheckbox(container, accessor.Get(), accessor.Set);
+	}
+	
+	public virtual UIDropdown EditDropdown<T>(string label, IAccessor<T?> accessor, Enums.Map<T?> options, bool nullable = false, string tooltip = "") {
+		var container = UI.AddField(current_panel!, label, null, tooltip);
+		return UI.AddDropdown<T>(container, accessor.Get(), accessor.Set, options, nullable);
+	}
+	
+	public virtual Textbox EditTextbox(string label, IAccessor<string?> accessor, bool tall = false, string tooltip = "") {
+		var container = UI.AddField(current_panel!, label, null, tooltip);
+		return UI.AddTextbox(container, accessor.Get(), accessor.Set, tall);
+	}
+	
+	public virtual Textbox EditParsed<T>(string label, IAccessor<T?> accessor, string tooltip = "") where T : struct
+		=> EditTextbox(label, accessor + Data.TextParser<T>(), false, tooltip);
+	
+	public virtual Collapsible Expando(string name, string label, bool expanded, string tooltip = "", bool background = true) {
 		var c = Collapsible.Singleton(current_panel ?? panel!, name, label, expanded, tooltip, background);
 		panels.Push(c.panel!);
 		return c;

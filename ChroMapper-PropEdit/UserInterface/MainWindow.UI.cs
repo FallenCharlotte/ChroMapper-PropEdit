@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using SimpleJSON;
 
 using Beatmap.Base;
 
@@ -104,12 +105,12 @@ public partial class MainWindow : UIWindow {
 	
 #region Form Fields
 	
-	private GameObject AddLine(string title, Vector2? size = null, string tooltip = "") {
+	private GameObject Line(string title, Vector2? size = null, string tooltip = "") {
 		var existing = (!full_rebuild) ? current_panel!.transform.Find(title)?.gameObject : null;
 		return existing ?? UI.AddField(current_panel!, title, size, tooltip);
 	}
 	
-	public override Collapsible AddExpando(string name, string label, bool expanded, string tooltip = "", bool background = true) {
+	public override Collapsible Expando(string name, string label, bool expanded, string tooltip = "", bool background = true) {
 		var expando = ((!full_rebuild)
 			? current_panel!.transform.Find(name)?.GetComponent<Collapsible>()
 			: null) ?? Collapsible.Create(current_panel ?? panel!, name, label, expanded, tooltip, background);
@@ -117,122 +118,171 @@ public partial class MainWindow : UIWindow {
 		return expando;
 	}
 	
+	public override Toggle EditCheckbox(string label, IAccessor<bool> accessor, string tooltip = "")
+		=> EditCheckbox(label, (IAccessor<bool?>)accessor, null, tooltip);
+	
 	// CustomData node gets removed when value = default
-	private Toggle AddCheckbox(string title, (Data.Getter<bool?>, Data.Setter<bool?>) get_set, bool? _default, string tooltip = "") {
-		var container = AddLine(title, null, tooltip);
-		var staged = editing!;
-		var (value_or, mixed) = Data.GetAllOrNothing<bool?>(editing!, get_set.Item1);
+	public Toggle EditCheckbox(string label, IAccessor<bool?> accessor, bool? _default, string tooltip = "") {
+		var container = Line(label, null, tooltip);
+		
+		var value_or = accessor.Get();
+		var mixed = accessor.IsMixed();
+		
 		// Do some jank, mixed needs to be drawn as true but act like false
 		var value = (value_or ?? _default ?? false) || mixed;
-		UnityAction<bool> setter = (v) => {
-			v ^= mixed;
-			if (v == _default) {
-				Data.UpdateObjects<bool?>(staged, get_set.Item2, null);
-			}
-			else {
-				Data.UpdateObjects<bool?>(staged, get_set.Item2, v);
-			}
-		};
 		
-		Toggle toggle;
+		var conv = new Converter<bool?, bool>(
+			(b) => b ?? _default ?? false,
+			(v) => {
+				v ^= mixed;
+				return (v == _default)
+					? null
+					: v;
+			}
+		);
+		var modded = (accessor as MultiAccessor<bool?>)!.Insert(conv);
+		
+		Toggle input;
 		
 		if (full_rebuild) {
-			toggle = UI.AddCheckbox(container, value!, setter);
+			input = UI.AddCheckbox(container, value!, modded.Set);
 		}
 		else {
-			toggle = container.GetComponentInChildren<Toggle>();
-			toggle = UI.UpdateCheckbox(toggle!, value!, setter);
+			input = container.GetComponentInChildren<Toggle>();
+			input = UI.UpdateCheckbox(input!, value!, modded.Set);
 		}
-		((Image)toggle.graphic).sprite = (mixed)
+		((Image)input.graphic).sprite = (mixed)
 			// Another sprite ripped from ChroMapper because it's unused and gets optimized out ;-;
 			? UI.LoadSprite("ChroMapper_PropEdit.Resources.Line.png")
 			: UI.GetSprite("Checkmark");
-		((Image)toggle.graphic).color = Color.black;
-		return toggle;
+		((Image)input.graphic).color = Color.black;
+		return input;
 	}
 	
-	private UIDropdown AddDropdown<T>(string? title, (Data.Getter<T?>, Data.Setter<T?>) get_set, Map<T?> type, bool nullable = false, string tooltip = "") {
-		var container = (title != null)
-			? AddLine(title, null, tooltip)
+	// I hate C# I hate C# I hate C#
+	// Can't override because C# sucks and can't handle nullable correctly
+	// Literally just says there's "no suitable method found to override" with copy-pasted signature
+#pragma warning disable CS0114
+	public virtual UIDropdown EditDropdown<T>(string? label, IAccessor<T?> accessor, Enums.Map<T?> options, bool nullable = false, string tooltip = "") {
+#pragma warning restore CS0114
+		var container = (label != null)
+			? Line(label, null, tooltip)
 			: current_panel!;
-		var staged = editing!;
-		var (value, _) = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
-		UnityAction<T?> setter = (v) => {
-			Data.UpdateObjects<T?>(staged, get_set.Item2, v);
-		};
 		
-		if (full_rebuild) {
-			return UI.AddDropdown(container, value, setter, type, nullable);
+		if (!full_rebuild && container.GetComponentInChildren<UIDropdown>() is UIDropdown input) {
+			return UI.UpdateDropdown(input, accessor.Get(), accessor.Set, options, nullable);
 		}
-		else {
-			var dd = container.GetComponentInChildren<UIDropdown>();
-			return UI.UpdateDropdown(dd, value, setter, type, nullable);
-		}
+		return UI.AddDropdown(container, accessor.Get(), accessor.Set, options, nullable);
 	}
 	
-	private Textbox AddParsed<T>(string title, (Data.Getter<T?>, Data.Setter<T?>) get_set, bool time = false, string tooltip = "") where T : struct {
-		var container = AddLine(title, null, tooltip);
-		var staged = editing!;
-		var (value, mixed) = Data.GetAllOrNothing<T?>(editing!, get_set.Item1);
-		
-		UnityAction<T?> setter = (v) => {
-			if (!(v == null && value == null)) {
-				Data.UpdateObjects<T?>(staged, get_set.Item2, v, time);
-			}
-		};
-		
-		if (full_rebuild) {
-			return UI.SetMixed(UI.CreateParsed<T>(container, value, setter), mixed);
-		}
-		else {
-			var input = container.GetComponentInChildren<Textbox>();
-			UI.UpdateParsed<T>(input, value, mixed, setter);
-			return input;
-		}
-	}
+	public override Textbox EditParsed<T>(string title, IAccessor<T?> accessor, string tooltip = "") where T : struct
+		=> EditTextbox(title, accessor + Data.TextParser<T>(), false, tooltip);
 	
-	private Textbox AddTextbox(string? title, (Data.Getter<string?>, Data.Setter<string?>) get_set, bool tall = false, string tooltip = "") {
+	public override Textbox EditTextbox(string? title, IAccessor<string?> accessor, bool tall = false, string tooltip = "") {
 		var container = (title != null)
-			? AddLine(title, tall ? (new Vector2(0, 22)) : null, tooltip)
+			? Line(title, tall ? (new Vector2(0, 22)) : null, tooltip)
 			: current_panel!;
-		var staged = editing!;
-		var (value, mixed) = Data.GetAllOrNothing<string>(editing!, get_set.Item1);
 		
-		Textbox.Setter setter = (v) => {
-			if (v == "") {
-				v = null;
-			}
-			if (v != value) {
-				Data.UpdateObjects<string?>(staged, get_set.Item2, v);
-			}
-		};
+		var value = accessor.Get();
+		var mixed = accessor.IsMixed();
 		
-		if (full_rebuild) {
-			return UI.SetMixed(UI.AddTextbox(container, value, setter), mixed);
+		if (!full_rebuild && container.GetComponentInChildren<Textbox>() is Textbox input) {
+			return input.Set(value, mixed, accessor.Set);
 		}
-		else {
-			var input = container.GetComponentInChildren<Textbox>();
-			return input.Set(value, mixed, setter);
-		}
+		return UI.SetMixed(UI.AddTextbox(container, value, accessor.Set), mixed);
 	}
 	
-	private void AddPointDefinition(string title, (Data.Getter<string?>, Data.Setter<string?>) get_set, string tooltip = "") {
-		var (value, mixed) = Data.GetAllOrNothing(editing!, get_set.Item1);
-		
+	private void EditPointDefinition(string title, IAccessor<string?> accessor, string tooltip = "") {
 		PointDefinitionEditor
 			.Singleton(current_panel!, title, tooltip)
+			.Set(accessor);
+	}
+	
+#endregion
+	
+#region Custom helper fields
+	
+	private void EditAnimation(string name, string path, string default_json, string tooltip) {
+		PointDefinitionEditor
+			.Singleton(
+				current_panel!,
+				name,
+				tooltip)
 			.Set(
-				value,
-				mixed,
-				(v) => {
-					if (v == "") {
-						v = null;
-					}
-					if (v != value) {
-						Data.UpdateObjects<string?>(editing!, get_set.Item2, v);
-					}
-				}
-			);
+				CustomFieldRaw(path),
+				CustomJSONNode(path, default_json).Set);
+	}
+	
+	private void EditColor(string label, string key, string tooltip = "") {
+		EditTextbox(label, CustomField(key, "CustomData").Insert(Data.JSONColor()), false, tooltip);
+	}
+	
+	// Unarrayable track
+	private void EditTrack(string? title, IAccessor<string?> accessor, string tooltip = "") {
+		// TODO: Want a combined dropdown + custom textbox
+		/*
+		var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent) as CustomEventGridContainer;
+		var tracks = new Map<string?>().AddRange(collection!.EventsByTrack.Keys);
+		AddDropdown(title, get_set, tracks, true, tooltip);
+		*/
+		EditTextbox(title, accessor, false, tooltip);
+	}
+	
+	// Arrayable tracks
+	private void EditTracks(string title, MultiAccessor<JSONNode?> accessor, string tooltip = "") {
+		ArrayEditor
+			.Singleton(current_panel!, title, tooltip)
+			.Set(accessor.Insert(ArrayEditor.JsonConverter()));
+		
+	}
+	
+	private void EditPrefab(string title, string prop, bool nullable = true) {
+		if (bundleInfo?.Prefabs == null) {
+			EditTextbox(title, DataField<string>(prop), false);
+		}
+		else {
+			EditDropdown(title, DataField<string>(prop), bundleInfo.Prefabs, nullable);
+		}
+	}
+	
+	//[X, Y, Z] JSON Array
+	private void EditVector3(string name, MultiAccessor<Vector3?> accessor) {
+		var v3json = new Converter<Vector3?, JSONNode?>(
+			(vec) => (vec != null)
+				? (new JSONArray()).WriteVector3(vec ?? new Vector3()) // Holy fuck why can't the ! operator ever do its job
+				: null,
+			(node) => node?.ReadVector3()
+		);
+		
+		EditTextbox(name, accessor.Insert(v3json).Insert(Data.JSONRaw()), true);
+	}
+	
+	private void EditEEComponent(string name, IAccessor<bool?> accessor, System.Action editor) {
+		var checkbox = EditCheckbox(name, accessor, null);
+		
+		var comp_container = Collapsible.Singleton(current_panel!, "_"+name, name, false);
+		
+		panels.Push(comp_container.panel!);
+		editor();
+		panels.Pop();
+		
+		checkbox.onValueChanged.AddListener((v) => {
+			if (v) {
+				comp_container.OnAnimationComplete = null;
+				comp_container.SetExpanded(false);
+				comp_container.gameObject.SetActive(true);
+				comp_container.SetExpanded(true);
+			}
+			else {
+				comp_container.OnAnimationComplete = (v) => {
+					comp_container.gameObject.SetActive(v);
+				};
+				comp_container.SetExpanded(v);
+			}
+		});
+		
+		comp_container.gameObject.SetActive(checkbox.isOn);
+		comp_container.SetExpanded(checkbox.isOn);
 	}
 	
 #endregion

@@ -56,7 +56,13 @@ public class Textbox : MonoBehaviour {
 		});
 		TextInput.InputField.onEndEdit.AddListener((string s) => {
 			if (s != _value) {
-				OnChange!(s);
+				try {
+					OnChange!(s);
+				}
+				catch (System.Exception e) {
+					Debug.LogError("Error while setting value:");
+					Debug.LogException(e);
+				}
 			}
 			else {
 				Plugin.Trace($"No change! {_value} => {s}");

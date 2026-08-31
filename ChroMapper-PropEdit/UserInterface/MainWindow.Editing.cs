@@ -33,10 +33,10 @@ public partial class MainWindow : UIWindow {
 	private bool refresh_frame = false;
 	
 	private void wipe(int skip = 0) {
-		Plugin.Trace($"Wipe after {skip}");
+		//Plugin.Trace($"Wipe after {skip}");
 		foreach (Transform child in panel!.transform) {
 			while (panel!.transform.childCount > skip) {
-				Plugin.Trace($"Delete {panel!.transform.GetChild(skip).gameObject.name}");
+				//Plugin.Trace($"Delete {panel!.transform.GetChild(skip).gameObject.name}");
 				GameObject.DestroyImmediate(panel!.transform.GetChild(skip).gameObject);
 			}
 		}
@@ -53,7 +53,7 @@ public partial class MainWindow : UIWindow {
 	private bool CheckRefresh(SelectionType new_type, bool force = false) {
 		full_rebuild = false;
 		
-		Plugin.Trace($"{old_stype} => {new_type}");
+		//Plugin.Trace($"{old_stype} => {new_type}");
 		
 		if (force || new_type != old_stype) {
 			wipe();
@@ -95,195 +95,195 @@ public partial class MainWindow : UIWindow {
 			panels.Clear();
 			panels.Push(panel!);
 			
-			AddParsed("Beat", Data.GetSet<float>("JsonTime"), true, (o is BaseGrid)
+			EditParsed("Beat", ObjectField<float>("JsonTime", true), (o is BaseGrid)
 				? tooltip.GetTooltip(PropertyType.Object, TooltipStrings.Tooltip.Beat)
 				: tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BeatEvent));
 			
 			switch (type) {
 				case ObjectType.Note: {
 					var note = (o as BaseNote)!;
-					AddParsed("X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.X));
-					AddParsed("Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Y));
-					AddDropdown<int?>("Type", Data.GetSet<int>("Type"), Notes.NoteTypes, false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Type));
-					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.CutDirection));
+					EditParsed("X", ObjectField<int>("PosX"), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.X));
+					EditParsed("Y", ObjectField<int>("PosY"), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Y));
+					EditDropdown<int?>("Type", ObjectField<int>("Type"), Notes.NoteTypes, false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Type));
+					EditDropdown<int?>("Direction", ObjectField<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.CutDirection));
 					if (!v2) {
-						AddParsed("Angle Offset", Data.GetSet<int>("AngleOffset"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.AngleOffset));
+						EditParsed("Angle Offset", ObjectField<int>("AngleOffset"), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.AngleOffset));
 					}
-					AddLine("");
+					Line("");
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						AddExpando(CHROMA_NAME, "Chroma", true);
-						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Color));
+						Expando(CHROMA_NAME, "Chroma", true);
+						EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Color));
 						if (v2) {
-							AddCheckbox("Disable Spawn Effect", Data.CustomGetSet<bool?>("_disableSpawnEffect"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableSpawnEffect));
+							EditCheckbox("Disable Spawn Effect", CustomField<bool?>("_disableSpawnEffect"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableSpawnEffect));
 						}
 						else {
-							AddCheckbox("Spawn Effect", Data.CustomGetSet<bool?>("spawnEffect"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnEffect));
-							AddCheckbox("Disable Debris", Data.CustomGetSet<bool?>("disableDebris"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableDebris));
+							EditCheckbox("Spawn Effect", CustomField<bool?>("spawnEffect"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnEffect));
+							EditCheckbox("Disable Debris", CustomField<bool?>("disableDebris"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableDebris));
 						}
 						panels.Pop();
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						AddExpando(NOODLE_NAME, "Noodle Extensions", true);
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NJS));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnOffset));
-						AddTextbox("Coordinates", Data.CustomGetSetRaw(note.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Rotation", Data.CustomGetSetRaw(note.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Rotation));
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(note.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.LocalRotation));
+						Expando(NOODLE_NAME, "Noodle Extensions", true);
+						EditParsed("NJS", CustomField<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NJS));
+						EditParsed("Spawn Offset", CustomField<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnOffset));
+						EditTextbox("Coordinates", CustomFieldRaw(note.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Coordinates));
+						EditTextbox("Rotation", CustomFieldRaw(note.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Rotation));
+						EditTextbox("Local Rotation", CustomFieldRaw(note.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.LocalRotation));
 						if (v2) {
-							AddParsed("Exact Angle", Data.CustomGetSet<float?>("_cutDirection"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.CutDirection));
-							AddCheckbox("Fake", Data.CustomGetSet<bool?>("_fake"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Fake));
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Interactable));
-							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Flip));
+							EditParsed("Exact Angle", CustomField<float?>("_cutDirection"), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.CutDirection));
+							EditCheckbox("Fake", CustomField<bool?>("_fake"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Fake));
+							EditCheckbox("Interactable", CustomField<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Interactable));
+							EditTextbox("Flip", CustomFieldRaw("_flip"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Flip));
 						}
 						else {
-							AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Fake));
-							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Uninteractable));
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableGravity));
-							AddCheckbox("Disable Look", Data.CustomGetSet<bool?>("disableNoteLook"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableLook));
-							AddCheckbox("No Badcut Direction", Data.CustomGetSet<bool?>("disableBadCutDirection"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NoBadcutDirection));
-							AddCheckbox("No Badcut Speed", Data.CustomGetSet<bool?>("disableBadCutSpeed"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NoBadcutSpeed));
-							AddCheckbox("No Badcut Color", Data.CustomGetSet<bool?>("disableBadCutSaberType"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NoBadcutColor));
-							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Flip));
-							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Link));
+							EditCheckbox("Fake", ObjectField<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Fake));
+							EditCheckbox("Uninteractable", CustomField<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Uninteractable));
+							EditCheckbox("Disable Gravity", CustomField<bool?>("disableNoteGravity"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableGravity));
+							EditCheckbox("Disable Look", CustomField<bool?>("disableNoteLook"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.DisableLook));
+							EditCheckbox("No Badcut Direction", CustomField<bool?>("disableBadCutDirection"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NoBadcutDirection));
+							EditCheckbox("No Badcut Speed", CustomField<bool?>("disableBadCutSpeed"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NoBadcutSpeed));
+							EditCheckbox("No Badcut Color", CustomField<bool?>("disableBadCutSaberType"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NoBadcutColor));
+							EditTextbox("Flip", CustomFieldRaw("flip"), true, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Flip));
+							EditTextbox("Link", CustomField<string?>("link"), false, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Link));
 						}
-						AddTracks("Tracks", Data.CustomGetSetRaw(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Track)); //prob. needs more info
-						AddAnimations(PropertyType.Note, v2);
+						EditTracks("Tracks", CustomField(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Track)); //prob. needs more info
+						EditAnimations(PropertyType.Note, v2);
 						panels.Pop();
 					}
 					
 				}	break;
 				case ObjectType.CustomNote:
-					AddLine("Wow, a custom note! How did you do this?");
+					Line("Wow, a custom note! How did you do this?");
 					break;
 				case ObjectType.Arc: {
-					AddParsed("Head X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.X));
-					AddParsed("Head Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Y));
-					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors, false,tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Type));
-					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.CutDirection));
-					AddParsed("Head Multiplier", Data.GetSet<float>("HeadControlPointLengthMultiplier"), false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Multiplier));
-					AddParsed("Tail Beat", Data.GetSet<float>("TailJsonTime"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Beat)); 
-					AddParsed("Tail X", Data.GetSet<int>("TailPosX"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.X));
-					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Y));
-					AddDropdown<int?>("Tail Direction", Data.GetSet<int>("TailCutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.CutDirection));
-					AddParsed("Tail Multiplier", Data.GetSet<float>("TailControlPointLengthMultiplier"), false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Multiplier));
-					AddDropdown<int?>("Mid-Anchor Mode", Data.GetSet<int>("MidAnchorMode"), Notes.MidAnchorModes, false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.MidAnchorMode));
-					AddLine("");
+					EditParsed("Head X", ObjectField<int>("PosX"), tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.X));
+					EditParsed("Head Y", ObjectField<int>("PosY"), tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Y));
+					EditDropdown<int?>("Color", ObjectField<int>("Color"), Notes.ArcColors, false,tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Type));
+					EditDropdown<int?>("Direction", ObjectField<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.CutDirection));
+					EditParsed("Head Multiplier", ObjectField<float>("HeadControlPointLengthMultiplier"), tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Multiplier));
+					EditParsed("Tail Beat", ObjectField<float>("TailJsonTime"), tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Beat)); 
+					EditParsed("Tail X", ObjectField<int>("TailPosX"), tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.X));
+					EditParsed("Tail Y", ObjectField<int>("TailPosY"), tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Y));
+					EditDropdown<int?>("Tail Direction", ObjectField<int>("TailCutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.CutDirection));
+					EditParsed("Tail Multiplier", ObjectField<float>("TailControlPointLengthMultiplier"), tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Multiplier));
+					EditDropdown<int?>("Mid-Anchor Mode", ObjectField<int>("MidAnchorMode"), Notes.MidAnchorModes, false, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.MidAnchorMode));
+					Line("");
 					
 					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						AddExpando(CHROMA_NAME, "Chroma", true);
-						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Color));
+						Expando(CHROMA_NAME, "Chroma", true);
+						EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Color));
 						panels.Pop();
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						AddExpando(NOODLE_NAME, "Noodle Extensions", true);
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.NJS));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.SpawnOffset));
-						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Rotation));
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.LocalRotation));
+						Expando(NOODLE_NAME, "Noodle Extensions", true);
+						EditParsed("NJS", CustomField<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.NJS));
+						EditParsed("Spawn Offset", CustomField<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.SpawnOffset));
+						EditTextbox("Head Coordinates", CustomFieldRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ArcHead, TooltipStrings.Tooltip.Coordinates));
+						EditTextbox("Tail Coordinates", CustomFieldRaw(s.CustomKeyTailCoordinate), true, tooltip.GetTooltip(PropertyType.ArcTail, TooltipStrings.Tooltip.Coordinates));
+						EditTextbox("Rotation", CustomFieldRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Rotation));
+						EditTextbox("Local Rotation", CustomFieldRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.LocalRotation));
 						if (v2) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Interactable));
-							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Flip)); //not sure if this works
+							EditCheckbox("Interactable", CustomField<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Interactable));
+							EditTextbox("Flip", CustomFieldRaw("_flip"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Flip)); //not sure if this works
 						}
 						else {
-							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Uninteractable));
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.DisableGravity));
-							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Flip));
-							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Link));
+							EditCheckbox("Uninteractable", CustomField<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Uninteractable));
+							EditCheckbox("Disable Gravity", CustomField<bool?>("disableNoteGravity"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.DisableGravity));
+							EditTextbox("Flip", CustomFieldRaw("flip"), true, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Flip));
+							EditTextbox("Link", CustomField<string?>("link"), false, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Link));
 						}
-						AddTracks("Tracks", Data.CustomGetSetRaw(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Track));
-						AddAnimations(PropertyType.Arc, v2);
+						EditTracks("Tracks", CustomField(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Track));
+						EditAnimations(PropertyType.Arc, v2);
 						panels.Pop();
 					}
 					
 				}	break;
 				case ObjectType.Chain: {
-					AddParsed("Head X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.X));
-					AddParsed("Head Y", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.Y));
-					AddDropdown<int?>("Color", Data.GetSet<int>("Color"), Notes.ArcColors, false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Color));
-					AddDropdown<int?>("Direction", Data.GetSet<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.CutDirection));
-					AddParsed("Slices", Data.GetSet<int>("SliceCount"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Slices));
-					AddParsed("Squish", Data.GetSet<float>("Squish"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Squish));
-					AddParsed("Tail X", Data.GetSet<int>("TailPosX"), false, tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.X));
-					AddParsed("Tail Y", Data.GetSet<int>("TailPosY"), false, tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.Y));
-					AddLine("");
+					EditParsed("Head X", ObjectField<int>("PosX"), tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.X));
+					EditParsed("Head Y", ObjectField<int>("PosY"), tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.Y));
+					EditDropdown<int?>("Color", ObjectField<int>("Color"), Notes.ArcColors, false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Color));
+					EditDropdown<int?>("Direction", ObjectField<int>("CutDirection"), Notes.CutDirections, false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.CutDirection));
+					EditParsed("Slices", ObjectField<int>("SliceCount"), tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Slices));
+					EditParsed("Squish", ObjectField<float>("Squish"), tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Squish));
+					EditParsed("Tail X", ObjectField<int>("TailPosX"), tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.X));
+					EditParsed("Tail Y", ObjectField<int>("TailPosY"), tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.Y));
+					Line("");
 					
 					var s = (o as BaseSlider)!;
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						AddExpando(CHROMA_NAME, "Chroma", true);
-						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Color));
+						Expando(CHROMA_NAME, "Chroma", true);
+						EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Color));
 						panels.Pop();
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						AddExpando(NOODLE_NAME, "Noodle Extensions", true);
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.NJS));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.SpawnOffset));
-						AddTextbox("Head Coordinates", Data.CustomGetSetRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Tail Coordinates", Data.CustomGetSetRaw(s.CustomKeyTailCoordinate), true, tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Rotation", Data.CustomGetSetRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Rotation));
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.LocalRotation));
-						AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Fake));
-						AddCheckbox(v2 ? "Interactable" : "Uninteractable", Data.CustomGetSet<bool?>(v2 ? "_interactable" : "uninteractable"), v2, tooltip.GetTooltip(PropertyType.Chain, (v2 ? TooltipStrings.Tooltip.Interactable : TooltipStrings.Tooltip.Uninteractable)));
+						Expando(NOODLE_NAME, "Noodle Extensions", true);
+						EditParsed("NJS", CustomField<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.NJS));
+						EditParsed("Spawn Offset", CustomField<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.SpawnOffset));
+						EditTextbox("Head Coordinates", CustomFieldRaw(s.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.ChainHead, TooltipStrings.Tooltip.Coordinates));
+						EditTextbox("Tail Coordinates", CustomFieldRaw(s.CustomKeyTailCoordinate), true, tooltip.GetTooltip(PropertyType.ChainTail, TooltipStrings.Tooltip.Coordinates));
+						EditTextbox("Rotation", CustomFieldRaw(s.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Rotation));
+						EditTextbox("Local Rotation", CustomFieldRaw(s.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.LocalRotation));
+						EditCheckbox("Fake", ObjectField<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Fake));
+						EditCheckbox(v2 ? "Interactable" : "Uninteractable", CustomField<bool?>(v2 ? "_interactable" : "uninteractable"), v2, tooltip.GetTooltip(PropertyType.Chain, (v2 ? TooltipStrings.Tooltip.Interactable : TooltipStrings.Tooltip.Uninteractable)));
 						if (v2) {
-							AddTextbox("Flip", Data.CustomGetSetRaw("_flip"), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
+							EditTextbox("Flip", CustomFieldRaw("_flip"), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
 						}
 						else {
-							AddCheckbox("Disable Gravity", Data.CustomGetSet<bool?>("disableNoteGravity"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
-							AddTextbox("Flip", Data.CustomGetSetRaw("flip"), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
-							AddTextbox("Link", Data.CustomGetSet<string>("link"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Link));
+							EditCheckbox("Disable Gravity", CustomField<bool?>("disableNoteGravity"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
+							EditTextbox("Flip", CustomFieldRaw("flip"), true, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Flip));
+							EditTextbox("Link", CustomField<string>("link"), false, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Link));
 						}
-						AddTracks("Tracks", Data.CustomGetSetRaw(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Track));
-						AddAnimations(PropertyType.Chain, v2);
+						EditTracks("Tracks", CustomField(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Track));
+						EditAnimations(PropertyType.Chain, v2);
 						panels.Pop();
 					}
 					
 				}	break;
 				case ObjectType.Obstacle: {
 					var ob = (o as BaseObstacle)!;
-					AddParsed("Duration", Data.GetSet<float>("Duration"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Duration));
+					EditParsed("Duration", ObjectField<float>("Duration"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Duration));
 					if (v2) {
-						AddParsed("X", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.X));
-						AddParsed("Width", Data.GetSet<int>("Width"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
-						AddDropdown<int?>("Height", Data.GetSet<int>("Type"), Obstacles.WallHeights, false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
+						EditParsed("X", ObjectField<int>("PosX"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.X));
+						EditParsed("Width", ObjectField<int>("Width"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
+						EditDropdown<int?>("Height", ObjectField<int>("Type"), Obstacles.WallHeights, false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
 					}
 					else {
-						AddParsed("X (Left)", Data.GetSet<int>("PosX"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.X));
-						AddParsed("Y (Bottom)", Data.GetSet<int>("PosY"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Y));
-						AddParsed("Width", Data.GetSet<int>("Width"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
-						AddParsed("Height", Data.GetSet<int>("Height"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Height));
+						EditParsed("X (Left)", ObjectField<int>("PosX"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.X));
+						EditParsed("Y (Bottom)", ObjectField<int>("PosY"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Y));
+						EditParsed("Width", ObjectField<int>("Width"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Width));
+						EditParsed("Height", ObjectField<int>("Height"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Height));
 					}
-					AddLine("");
+					Line("");
 					
 					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-						AddExpando(CHROMA_NAME, "Chroma", true);
-						AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Color));
+						Expando(CHROMA_NAME, "Chroma", true);
+						EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Color));
 						panels.Pop();
 					}
 					
 					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
-						AddExpando(NOODLE_NAME, "Noodle Extensions", true);
-						AddParsed("NJS", Data.CustomGetSet<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.NJS));
-						AddParsed("Spawn Offset", Data.CustomGetSet<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.SpawnOffset));
-						AddTextbox("Coordinates", Data.CustomGetSetRaw(ob.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Coordinates));
-						AddTextbox("Rotation", Data.CustomGetSetRaw(ob.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Rotation));
-						AddTextbox("Local Rotation", Data.CustomGetSetRaw(ob.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.LocalRotation));
-						AddTextbox("Size", Data.CustomGetSetRaw(ob.CustomKeySize), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Size));
-						AddCheckbox("Fake", Data.GetSet<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Fake));
+						Expando(NOODLE_NAME, "Noodle Extensions", true);
+						EditParsed("NJS", CustomField<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.NJS));
+						EditParsed("Spawn Offset", CustomField<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.SpawnOffset));
+						EditTextbox("Coordinates", CustomFieldRaw(ob.CustomKeyCoordinate), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Coordinates));
+						EditTextbox("Rotation", CustomFieldRaw(ob.CustomKeyWorldRotation), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Rotation));
+						EditTextbox("Local Rotation", CustomFieldRaw(ob.CustomKeyLocalRotation), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.LocalRotation));
+						EditTextbox("Size", CustomFieldRaw(ob.CustomKeySize), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Size));
+						EditCheckbox("Fake", ObjectField<bool>("CustomFake"), null, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Fake));
 						if (v2) {
-							AddCheckbox("Interactable", Data.CustomGetSet<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Interactable));
+							EditCheckbox("Interactable", CustomField<bool?>("_interactable"), true, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Interactable));
 						}
 						else {
-							AddCheckbox("Uninteractable", Data.CustomGetSet<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Uninteractable)); // not sure if this means that it will screw up your score
+							EditCheckbox("Uninteractable", CustomField<bool?>("uninteractable"), false, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Uninteractable)); // not sure if this means that it will screw up your score
 						}
-						AddTracks("Tracks", Data.CustomGetSetRaw(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Track));
-						AddAnimations(PropertyType.Obstacle, v2);
+						EditTracks("Tracks", CustomField(o.CustomKeyTrack), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Track));
+						EditAnimations(PropertyType.Obstacle, v2);
 						panels.Pop();
 					}
 					
@@ -310,88 +310,88 @@ public partial class MainWindow : UIWindow {
 					
 					var lanes = GetEventLanes();
 					if (lanes != null) {
-						AddDropdown<int?>("Type", Data.GetSet<int>("Type"), lanes, false);
+						EditDropdown<int?>("Type", ObjectField<int>("Type"), lanes, false);
 					}
 					
 					switch (new_etype) {
 					case Events.EventType.Light:
 						if (Settings.Get(Settings.SplitValue, true)!.AsBool) {
-							AddDropdown<int?>("Color", Data.GetSetSplitValue(0b1100), Events.LightColors, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventColor));
-							AddDropdown<int?>("Action", Data.GetSetSplitValue(0b0011), Events.LightActions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventAction));
+							EditDropdown<int?>("Color", SplitEventValue(0b1100), Events.LightColors, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventColor));
+							EditDropdown<int?>("Action", SplitEventValue(0b0011), Events.LightActions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventAction));
 						}
 						else {
-							AddDropdown<int?>("Value", Data.GetSet<int>("Value"), Events.LightValues, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LegacyEventType));
+							EditDropdown<int?>("Value", ObjectField<int>("Value"), Events.LightValues, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LegacyEventType));
 						}
-						AddParsed("Brightness", Data.GetSet<float>("FloatValue"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Brightness));
-						AddLine("");
+						EditParsed("Brightness", ObjectField<float>("FloatValue"), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Brightness));
+						Line("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							AddExpando(CHROMA_NAME, "Chroma", true);
-							AddTextbox("LightID", Data.CustomGetSetRaw(f.CustomKeyLightID), true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LightID));
-							AddColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Color));
-							AddDropdown<string>("Easing",    Data.CustomGetSet<string>(f.CustomKeyEasing), Events.Easings, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Easing));
-							AddDropdown<string>("Lerp Type", Data.CustomGetSet<string>(f.CustomKeyLerpType), Events.LerpTypes, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LerpType)); //Unsure
+							Expando(CHROMA_NAME, "Chroma", true);
+							EditTextbox("LightID", CustomFieldRaw(f.CustomKeyLightID), true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LightID));
+							EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Color));
+							EditDropdown<string>("Easing",    CustomField<string>(f.CustomKeyEasing), Events.Easings, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Easing));
+							EditDropdown<string>("Lerp Type", CustomField<string>(f.CustomKeyLerpType), Events.LerpTypes, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LerpType)); //Unsure
 							if (o is BaseEvent e && v2) {
-								AddCheckbox("V2 Gradient", Data.GetSetGradient(), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.V2Gradient));
+								EditCheckbox("V2 Gradient", EditingAccessor(new V2Gradient()), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.V2Gradient));
 								if (e.CustomLightGradient != null) {
-									AddParsed("Duration",     Data.CustomGetSet<float?>($"{e.CustomKeyLightGradient}._duration"), false, tooltip.GetTooltip(PropertyType.Gradient, TooltipStrings.Tooltip.Duration));
-									AddColor("Start Color", $"{e.CustomKeyLightGradient}._startColor", tooltip.GetTooltip(PropertyType.GradientStart, TooltipStrings.Tooltip.Color));
-									AddColor("End Color", $"{e.CustomKeyLightGradient}._endColor", tooltip.GetTooltip(PropertyType.GradientEnd, TooltipStrings.Tooltip.Color));
-									AddDropdown<string>("Easing",    Data.CustomGetSet<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.V2Easing));
+									EditParsed("Duration",     CustomField<float?>($"{e.CustomKeyLightGradient}._duration"), tooltip.GetTooltip(PropertyType.Gradient, TooltipStrings.Tooltip.Duration));
+									EditColor("Start Color", $"{e.CustomKeyLightGradient}._startColor", tooltip.GetTooltip(PropertyType.GradientStart, TooltipStrings.Tooltip.Color));
+									EditColor("End Color", $"{e.CustomKeyLightGradient}._endColor", tooltip.GetTooltip(PropertyType.GradientEnd, TooltipStrings.Tooltip.Color));
+									EditDropdown<string>("Easing",    CustomField<string>($"{e.CustomKeyLightGradient}._easing"), Events.Easings, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.V2Easing));
 								}
 							}
 							panels.Pop();
 						}
 						break;
 					case Events.EventType.LaserRotation:
-						AddParsed("Speed", Data.GetSet<int>("Value"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserSpeed));
-						AddLine("");
+						EditParsed("Speed", ObjectField<int>("Value"), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserSpeed));
+						Line("");
 						
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							AddExpando(CHROMA_NAME, "Chroma", true);
-							AddCheckbox("Lock Rotation", Data.CustomGetSet<bool?> (f.CustomKeyLockRotation), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LockRotation));
-							AddDropdown<int?>("Direction",     Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.LaserDirection, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserDirection));
-							AddParsed("Precise Speed",   Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.PreciseSpeed));
+							Expando(CHROMA_NAME, "Chroma", true);
+							EditCheckbox("Lock Rotation", CustomField<bool?> (f.CustomKeyLockRotation), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LockRotation));
+							EditDropdown<int?>("Direction", CustomField<int?>  (f.CustomKeyDirection), Events.LaserDirection, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserDirection));
+							EditParsed("Precise Speed", CustomField<float?>(f.CustomKeySpeed), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.PreciseSpeed));
 							panels.Pop();
 						}
 						break;
 					case Events.EventType.RingRotation:
-						AddLine("");
+						Line("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							AddExpando(CHROMA_NAME, "Chroma", true);
-							AddTextbox("Filter",     Data.CustomGetSet<string>(f.CustomKeyNameFilter), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingFilter));
+							Expando(CHROMA_NAME, "Chroma", true);
+							EditTextbox("Filter",     CustomField<string>(f.CustomKeyNameFilter), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingFilter));
 							if (v2) {
-								AddCheckbox("Reset", Data.CustomGetSet<bool?>("_reset"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2Reset));
+								EditCheckbox("Reset", CustomField<bool?>("_reset"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2Reset));
 							}
-							AddParsed("Rotation",    Data.CustomGetSet<float?>(f.CustomKeyLaneRotation), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingRotation));
-							AddParsed("Step",        Data.CustomGetSet<float?>(f.CustomKeyStep), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingStep));
-							AddParsed("Propagation", Data.CustomGetSet<float?>(f.CustomKeyProp), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingPropagation));
-							AddParsed("Speed",       Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));
-							AddDropdown<int?>("Direction", Data.CustomGetSet<int?>  (f.CustomKeyDirection), Events.RingDirection, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingDirection));
+							EditParsed("Rotation",    CustomField<float?>(f.CustomKeyLaneRotation), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingRotation));
+							EditParsed("Step",        CustomField<float?>(f.CustomKeyStep), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingStep));
+							EditParsed("Propagation", CustomField<float?>(f.CustomKeyProp), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingPropagation));
+							EditParsed("Speed",       CustomField<float?>(f.CustomKeySpeed), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));
+							EditDropdown<int?>("Direction", CustomField<int?>  (f.CustomKeyDirection), Events.RingDirection, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingDirection));
 							if (v2) {
-								AddCheckbox("Counter Spin", Data.CustomGetSet<bool?>("_counterSpin"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2CounterSpin));
+								EditCheckbox("Counter Spin", CustomField<bool?>("_counterSpin"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingV2CounterSpin));
 							}
 							panels.Pop();
 						}
 						break;
 					case Events.EventType.RingZoom:
-						AddLine("");
+						Line("");
 						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
-							AddExpando(CHROMA_NAME, "Chroma", true);
-							AddParsed("Step",  Data.CustomGetSet<float?>(f.CustomKeyStep), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingZoomStep));
-							AddParsed("Speed", Data.CustomGetSet<float?>(f.CustomKeySpeed), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));
+							Expando(CHROMA_NAME, "Chroma", true);
+							EditParsed("Step",  CustomField<float?>(f.CustomKeyStep), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingZoomStep));
+							EditParsed("Speed", CustomField<float?>(f.CustomKeySpeed), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));
 							panels.Pop();
 						}
 						break;
 					case Events.EventType.ColorBoost:
-						AddDropdown<int?>("Color Set", Data.GetSet<int>("Value"), Events.BoostSets, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BoostColorSet));
+						EditDropdown<int?>("Color Set", ObjectField<int>("Value"), Events.BoostSets, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BoostColorSet));
 						break;
 					case Events.EventType.LaneRotation:
-						AddDropdown<int?>("Rotation", Data.GetSet<int>("Value"), Events.LaneRotaions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaneRotation));
+						EditDropdown<int?>("Rotation", ObjectField<int>("Value"), Events.LaneRotaions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaneRotation));
 						break;
 					default:
-						AddParsed("Value", Data.GetSet<int>("Value"), false);
-						AddParsed("FloatValue", Data.GetSet<float>("FloatValue"), false);
+						EditParsed("Value", ObjectField<int>("Value"));
+						EditParsed("FloatValue", ObjectField<float>("FloatValue"));
 						//Debug.LogError($"Unhandled event type: {new_etype}");
 						break;
 					}
@@ -418,164 +418,164 @@ public partial class MainWindow : UIWindow {
 					switch (types.First()) {
 					// Heck
 					case "AnimateTrack":
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						EditParsed("Duration", DataField<float?>(v2 ? "_duration" : "duration"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						EditDropdown<string>("Easing", DataField<string>(v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
+							EditParsed("Repeat", DataField<int?>("repeat"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
-						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
-						AddExpando("Properties", "Point Definitions", true);
+						EditTracks("Tracks", CustomField(v2 ? "_track" : "track", "Data"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						Expando("Properties", "Point Definitions", true);
 						foreach (var property in Events.NoodleProperties) {
 							if (property.Value[v2 ? 0 : 1] == "") continue;
-							AddPointDefinition(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
+							EditPointDefinition(property.Key, DataFieldRaw(property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
-						AddPointDefinition("Time", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_time" : "time"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateTime));
+						EditPointDefinition("Time", DataFieldRaw( v2 ? "_time" : "time"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateTime));
 						panels.Pop();
 						break;
 					
 					case "AssignPathAnimation":
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						EditParsed("Duration", DataField<float?>(v2 ? "_duration" : "duration"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						EditDropdown<string>("Easing", DataField<string>(v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
+							EditParsed("Repeat", DataField<int?>("repeat"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
-						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
-						AddExpando("Properties", "Point Definitions", true);
+						EditTracks("Tracks", CustomField(v2 ? "_track" : "track", "Data"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						Expando("Properties", "Point Definitions", true);
 						foreach (var property in Events.NoodleProperties) {
 							if (property.Value[v2 ? 0 : 1] == "") continue;
-							AddPointDefinition(property.Key, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
+							EditPointDefinition(property.Key, DataFieldRaw(property.Value[v2 ? 0 : 1]), tooltip.GetTooltip(PropertyType.CustomEvent, $"Animate{property.Key}"));
 						}
-						AddPointDefinition("Definite Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_definitePosition" : "definitePosition"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+						EditPointDefinition("Definite Position", DataFieldRaw(v2 ? "_definitePosition" : "definitePosition"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
 						panels.Pop();
 						break;
 					
 					// Noodle
 					case "AssignTrackParent":
-						AddTrack("Parent", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_parentTrack" : "parentTrack"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackParentParent));
-						AddTracks("Children", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_childrenTracks" : "childrenTracks"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackChildren));
-						AddCheckbox("Keep Position", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", v2 ? "_worldPositionStays" : "worldPositionStays"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackKeepPosition));
+						EditTrack("Parent", DataField<string>(v2 ? "_parentTrack" : "parentTrack"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackParentParent));
+						EditTracks("Children", CustomField(v2 ? "_childrenTracks" : "childrenTracks", "Data"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackChildren));
+						EditCheckbox("Keep Position", DataField<bool?>(v2 ? "_worldPositionStays" : "worldPositionStays"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignTrackKeepPosition));
 						break;
 					
 					case "AssignPlayerToTrack":
-						AddTextbox("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTrack));
-						AddDropdown("Target", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_target" : "target"), Events.PlayerTargets, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTarget));
+						EditTextbox("Track", DataField<string>(v2 ? "_track" : "track"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTrack));
+						EditDropdown("Target", DataField<string>(v2 ? "_target" : "target"), Events.PlayerTargets, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AssignPlayerToTrackTarget));
 						break;
 					
 					// Chroma
 					case "AssignFogTrack":
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						EditParsed("Duration", DataField<float?>(v2 ? "_duration" : "duration"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						EditDropdown<string>("Easing", DataField<string>(v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
+							EditParsed("Repeat", DataField<int?>("repeat"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
-						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
-						AddExpando("Properties", "Properties", true);
-						AddParsed("Attenuation", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_attenuation"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackAttenuation));
-						AddParsed("Offset", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_offset"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackOffset));
-						AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_startY"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackStartY));
-						AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "_height"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackHeight));
+						EditTracks("Tracks", CustomField(v2 ? "_track" : "track", "Data"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						Expando("Properties", "Properties", true);
+						EditParsed("Attenuation", DataField<float?>("_attenuation"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackAttenuation));
+						EditParsed("Offset", DataField<float?>("_offset"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackOffset));
+						EditParsed("Start Y", DataField<float?>( "_startY"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackStartY));
+						EditParsed("Height", DataField<float?>("_height"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.V2AssignFogTrackHeight));
 						panels.Pop();
 						break;
 					
 					case "AnimateComponent":
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", v2 ? "_duration" : "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						EditParsed("Duration", DataField<float?>(v2 ? "_duration" : "duration"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						EditDropdown<string>("Easing", DataField<string>(v2 ? "_easing" : "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						if (!v2) {
-							AddParsed("Repeat", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "repeat"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
+							EditParsed("Repeat", DataField<int?>("repeat"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackRepeat));
 						}
-						AddTracks("Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", v2 ? "_track" : "track"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
+						EditTracks("Tracks", CustomField(v2 ? "_track" : "track", "Data"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.Track));
 						//it seems these are only normal json inputs. might have to change the tooltip then.
-						AddTextbox("Environment Fog", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "BloomFogEnvironment"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentBloomFogEnvironment));
-						AddTextbox("Tube Bloom Light", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "TubeBloomPrePassLight"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentTubeBloomPrePassLight));
+						EditTextbox("Environment Fog", DataFieldRaw("BloomFogEnvironment"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentBloomFogEnvironment));
+						EditTextbox("Tube Bloom Light", DataFieldRaw("TubeBloomPrePassLight"), true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.AnimateComponentTubeBloomPrePassLight));
 						break;
 					
 					// Vivify
 					case "SetMaterialProperty":
-						AddMaterial();
+						EditMaterial();
 						goto case "SetGlobalProperty";
 					case "SetGlobalProperty":
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
-						AddCustomProperties();
+						EditParsed("Duration", DataField<float?>("duration"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						EditDropdown<string>("Easing", DataField<string>("easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						EditVivifyProperties();
 						break;
 					case "Blit":
-						AddMaterial();
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
-						AddParsed("Priority", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "priority"));
-						AddParsed("Pass", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "pass"));
-						AddDropdown("Order", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "order"), Vivify.Orders, true);
-						AddTextbox("Source Texture", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "source"), false);
-						AddTextbox("Destination Texture", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "destination"), false);
-						AddMaterialProperties();
+						EditMaterial();
+						EditParsed("Duration", DataField<float?>("duration"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						EditDropdown<string>("Easing", DataField<string>("easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						EditParsed("Priority", DataField<int?>("priority"));
+						EditParsed("Pass", DataField<int?>("pass"));
+						EditDropdown("Order", DataField<string>("order"), Vivify.Orders, true);
+						EditTextbox("Source Texture", DataField<string>("source"), false);
+						EditTextbox("Destination Texture", DataField<string>("destination"), false);
+						EditMaterialProperties();
 						break;
 					case "CreateCamera":
-						AddTextbox("Camera ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
-						AddTextbox("Texture", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "texture"), false);
-						AddTextbox("Depth Texture", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "depthTexture"), false);
-						AddCameraProperties();
+						EditTextbox("Camera ID", DataField<string>("id"), false);
+						EditTextbox("Texture", DataField<string>("texture"), false);
+						EditTextbox("Depth Texture", DataField<string>("depthTexture"), false);
+						EditCameraProperties();
 						break;
 					case "CreateScreenTexture":
-						AddTextbox("Name", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
-						AddParsed("X Ratio", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "xRatio"));
-						AddParsed("Y Ratio", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "yRatio"));
-						AddParsed("Width", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "width"));
-						AddParsed("Height", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "height"));
-						AddDropdown("Color Format", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "colorFormat"), Vivify.ColorFormats, true);
-						AddDropdown("Filter Mode", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "filterMode"), Vivify.FilterModes, true);
+						EditTextbox("Name", DataField<string>("id"), false);
+						EditParsed("X Ratio", DataField<float?>("xRatio"));
+						EditParsed("Y Ratio", DataField<float?>("yRatio"));
+						EditParsed("Width", DataField<int?>("width"));
+						EditParsed("Height", DataField<int?>("height"));
+						EditDropdown("Color Format", DataField<string>("colorFormat"), Vivify.ColorFormats, true);
+						EditDropdown("Filter Mode", DataField<string>("filterMode"), Vivify.FilterModes, true);
 						break;
 					case "InstantiatePrefab":
-						AddPrefab("Prefab", "asset", false);
-						AddTextbox("ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
-						AddTrack("Track", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "track"));
-						AddTextbox("Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "position"), true);
-						AddTextbox("Local Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "localPosition"), true);
-						AddTextbox("Rotation", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "rotation"), true);
-						AddTextbox("Local Rotation", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "localRotation"), true);
-						AddTextbox("Scale", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "scale"), true);
+						EditPrefab("Prefab", "asset", false);
+						EditTextbox("ID", DataField<string>("id"), false);
+						EditTrack("Track", DataField<string>("track"));
+						EditTextbox("Position", DataFieldRaw("position"), true);
+						EditTextbox("Local Position", DataFieldRaw("localPosition"), true);
+						EditTextbox("Rotation", DataFieldRaw("rotation"), true);
+						EditTextbox("Local Rotation", DataFieldRaw("localRotation"), true);
+						EditTextbox("Scale", DataFieldRaw("scale"), true);
 						break;
 					case "DestroyObject":
-						AddTextbox("ID(s)", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "id"), true);
+						EditTextbox("ID(s)", DataFieldRaw("id"), true);
 						// TODO: Array view?
 						break;
 					case "SetAnimatorProperty":
-						AddTextbox("ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
-						AddCustomProperties();
+						EditTextbox("ID", DataField<string>("id"), false);
+						EditParsed("Duration", DataField<float?>("duration"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						EditDropdown<string>("Easing", DataField<string>("easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						EditVivifyProperties();
 						break;
 					case "SetCameraProperty":
-						AddTextbox("Camera ID", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "id"), false);
-						AddCameraProperties();
+						EditTextbox("Camera ID", DataField<string>("id"), false);
+						EditCameraProperties();
 						break;
 					case "AssignObjectPrefab":
-						AddDropdown("Load Mode", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "loadMode"), Vivify.LoadModes, true);
-						AddObjectProperties();
+						EditDropdown("Load Mode", DataField<string>("loadMode"), Vivify.LoadModes, true);
+						EditPrefabProperties();
 						break;
 					case "SetRenderingSettings":
-						AddParsed("Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "duration"), false, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
-						AddDropdown<string>("Easing", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
+						EditParsed("Duration", DataField<float?>("duration"), tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackDuration));
+						EditDropdown<string>("Easing", DataField<string>("easing"), Events.Easings, true, tooltip.GetTooltip(PropertyType.CustomEvent, TooltipStrings.Tooltip.TrackEasing));
 						{
-							var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("renderSettings") ?? false);
-							AddExpando("_Render Settings", "Render Settings", has_any || mixed);
+							var (has_any, mixed) = GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("renderSettings") ?? false);
+							Expando("_Render Settings", "Render Settings", has_any || mixed);
 							foreach (var prop in Vivify.RenderSettings) {
-								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
+								EditTextbox(prop.Value, DataFieldRaw(prop.Key), true);
 							}
 							panels.Pop();
 						}
 						{
-							var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("qualitySettings") ?? false);
-							AddExpando("_Quality Settings", "Quality Settings", has_any || mixed);
+							var (has_any, mixed) = GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("qualitySettings") ?? false);
+							Expando("_Quality Settings", "Quality Settings", has_any || mixed);
 							foreach (var prop in Vivify.QualitySettings) {
-								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
+								EditTextbox(prop.Value, DataFieldRaw(prop.Key), true);
 							}
 							panels.Pop();
 						}
 						{
-							var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("xrSettings") ?? false);
-							AddExpando("_XR Settings", "XR Settings", has_any || mixed);
+							var (has_any, mixed) = GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("xrSettings") ?? false);
+							Expando("_XR Settings", "XR Settings", has_any || mixed);
 							foreach (var prop in Vivify.XRSettings) {
-								AddTextbox(prop.Value, Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", prop.Key), true);
+								EditTextbox(prop.Value, DataFieldRaw(prop.Key), true);
 							}
 							panels.Pop();
 						}
@@ -583,22 +583,24 @@ public partial class MainWindow : UIWindow {
 					}
 				}	break;
 				case ObjectType.BpmChange:
-					AddParsed("BPM", Data.GetSet<float>("Bpm"), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BPMChange));
+					EditParsed("BPM", ObjectField<float>("Bpm"), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BPMChange));
 					break;
 				case ObjectType.NJSEvent: {
-					Data.Getter<bool?> getter = (o) => ((BaseNJSEvent)o).UsePrevious == 1;
-					Data.Setter<bool?> setter = (o, v) => { ((BaseNJSEvent)o).UsePrevious = (v ?? false) ? 1 : 0; };
-					AddCheckbox("Use Previous", (getter, setter), null);
-					AddParsed("Relative NJS", Data.GetSet<float>("RelativeNJS"));
-					AddDropdown("Easing", Data.GetSet<int>("Easing"), Events.NJSEasings, false);
+					var conv = new Converter<int?, bool?>(
+						(i) => (i == 1),
+						(b) => (b ?? false) ? 1 : 0
+					);
+					EditCheckbox("Use Previous", ObjectField<int>("UsePrevious").Insert(conv), null);
+					EditParsed("Relative NJS", ObjectField<float>("RelativeNJS"));
+					EditDropdown("Easing", ObjectField<int>("Easing"), Events.NJSEasings, false);
 				}	break;
 #if !CHROMPER_13
 				case ObjectType.RotationEvent: {
-					AddParsed("Rotation", Data.GetSet<float>("Rotation"), false, "Rotation in degrees");
+					EditParsed("Rotation", ObjectField<float>("Rotation"), "Rotation in degrees");
 				}	break;
 #endif
 				case ObjectType.EnvironmentEnhancement: {
-					HandleEEs(objects);
+					EditEnvironment(objects);
 				}	break;
 #if !CHROMPER_13
 				case ObjectType.GLSColor:
@@ -626,45 +628,22 @@ public partial class MainWindow : UIWindow {
 			
 			CheckRefresh(SelectionType.Materials);
 			
-			System.Func<Color?, string?> gc = (c) => 
-					(c == null)
-						? ""
-						: (new JSONArray())
-							.WriteColor(c ?? Color.white) // microslop can't make the damn ! operator work
-							.ToString();
-			System.Func<string?, Color?> sc = (s) => Data.RawToJson(s ?? "")?.ReadColor();
-			AddTextbox("Color", Data.Add(Data.GetSetNullable<Color?>("Color"), (gc, sc)), true);
-			AddDropdown("Shader", Data.GetSetNullable<string>("Shader"), MapSettings.Shaders, false);
-			AddTextbox("Track", Data.GetSetNullable<string?>("Track"), false, "Assign the material to a track, allowing you to animate the color.");
+			Converter<Color?, string?> cc = new(
+				(c) => (c == null)
+					? ""
+					: (new JSONArray())
+						.WriteColor(c ?? Color.white) // microslop can't make the damn ! operator work
+						.ToString(),
+				(s) => Data.RawToJson(s ?? "")?.ReadColor()
+			);
 			
-			var (getter, setter) = Data.GetSetNullable<List<string>>("ShaderKeywords");
-			
-			var (value, mixed) = Data.GetAllOrNothing<List<string>>(editing!, getter);
-			
-			Plugin.Trace($"{value?.Count ?? -1} {mixed}");
-			
-			ArrayEditor.Getter arr_get = () => {
-				if (mixed) return null;
-				var arr = new JSONArray();
-				foreach (var keyword in value!) {
-					arr.Add(keyword);
-				}
-				return arr;
-			};
-			
-			ArrayEditor.Setter arr_set = (JSONArray node) => {
-				var arr = new List<string>();
-				foreach (var keyword in node) {
-					arr.Add(keyword.Value);
-				}
-				Data.UpdateObjects<List<string>>(editing!, setter, arr);
-				// Don't have real actions yet
-				UpdateFromAction(null);
-			};
+			EditTextbox("Color", NullableField<Color?>("Color").Insert(cc), true);
+			EditDropdown("Shader", NullableField<string>("Shader"), MapSettings.Shaders, false);
+			EditTextbox("Track", NullableField<string?>("Track"), false, "Assign the material to a track, allowing you to animate the color.");
 			
 			ArrayEditor
 				.Singleton(current_panel!, "Shader Keywords", "By default, each shader has its default keywords. This allows overwriting the keywords of the shader.")
-				.Set((arr_get, arr_set), false);
+				.Set(NullableField<List<string>>("ShaderKeywords"), true);
 			
 		}	break;
 		default:
@@ -674,187 +653,101 @@ public partial class MainWindow : UIWindow {
 			wipe();
 			break;
 		}
-		Plugin.Trace($"End UpdateSelection: {old_otype}");
+		//Plugin.Trace($"End UpdateSelection: {old_otype}");
 	}
 	
-	private void HandleEEs(List<BaseObject> ees) {
+	private void EditEnvironment(List<BaseObject> ees) {
 		window!.SetTitle($"{ees.Count} Items selected");
 		
 		CheckRefresh(SelectionType.EnvironmentEnhancements);
 		
-		AddTextbox("ID", Data.GetSetNullable<string>("ID"), true);
-		AddDropdown("Lookup Method", Data.GetSetNullable<int?>("LookupMethod"), (new Map<int?>()).AddEnum(typeof(EnvironmentLookupMethod)), false);
-		Data.Getter<bool?> dup_get = (ee) => (ee as BaseEnvironmentEnhancement)!.Active?.AsBool ?? null;
-		Data.Setter<bool?> dup_set = (ee, v) => (ee as BaseEnvironmentEnhancement)!.Active = v;
-		AddCheckbox("Active", (dup_get, dup_set), true);
-		AddParsed<int>("Duplicate", Data.GetSetNullable<int?>("Duplicate"));
-		EditVector3("Scale", Data.GetSetNullable<Vector3?>("Scale"));
-		EditVector3("Position", Data.GetSetNullable<Vector3?>("Position"));
-		EditVector3("Local Position", Data.GetSetNullable<Vector3?>("LocalPosition"));
-		EditVector3("Rotation", Data.GetSetNullable<Vector3?>("Rotation"));
-		EditVector3("Local Rotation", Data.GetSetNullable<Vector3?>("LocalRotation"));
-		AddTextbox("Track", Data.GetSetNullable<string?>("Track"));
+		EditTextbox("ID", NullableField<string>("ID"), true);
+		EditDropdown("Lookup Method", NullableField<int?>("LookupMethod"), (new Map<int?>()).AddEnum(typeof(EnvironmentLookupMethod)), false);
+		EditCheckbox("Active", NullableField<JSONNode?>("Active").Insert(Data.JSONValue<bool?>()), true);
+		EditParsed<int>("Duplicate", NullableField<int?>("Duplicate"));
+		EditVector3("Scale", NullableField<Vector3?>("Scale"));
+		EditVector3("Position", NullableField<Vector3?>("Position"));
+		EditVector3("Local Position", NullableField<Vector3?>("LocalPosition"));
+		EditVector3("Rotation", NullableField<Vector3?>("Rotation"));
+		EditVector3("Local Rotation", NullableField<Vector3?>("LocalRotation"));
+		EditTextbox("Track", NullableField<string?>("Track"));
 		
-		Data.Getter<bool?> geo_get = (ee) => (ee as BaseEnvironmentEnhancement)!.Geometry != null;
-		Data.Setter<bool?> geo_set = (ee, v) => {
-			if (v == false) {
-				(ee as BaseEnvironmentEnhancement)!.Geometry = null;
-			}
-			else {
-				(ee as BaseEnvironmentEnhancement)!.Geometry ??= new JSONObject();
-			}
-		};
-		EEComponent("Geometry", (geo_get, geo_set), () => {
-			AddDropdown("Type", Data.JSONGetSet<string>(typeof(BaseEnvironmentEnhancement), "Geometry", "type"), MapSettings.GeometryTypes, true);
+		EditEEComponent("Geometry", GeometryField(), () => {
+			EditDropdown("Type", CustomField<string>("type", "Geometry"), MapSettings.GeometryTypes, true);
 			var materials = new Map<string?> {
 				//{ "[Create New]", "[Create New]" }
 			};
 			materials.AddRange(BeatSaberSongContainer.Instance.Map.Materials.Keys);
-			AddDropdown("Material", Data.JSONGetSet<string>(typeof(BaseEnvironmentEnhancement), "Geometry", "material"), materials, true);
-			AddCheckbox("Collision", Data.JSONGetSet<bool?>(typeof(BaseEnvironmentEnhancement), "Geometry", "collision"), false);
+			EditDropdown("Material", CustomField<string>("material", "Geometry"), materials, true);
+			EditCheckbox("Collision", CustomField<bool?>("collision", "Geometry"), false);
 		});
 		
-		EEComponent("Light", Data.EEGetSetComp("ILightWithId"), () => {
-			AddParsed("Light ID", Data.GetSetNullable<int?>("LightID"));
-			AddParsed("Light Type", Data.GetSetNullable<int?>("LightType"));
+		EditEEComponent("Light", EEComponent("ILightWithId"), () => {
+			EditParsed("Light ID", NullableField<int?>("LightID"));
+			EditParsed("Light Type", NullableField<int?>("LightType"));
 		});
 		
-		EEComponent("Bloom Fog", Data.EEGetSetComp("BloomFogEnvironment"), () => {
-			AddParsed("Attenuation", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.attenuation"));
-			AddParsed("Offset", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.offset"));
-			AddParsed("Start Y", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.startY"));
-			AddParsed("Height", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "BloomFogEnvironment.height"));
+		EditEEComponent("Bloom Fog", EEComponent("BloomFogEnvironment"), () => {
+			EditParsed("Attenuation", CustomField<float?>("BloomFogEnvironment.attenuation", "Components"));
+			EditParsed("Offset", CustomField<float?>("BloomFogEnvironment.offset", "Components"));
+			EditParsed("Start Y", CustomField<float?>("BloomFogEnvironment.startY", "Components"));
+			EditParsed("Height", CustomField<float?>("BloomFogEnvironment.height", "Components"));
 		});
 		
-		EEComponent("Tube Bloom Pre Pass Light", Data.EEGetSetComp("TubeBloomPrePassLight"), () => {
-			AddParsed("Color Alpha Multiplier", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "TubeBloomPrePassLight.colorAlphaMultiplier"));
-			AddParsed("Bloom Fog Intensity Multiplier", Data.JSONGetSet<float?>(typeof(BaseEnvironmentEnhancement), "Components", "TubeBloomPrePassLight.bloomFogIntensityMultiplier"));
+		EditEEComponent("Tube Bloom Pre Pass Light", EEComponent("TubeBloomPrePassLight"), () => {
+			EditParsed("Color Alpha Multiplier", CustomField<float?>("TubeBloomPrePassLight.colorAlphaMultiplier", "Components"));
+			EditParsed("Bloom Fog Intensity Multiplier", CustomField<float?>("TubeBloomPrePassLight.bloomFogIntensityMultiplier", "Components"));
 		});
 	}
 	
-	private void AddAnimations(PropertyType type, bool v2) {
+	private void EditAnimations(PropertyType type, bool v2) {
 		var CustomKeyAnimation = v2 ? "_animation" : "animation";
 		
-		AddExpando("Animations", "Animations", true);
+		Expando("Animations", "Animations", true);
 		foreach (var property in Events.NoodleProperties) {
 			if (property.Value[v2 ? 0 : 1] == "") continue;
-			AddAnimation(property.Key, CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2], tooltip.GetTooltip(type, $"Animate{property.Key}"));
+			EditAnimation(property.Key, CustomKeyAnimation+"."+ property.Value[v2 ? 0 : 1], property.Value[2], tooltip.GetTooltip(type, $"Animate{property.Key}"));
 		}
-		AddAnimation("Definite Position", CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
+		EditAnimation("Definite Position", CustomKeyAnimation+"."+ (v2 ? "_definitePosition" : "definitePosition"), "[[0,0,0,0], [0,0,0,0.49]]", tooltip.GetTooltip(type, TooltipStrings.Tooltip.AssignPathAnimationDefinitePosition));
 		panels.Pop();
 	}
 	
-	private void AddAnimation(string name, string path, string default_json, string tooltip) {
-		var (_, default_set) = Data.CustomGetSetNode(path, default_json);
-		var (getter, setter) = Data.CustomGetSetRaw(path);
-		var (value, mixed) = Data.GetAllOrNothing(editing!, getter);
-		
-		PointDefinitionEditor
-			.Singleton(
-				current_panel!,
-				name,
-				tooltip)
-			.Set(
-				value,
-				mixed,
-				(v) => {
-					if (v == "") {
-						v = null;
-					}
-					if (v != value) {
-						Data.UpdateObjects<string?>((editing as List<BaseObject>)!, setter, v);
-					}
-				},
-				(v) => {
-					Data.UpdateObjects<bool?>((editing as List<BaseObject>)!, default_set, v);
-				});
-		return;
-	}
-	
-	private void AddColor(string label, string key, string tooltip = "") {
-		AddTextbox(label, Data.CustomGetSetColor(key), false, tooltip);
-	}
-	
-	// Unarrayable track
-	private void AddTrack(string? title, (Data.Getter<string?>, Data.Setter<string?>) get_set, string tooltip = "") {
-		// TODO: Needs a custom option with a textbox
-		/*
-		var collection = BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.CustomEvent) as CustomEventGridContainer;
-		var tracks = new Map<string?>().AddRange(collection!.EventsByTrack.Keys);
-		AddDropdown(title, get_set, tracks, true, tooltip);
-		*/
-		AddTextbox(title, get_set, false, tooltip);
-	}
-	
-	// Arrayable tracks
-	private void AddTracks(string title, (Data.Getter<string?>, Data.Setter<string?>) get_set, string tooltip = "") {
-		// TODO: dropdowns somehow?
-		var staged = editing!;
-		var (getter, setter) = get_set;
-		var (value, mixed) = Data.GetAllOrNothing<string>(staged, getter);
-		
-		ArrayEditor.Getter arr_get = () => {
-			if (mixed) return null;
-			return Data.RawToJson(value ?? "{}") switch {
-				JSONArray arr => arr,
-				JSONString s => JSONObject.Parse($"[{s}]").AsArray,
-				_ => new JSONArray()
-			};
-		};
-		
-		ArrayEditor.Setter arr_set =
-			(JSONArray node) => Data.UpdateObjects<string?>(staged, setter, node.ToString());
-		
-		ArrayEditor
-			.Singleton(current_panel!, title, tooltip)
-			.Set((arr_get, arr_set), false);
-	}
-	
-	private void AddMaterial() {
+	private void EditMaterial() {
 		if (bundleInfo?.Materials == null) {
-			AddTextbox("Material", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset"), false);
+			EditTextbox("Material", DataField<string>("asset"), false);
 		}
 		else {
-			AddDropdown("Material", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset"), bundleInfo.Materials, true);
+			EditDropdown("Material", DataField<string>("asset"), bundleInfo.Materials, true);
 		}
 	}
 	
-	private void AddPrefab(string title, string prop, bool nullable = true) {
-		if (bundleInfo?.Prefabs == null) {
-			AddTextbox(title, Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", prop), false);
-		}
-		else {
-			AddDropdown(title, Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", prop), bundleInfo.Prefabs, nullable);
-		}
-	}
-	
-	private void AddMaterialProperties() {
-		var (getter, _) = Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "asset");
-		var (asset, _) = Data.GetAllOrNothing(editing!, getter);
+	private void EditMaterialProperties() {
+		var accessor = DataField<string>("asset");
+		var asset = accessor.Get();
 		if (asset != null) {
 			var mat = bundleInfo?.Materials?.Forward(asset);
 			if (mat != null && (bundleInfo?.Properties?.ContainsKey(mat) ?? false)) {
 				panels.Push(Collapsible.Create(panel!, "Properties", "Properties", true).panel!);
 				foreach (var prop in bundleInfo.Properties[mat]) {
-					AddTextbox(prop.Key, Data.PropertyGetSetRaw(prop.Key, prop.Value.ToString()), true);
+					EditTextbox(prop.Key, PropertyValue(prop.Key, prop.Value.ToString()), true);
 				}
 				panels.Pop();
 			}
 		}
 	}
 	
-	private void AddCameraProperties() {
-		AddTextbox("Depth Texture Mode", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.depthTextureMode"), true);
-		AddDropdown("Clear Flags", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "properties.clearFlags"), Vivify.ClearFlags, true);
-		AddTextbox("Background Colors", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.backgroundColor"), true);
-		AddTracks("Culling Tracks", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "properties.culling.track"));
-		AddCheckbox("Culling Whitelist", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.culling.whitelist"), false);
+	private void EditCameraProperties() {
+		EditTextbox("Depth Texture Mode", DataFieldRaw("properties.depthTextureMode"), true);
+		EditDropdown("Clear Flags", DataField<string>("properties.clearFlags"), Vivify.ClearFlags, true);
+		EditTextbox("Background Colors", DataFieldRaw("properties.backgroundColor"), true);
+		EditTracks("Culling Tracks", CustomField("properties.culling.track", "Data"));
+		EditCheckbox("Culling Whitelist", DataField<bool?>("properties.culling.whitelist"), false);
 		// Do these have defaults? Idk :3
-		AddDropdown("Bloom Pre Pass", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.bloomPrePass"), MapSettings.OptionBool, true);
-		AddDropdown("Main Bloom Effects", Data.JSONGetSet<bool?>(typeof(BaseCustomEvent), "Data", "properties.mainEffect"), MapSettings.OptionBool, true);
+		EditDropdown("Bloom Pre Pass", DataField<bool?>("properties.bloomPrePass"), MapSettings.OptionBool, true);
+		EditDropdown("Main Bloom Effects", DataField<bool?>("properties.mainEffect"), MapSettings.OptionBool, true);
 	}
 	
-	private void AddCustomProperties() {
+	private void EditVivifyProperties() {
 		var all_props = new Dictionary<string, Vivify.PropertyType>();
 		foreach (var o in editing!) {
 			var root = (o as BaseCustomEvent)!.Data ?? new JSONObject();
@@ -863,126 +756,75 @@ public partial class MainWindow : UIWindow {
 					var id = (string)prop.AsObject["id"];
 					System.Enum.TryParse((string)prop.AsObject["type"], out Vivify.PropertyType type);
 					if (!all_props.ContainsKey(id)) {
+						Plugin.Trace($"Add prop: {id}");
 						all_props.Add(id, type);
 					}
 				}
 			}
 		}
 		
+		// Dynamic updates do not work, rebuild every time
+		if (panel!.transform.Find("Properties") is Transform old) {
+			GameObject.DestroyImmediate(old.gameObject);
+		}
+		
 		panels.Push(Collapsible.Create(panel!, "Properties", "Properties", true).panel!);
 		foreach (var prop in all_props) {
-			var container = UI.AddChild(current_panel!, prop + " Container");
+			var title = prop.Key + " Container";
+			var container =  UI.AddChild(current_panel!, title);
 			UI.AttachTransform(container, new Vector2(0, 20), pos: new Vector2(0, 0));
 			panels.Push(container);
-			var id_box = AddTextbox(null, Data.PropertyGetSetPart(prop.Key, "id"));
-			UI.LeftColumn(id_box.gameObject);
-			AddDropdown(null, Data.PropertyGetSetPart(prop.Key, "type"), Vivify.PropertyTypes, false);
+				var id_box = EditTextbox(null, PropertyComponent(prop.Key, "id"));
+				UI.LeftColumn(id_box.gameObject);
+				EditDropdown(null, PropertyComponent(prop.Key, "type"), Vivify.PropertyTypes, false);
 			panels.Pop();
-			var value_box = AddTextbox(null, Data.PropertyGetSetRaw(prop.Key, prop.Value.ToString()), true);
+			var value_box = EditTextbox(null, PropertyValue(prop.Key, prop.Value.ToString()), true);
 			UI.MoveTransform((RectTransform)value_box.transform, new Vector2(0, 22), new Vector2(0, 0));
 		}
-		AddTextbox("Add Property", Data.PropertyGetSetPart(null, "id"));
+		EditTextbox("Add Property", PropertyComponent(null, "id"));
 		panels.Pop();
 	}
 	
-	private void AddObjectProperties() {
+	private void EditPrefabProperties() {
 		{
-			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("colorNotes") ?? false);
+			var (has_any, mixed) = GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("colorNotes") ?? false);
 			panels.Push(Collapsible.Create(panel!, "_Color Notes", "Color Notes", has_any || mixed).panel!);
-			AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "colorNotes.track"), true);
-			AddPrefab("Asset", "colorNotes.asset");
-			AddPrefab("Any Direction Asset", "colorNotes.anyDirectionAsset");
-			AddPrefab("Debris Asset", "colorNotes.debrisAsset");
+			EditTextbox("Track", DataFieldRaw("colorNotes.track"), true);
+			EditPrefab("Asset", "colorNotes.asset");
+			EditPrefab("Any Direction Asset", "colorNotes.anyDirectionAsset");
+			EditPrefab("Debris Asset", "colorNotes.debrisAsset");
 			panels.Pop();
 		}
 		{
-			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("burstSliders") ?? false);
-			AddExpando("_Burst Sliders", "Burst Sliders", has_any || mixed);
-			AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "burstSliders.track"), true);
-			AddPrefab("Asset", "burstSliders.asset");
-			AddPrefab("Debris Asset", "burstSliders.debrisAsset");
+			var (has_any, mixed) = GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("burstSliders") ?? false);
+			Expando("_Burst Sliders", "Burst Sliders", has_any || mixed);
+			EditTextbox("Track", DataFieldRaw("burstSliders.track"), true);
+			EditPrefab("Asset", "burstSliders.asset");
+			EditPrefab("Debris Asset", "burstSliders.debrisAsset");
 			panels.Pop();
 		}
 		{
-			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("burstSliderElemeents") ?? false);
-			AddExpando("_Burst Slider Elements", "Burst Slider Elements", has_any || mixed);
-			AddTextbox("Track", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "burstSliderElemeents.track"), true);
-			AddPrefab("Asset", "burstSliderElemeents.asset");
-			AddPrefab("Debris Asset",  "burstSliderElemeents.debrisAsset");
+			var (has_any, mixed) = GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("burstSliderElemeents") ?? false);
+			Expando("_Burst Slider Elements", "Burst Slider Elements", has_any || mixed);
+			EditTextbox("Track", DataFieldRaw("burstSliderElemeents.track"), true);
+			EditPrefab("Asset", "burstSliderElemeents.asset");
+			EditPrefab("Debris Asset",  "burstSliderElemeents.debrisAsset");
 			panels.Pop();
 		}
 		{
-			var (has_any, mixed) = Data.GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("saber") ?? false);
-			AddExpando("_Sabers", "Sabers", has_any || mixed);
-			AddDropdown("Type", Data.JSONGetSet<string>(typeof(BaseCustomEvent), "Data", "saber.type"), Vivify.SaberTypes, false);
-			AddPrefab("Asset", "saber.asset");
-			AddPrefab("Trail Asset", "saber.trailAsset");
-			AddTextbox("Trail Top Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "saber.trailTopPos"), true);
-			AddTextbox("Trail Bottom Position", Data.JSONGetSetRaw(typeof(BaseCustomEvent), "Data", "saber.trailBottomPos"), true);
-			AddParsed("Trail Duration", Data.JSONGetSet<float?>(typeof(BaseCustomEvent), "Data", "saber.trailDuration"));
-			AddParsed("Trail Sampling Frequency", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "saber.trailSamplingFrequency"));
-			AddParsed("Trail Granularity", Data.JSONGetSet<int?>(typeof(BaseCustomEvent), "Data", "saber.trailGranularity"));
+			var (has_any, mixed) = GetAllOrNothing<bool>(editing!, (o) => (o as BaseCustomEvent)?.Data?.HasKey("saber") ?? false);
+			Expando("_Sabers", "Sabers", has_any || mixed);
+			EditDropdown("Type", DataField<string>("saber.type"), Vivify.SaberTypes, false);
+			EditPrefab("Asset", "saber.asset");
+			EditPrefab("Trail Asset", "saber.trailAsset");
+			EditTextbox("Trail Top Position", DataFieldRaw("saber.trailTopPos"), true);
+			EditTextbox("Trail Bottom Position", DataFieldRaw("saber.trailBottomPos"), true);
+			EditParsed("Trail Duration", DataField<float?>("saber.trailDuration"));
+			EditParsed("Trail Sampling Frequency", DataField<int?>("saber.trailSamplingFrequency"));
+			EditParsed("Trail Granularity", DataField<int?>("saber.trailGranularity"));
 			panels.Pop();
 		}
 		panels.Pop();
-	}
-	
-	private void EditVector3(string name, (Data.Getter<Vector3?>, Data.Setter<Vector3?>) get_set) {
-		Data.Getter<string?> getter = (o) => {
-			var value = get_set.Item1(o);
-			return (value != null)
-				? (new JSONArray()).WriteVector3(value ?? new Vector3()).ToString()
-				: "";
-		};
-		Data.Setter<string?> setter = (o, v) => {
-			if (v == null || v == "") {
-				get_set.Item2(o, null);
-				return;
-			}
-			var node = Data.RawToJson(v);
-			if (node is JSONArray vec) {
-				get_set.Item2(o, vec.ReadVector3());
-			}
-		};
-		
-		AddTextbox(name, (getter, setter), true);
-		
-		/* Component version, TODO: combine these two somehow?
-		var (value, mixed) = Data.GetAllOrNothing<Vector3?>(editing!, get_set.Item1);
-		
-		AddExpando("_"+name, name, (value != null || mixed), background: false);
-		AddParsed<float>("X", Data.V3Component(get_set, Axis.X));
-		AddParsed<float>("Y", Data.V3Component(get_set, Axis.Y));
-		AddParsed<float>("Z", Data.V3Component(get_set, Axis.Z));
-		panels.Pop();*/
-	}
-	
-	private void EEComponent(string name, (Data.Getter<bool?>, Data.Setter<bool?>) get_set, System.Action editor) {
-		var checkbox = AddCheckbox(name, get_set, null);
-		
-		var comp_container = Collapsible.Singleton(current_panel!, "_"+name, name, false);
-		
-		panels.Push(comp_container.panel!);
-		editor();
-		panels.Pop();
-		
-		checkbox.onValueChanged.AddListener((v) => {
-			if (v) {
-				comp_container.OnAnimationComplete = null;
-				comp_container.SetExpanded(false);
-				comp_container.gameObject.SetActive(true);
-				comp_container.SetExpanded(true);
-			}
-			else {
-				comp_container.OnAnimationComplete = (v) => {
-					comp_container.gameObject.SetActive(v);
-				};
-				comp_container.SetExpanded(v);
-			}
-		});
-		
-		comp_container.gameObject.SetActive(checkbox.isOn);
-		comp_container.SetExpanded(checkbox.isOn);
 	}
 	
 	private Enums.Map<int?>? GetEventLanes() {
@@ -1017,6 +859,7 @@ public partial class MainWindow : UIWindow {
 		}
 		return EventLanes;
 	}
+	
 }
 
 }

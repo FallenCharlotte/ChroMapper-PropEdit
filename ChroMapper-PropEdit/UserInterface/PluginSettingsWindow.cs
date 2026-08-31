@@ -24,64 +24,56 @@ public class PluginSettingsWindow : UIWindow {
 			UI.AttachTransform(button.gameObject, pos: new Vector2(-25, -14), size: new Vector2(30, 30), anchor_min: new Vector2(1, 1), anchor_max: new Vector2(1, 1));
 		}
 		
-		chroma_enable = AddCheckbox("Show Chroma", (v) => {
-			Settings.Set(Settings.ShowChromaKey, v);
-			Plugin.main?.TriggerFullRefresh();
-		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowChroma));
+		chroma_enable = EditCheckbox("Show Chroma",
+			SettingAccessor(Settings.ShowChromaKey, true),
+			tooltip.GetTooltip(TooltipStrings.Tooltip.ShowChroma));
 		
-		noodle_enable = AddCheckbox("Show Noodle Extensions", (v) => {
-			Settings.Set(Settings.ShowNoodleKey, v);
-			Plugin.main?.TriggerFullRefresh();
-		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowNoodleExtensions));
+		noodle_enable = EditCheckbox("Show Noodle Extensions",
+			SettingAccessor(Settings.ShowNoodleKey, true),
+			tooltip.GetTooltip(TooltipStrings.Tooltip.ShowNoodleExtensions));
 		
-		split_value = AddCheckbox("Split light values", (v) => {
-			Settings.Set(Settings.SplitValue, v);
-			Plugin.main?.TriggerFullRefresh();
-		}, tooltip.GetTooltip(TooltipStrings.Tooltip.SplitLightValues));
+		split_value = EditCheckbox("Split light values",
+			SettingAccessor(Settings.SplitValue, true),
+			tooltip.GetTooltip(TooltipStrings.Tooltip.SplitLightValues));
 		
-		color_hex = AddCheckbox("Colors as Hex", (v) => {
-			Settings.Set(Settings.ColorHex, v);
-			Plugin.main?.TriggerRefresh();
-		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ColorsAsHex));
+		color_hex = EditCheckbox("Colors as Hex", 
+			SettingAccessor(Settings.SplitValue, true),
+			tooltip.GetTooltip(TooltipStrings.Tooltip.ColorsAsHex));
 		
-		tooltip_enable = AddCheckbox("Show Tooltips", (v) => {
-			Settings.Set(Settings.ShowTooltips, v);
-			Plugin.main?.TriggerFullRefresh();
-			UI.RefreshTooltips(Plugin.main?.panel);
-			UI.RefreshTooltips(Plugin.map_settings?.panel);
-			UI.RefreshTooltips(panel);
-		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ShowTooltips));
+		tooltip_enable = EditCheckbox("Show Tooltips",
+			SettingAccessor(Settings.ShowTooltips, true, (_) => {
+				UI.RefreshTooltips(Plugin.main?.panel);
+				UI.RefreshTooltips(Plugin.map_settings?.panel);
+				UI.RefreshTooltips(panel);
+			}),
+			tooltip.GetTooltip(TooltipStrings.Tooltip.ShowTooltips));
 		
-		force_lanes = AddCheckbox("Force Custom Event Lanes", (v) => {
-			Settings.Set(Settings.ForceLanes, v);
-			if (v) ShowDefaultLanes();
-		}, tooltip.GetTooltip(TooltipStrings.Tooltip.ForceLanes));
+		force_lanes = EditCheckbox("Force Custom Event Lanes",
+			SettingAccessor(Settings.ForceLanes, false, (v) => {
+				if (v) ShowDefaultLanes();
+			}),
+			tooltip.GetTooltip(TooltipStrings.Tooltip.ForceLanes));
 		
 		if (Settings.Get(Settings.ForceLanes, false)) {
 			ShowDefaultLanes();
 		}
 		
-		Refresh();
 		UI.RefreshTooltips(panel);
 	}
 	
-	public void Refresh() {
-		chroma_enable!.SetIsOnWithoutNotify(Settings.Get(Settings.ShowChromaKey, true));
-		noodle_enable!.SetIsOnWithoutNotify(Settings.Get(Settings.ShowNoodleKey, true));
-		split_value!.SetIsOnWithoutNotify(Settings.Get(Settings.SplitValue, true));
-		color_hex!.SetIsOnWithoutNotify(Settings.Get(Settings.ColorHex, true));
-		tooltip_enable!.SetIsOnWithoutNotify(Settings.Get(Settings.ShowTooltips, true));
-		force_lanes!.SetIsOnWithoutNotify(Settings.Get(Settings.ForceLanes, false));
+	private Utils.Accessor<bool> SettingAccessor(string key, bool _default, UnityAction<bool>? extra = null) {
+		return new Utils.Accessor<bool>(
+			() => Settings.Get(key, _default),
+			(v) => {
+				Settings.Set(key, v);
+				Plugin.main?.TriggerFullRefresh();
+				if (extra != null) extra(v);
+			}
+		);
 	}
 	
 	public override void ToggleWindow() {
-		Refresh();
 		window!.Toggle();
-	}
-	
-	private Toggle AddCheckbox(string label, UnityAction<bool> setter, string tooltip = "") {
-		var container = UI.AddField(current_panel!, label, null, tooltip);
-		return UI.AddCheckbox(container, false, setter);
 	}
 	
 	private static string[] Lanes = new string[] {

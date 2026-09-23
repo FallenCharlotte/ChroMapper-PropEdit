@@ -1,3 +1,8 @@
+v0.14
+	GLSEvents!
+	Light type dropdown for geometry; numerical type next to name
+	Complete data access refactor!
+
 v0.13.11
 	Event type dropdown
 	Recover if some other plugin errors during SceneLoaded

@@ -586,11 +586,7 @@ public partial class MainWindow : UIWindow {
 					EditParsed("BPM", ObjectField<float>("Bpm"), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.BPMChange));
 					break;
 				case ObjectType.NJSEvent: {
-					var conv = new Converter<int?, bool?>(
-						(i) => (i == 1),
-						(b) => (b ?? false) ? 1 : 0
-					);
-					EditCheckbox("Use Previous", ObjectField<int>("UsePrevious").Insert(conv), null);
+					EditCheckbox("Use Previous", ObjectField<int>("UsePrevious").Insert(Data.IntBool()), null);
 					EditParsed("Relative NJS", ObjectField<float>("RelativeNJS"));
 					EditDropdown("Easing", ObjectField<int>("Easing"), Events.NJSEasings, false);
 				}	break;
@@ -606,12 +602,36 @@ public partial class MainWindow : UIWindow {
 				case ObjectType.GLSColor:
 				case ObjectType.GLSRotation:
 				case ObjectType.GLSTranslation:
+					//EditParsed("ID", ObjectField<int>("ID"));
+					break;
 				case ObjectType.GLSEvent: {
-					//AddParsed("Color", Data.GetSet<int>("Color"), false, "Test");
-					//AddParsed("Brightness", Data.GetSet<float>("Brightness"), false, "Test");
-					
-					wipe();
-					UI.AddLabel(panel!, "Unsupported", "GLS Unsupported!", Vector2.zero);
+					var glse = objects.First();
+					if (glse is BaseLightColorBase) {
+						EditParsed("Color", ObjectField<int>("Color"));
+						EditParsed("Brightness", ObjectField<float>("Brightness"));
+						EditCheckbox("Use Previous", ObjectField<int>("UsePrevious").Insert(Data.IntBool()), null);
+						var easings = global::Settings.Instance.MapVersion == 4
+							? Events.NJSEasings
+							: Events.WeHaveEasingsAtHome;
+						EditDropdown("Easing", ObjectField<int>("Easing"), easings, false);
+						EditParsed("Frequency", ObjectField<int>("Frequency"));
+						EditParsed("Strobe Brightness", ObjectField<float>("StrobeBrightness"));
+						EditParsed("Strobe Fade", ObjectField<int>("StrobeFade"));
+						EditTextbox("Strobe Color", NullableField<Color?>("StrobeColor").Insert(Data.ColorConverter()), false);
+						EditParsed("Chroma Strobe Interval", NullableField<float?>("ChromaStrobeInterval"));
+					}
+					else if (glse is BaseLightRotationBase) {
+						EditParsed("Rotation", ObjectField<float>("Rotation"));
+						EditDropdown("Direction", ObjectField<int>("Direction"), Events.RotationDirections, false);
+						EditDropdown("Easing", ObjectField<int>("EaseType"), Events.NJSEasings, false);
+						EditParsed("Loop", ObjectField<int>("Loop"));
+						EditCheckbox("Use Previous", ObjectField<int>("UsePrevious").Insert(Data.IntBool()), null);
+					}
+					else if (glse is BaseLightTranslationBase) {
+						EditParsed("Translation", ObjectField<float>("Translation"));
+						EditDropdown("Easing", ObjectField<int>("EaseType"), Events.NJSEasings, false);
+						EditCheckbox("Use Previous", ObjectField<int>("UsePrevious").Insert(Data.IntBool()), null);
+					}
 				}	break;
 #endif
 				default:
@@ -628,16 +648,7 @@ public partial class MainWindow : UIWindow {
 			
 			CheckRefresh(SelectionType.Materials);
 			
-			Converter<Color?, string?> cc = new(
-				(c) => (c == null)
-					? ""
-					: (new JSONArray())
-						.WriteColor(c ?? Color.white) // microslop can't make the damn ! operator work
-						.ToString(),
-				(s) => Data.RawToJson(s ?? "")?.ReadColor()
-			);
-			
-			EditTextbox("Color", NullableField<Color?>("Color").Insert(cc), true);
+			EditTextbox("Color", NullableField<Color?>("Color").Insert(Data.ColorConverter()), true);
 			EditDropdown("Shader", NullableField<string>("Shader"), MapSettings.Shaders, false);
 			EditTextbox("Track", NullableField<string?>("Track"), false, "Assign the material to a track, allowing you to animate the color.");
 			

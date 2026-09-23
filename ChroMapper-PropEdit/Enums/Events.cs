@@ -188,6 +188,17 @@ public static class Events {
 		{ 102, "BeatSaberInOutBounce" },
 	};
 	
+	public static readonly Map<int?> WeHaveEasingsAtHome = new() {
+		{  -1, "None" },
+		{   0, "Linear" },
+	};
+	
+	public static readonly Map<int?> RotationDirections = new() {
+		{ 0, "Automatic" },
+		{ 1, "Clockwire" },
+		{ 2, "Counter-Clockwise" },
+	};
+	
 	public static readonly Map<string?> LerpTypes = new Map<string?> {
 		{"RGB", "RGB"},
 		{"HSV", "HSV"}

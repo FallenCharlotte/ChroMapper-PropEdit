@@ -155,6 +155,23 @@ public static class Data {
 	}
 	public static JSONColorCoverter JSONColor() => new();
 	
+	//Someone who cares about performance can make these into classes
+	public static Converter<Color?, string?> ColorConverter() =>
+		new(
+			(c) => (c == null)
+				? ""
+				: (new JSONArray())
+					.WriteColor(c ?? Color.white) // microslop can't make the damn ! operator work
+					.ToString(),
+			(s) => Data.RawToJson(s ?? "")?.ReadColor()
+		);
+	
+	public static Converter<int?, bool?> IntBool()
+		=> new(
+			(i) => (i == 1),
+			(b) => (b ?? false) ? 1 : 0
+		);
+	
 	// https://stackoverflow.com/a/32037899
 	public static System.Func<TInput, TOutput> CreateConvertFunc<TInput, TOutput>()
 	{

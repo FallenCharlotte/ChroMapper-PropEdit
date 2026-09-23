@@ -852,14 +852,14 @@ public partial class MainWindow : UIWindow {
 #else
 			var context = (BeatmapRuntimeContext)Object.FindFirstObjectByType(typeof(BeatmapRuntimeContext));
 			
-			var entries = context?.TracksDefinition?.Basic?.ToList() ?? null;
+			var entries = context?.TrackDefinitions?.Basic?.ToList() ?? null;
 			
 			if (entries == null) return null;
 			
 			EventLanes = new();
 			
 			for (int i = 0; i < entries.Count; ++i) {
-				EventLanes.Add(entries[i].Value.Type, entries[i].Value.Name);
+				EventLanes.Add(entries[i].Value.Type, $"{entries[i].Value.Type}: {entries[i].Value.Name}");
 			}
 #endif
 		}

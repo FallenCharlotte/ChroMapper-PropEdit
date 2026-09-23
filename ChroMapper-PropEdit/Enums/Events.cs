@@ -46,8 +46,8 @@ public static class Events {
 		UnityEngine.Debug.LogError($"Unknown event type {typeName} ({e.Type}) at beat {e.JsonTime}!");
 #else
 		var context = (BeatmapRuntimeContext)UnityEngine.Object.FindFirstObjectByType(typeof(BeatmapRuntimeContext));
-		var kind = context.TracksDefinition.GetBasicOrDefault(e.Type).Kind;
-		var components = context.TracksDefinition.GetBasicOrDefault(e.Type).Components;
+		var kind = context.TrackDefinitions.GetBasicOrDefault(e.Type).Kind;
+		var components = context.TrackDefinitions.GetBasicOrDefault(e.Type).Components;
 		
 		Plugin.Trace($"Type: {e.Type}, Kind: {kind}, Components: {components}");
 		

@@ -684,7 +684,13 @@ public partial class MainWindow : UIWindow {
 		
 		EditEEComponent("Light", EEComponent("ILightWithId"), () => {
 			EditParsed("Light ID", NullableField<int?>("LightID"));
-			EditParsed("Light Type", NullableField<int?>("LightType"));
+			var lanes = GetEventLanes();
+			if (lanes != null) {
+				EditDropdown<int?>("Light Type", NullableField<int?>("LightType"), lanes, true);
+			}
+			else {
+				EditParsed("Light Type", NullableField<int?>("LightType"));
+			}
 		});
 		
 		EditEEComponent("Bloom Fog", EEComponent("BloomFogEnvironment"), () => {
@@ -837,11 +843,11 @@ public partial class MainWindow : UIWindow {
 				var type = _etlabels.LaneIdToEventType(i);
 				
 				var lane = _etlabels.LayerInstantiate.transform.parent.GetChild(type + 1);
-				var textMesh = lane.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+				var label = lane.GetComponentInChildren<TMPro.TextMeshProUGUI>()?.text ?? "";
 				
-				Plugin.Trace($"{i} {type} {textMesh?.text}");
+				Plugin.Trace($"{i} {type} {label}");
 				
-				EventLanes.Add(type, textMesh?.text ?? "");
+				EventLanes.Add(type, $"{type}: {label}");
 			}
 #else
 			var context = (BeatmapRuntimeContext)Object.FindFirstObjectByType(typeof(BeatmapRuntimeContext));

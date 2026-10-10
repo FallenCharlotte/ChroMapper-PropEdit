@@ -1,3 +1,6 @@
+v0.14.1
+	Fix undo/redo
+
 v0.14
 	GLSEvents!
 	Light type dropdown for geometry; numerical type next to name

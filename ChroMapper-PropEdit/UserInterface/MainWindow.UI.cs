@@ -100,6 +100,7 @@ public partial class MainWindow : UIWindow {
 	
 	private void UpdateFromAction(BeatmapAction? _) {
 		Plugin.Trace($"{Time.frameCount} UpdateFromAction");
+		Selection.RefreshSelectedObjects();
 		TriggerRefresh();
 	}
 	

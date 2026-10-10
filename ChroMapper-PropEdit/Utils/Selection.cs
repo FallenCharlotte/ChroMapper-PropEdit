@@ -36,6 +36,14 @@ public class Selection {
 		OnSelectionChanged?.Invoke();
 	}
 	
+	public static void RefreshSelectedObjects() {
+		if (SelectedType == SelectionType.Objects) {
+			Selected = SelectionController.HasSelectedObjects()
+				? SelectionController.SelectedObjects.Select(it => it).ToList()
+				: null;
+		}
+	}
+	
 	public static void OnPDsSelected(List<JSONArray> sel) {
 		SpecialType(SelectionType.PointDefinitions, sel);
 	}

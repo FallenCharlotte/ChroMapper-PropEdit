@@ -301,44 +301,16 @@ public partial class MainWindow : UIWindow {
 				bool ees = false;
 				var modified = new List<BaseObject>();
 				foreach (var o in editing!) {
-					// Work around chromapper bug where all edits to any environment enhancement gets applied to [0]
-					// Still needed in 0.14
-					if (o is BaseEnvironmentEnhancement eh) {
-						ees = true;
-						Plugin.Trace("Funky workaround!");
-						var collection = (GeometryGridContainer)BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.EnvironmentEnhancement);
-						
-						if (collection.LoadedContainers.ContainsKey(eh)) {
-							GameObject.DestroyImmediate(collection.LoadedContainers[eh].gameObject);
-							collection.LoadedContainers.Remove(eh);
-							collection.ObjectsWithContainers.Remove(eh);
-						}
-						SelectionController.Deselect(o, false);
-						
-						o_accesser.Set(o, value);
-					}
-					else {
-						var mod = BeatmapFactory.Clone(o);
-						modified.Add(mod);
-						
-						o_accesser.Set(mod, value);
-						
-						Plugin.Trace($"{o.ToJson()} => {mod.ToJson()}");
-					}
+					var mod = BeatmapFactory.Clone(o);
+					modified.Add(mod);
+					
+					o_accesser.Set(mod, value);
+					
+					Plugin.Trace($"{o.ToJson()} => {mod.ToJson()}");
 				}
-				if (ees) {
-					var collection = (GeometryGridContainer)BeatmapObjectContainerCollection.GetCollectionForType(ObjectType.EnvironmentEnhancement);
-					collection.RefreshPool(true);
-					foreach (var o in editing!) {
-						SelectionController.Select(o, true, false, false);
-					}
-					Plugin.map_settings!.Refresh();
-				}
-				else {
-					BeatmapActionContainer.AddAction(
-						new BeatmapObjectModifiedCollectionAction(modified, editing, $"Edited ({modified.Count}) objects with Prop Edit."),
-						true);
-				}
+				BeatmapActionContainer.AddAction(
+					new BeatmapObjectModifiedCollectionAction(modified, editing, $"Edited ({modified.Count}) objects with Prop Edit."),
+					true);
 				// Need to refresh Selection.Selected
 				Selection.OnObjectsSelected();
 				break;

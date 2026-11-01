@@ -271,52 +271,58 @@ public class MapSettingsWindow : UIWindow {
 	
 	private string prefix = "";
 	
-	private readonly Dictionary<string, RequirementCheck.RequirementType> req_statuses = new Dictionary<string, RequirementCheck.RequirementType>() {
-		{"_requirements", RequirementCheck.RequirementType.Requirement},
-		{"_suggestions", RequirementCheck.RequirementType.Suggestion}
-	};
-	
+	private bool refreshing_reqs = false;
 	private void RefreshRequirements() {
+		refreshing_reqs = true;
 		foreach (Transform child in requirements_panel!.transform) {
 			GameObject.Destroy(child.gameObject);
 		}
+		RestoreReqChecks();
+		
 		requirements = new Dictionary<string, UIDropdown>();
 		forced = new Dictionary<string, Toggle>();
 		
+		var all_rs = new Dictionary<string, RequirementCheck.RequirementType>();
+		
+		// Goddammit why can't these just stay in custom data
+		// Suggestions first to requirements will take priority
+		var rs = new Dictionary<RequirementCheck.RequirementType, List<string>>() {
+			{RequirementCheck.RequirementType.Suggestion, DifficultyInfo().CustomSuggestions},
+			{RequirementCheck.RequirementType.Requirement, DifficultyInfo().CustomRequirements},
+		};
+		// Combine all suggested and required into one list
+		foreach (var rs_mods in rs) {
+			foreach (var req in rs_mods.Value) {
+				all_rs.Add(req, rs_mods.Key);
+			}
+		}
+		
+		// Add all default mods
 		foreach (var rc in default_reqchecks) {
-			ReqField(rc.Key, false, rc.Value.Name);
+			var default_status = GetReqCheck(rc.Key)!.IsRequiredOrSuggested(DifficultyInfo(), BeatSaberSongContainer.Instance.Map);
+			var current_status = all_rs.ContainsKey(rc.Key)
+				? all_rs[rc.Key]
+				: default_status;
+			Plugin.Trace($"{rc.Key}: Map: {current_status} CM: {default_status}");
+			ReqField(rc.Key, (int)current_status, current_status != default_status, rc.Value.Name);
 		}
 		
-		foreach (var req_status in req_statuses) {
-			if (GetGustomData()[req_status.Key] is JSONArray reqs) {
-				foreach (var req in reqs.Children) {
-					var reqcheck = GetReqCheck(req);
-					if (reqcheck == null) {
-						RequirementCheck.RegisterRequirement(new CustomRequirement(req, req_status.Value, DifficultyInfo()));
-					}
-					else {
-						if (reqcheck.IsRequiredOrSuggested(DifficultyInfo(), BeatSaberSongContainer.Instance.Map) != req_status.Value) {
-							// Triggers forced
-							requirements[req].Dropdown.value = (int)req_status.Value;
-						}
-					}
-				}
+		// Add all custom mods
+		foreach (var rc in all_rs) {
+			if (!default_reqchecks.ContainsKey(rc.Key)) {
+				RequirementCheck.RegisterRequirement(new CustomRequirement(rc.Key, rc.Value, DifficultyInfo()));
+				ReqField(rc.Key, (int)rc.Value, true);
 			}
 		}
 		
-		foreach (var reqcheck in requirementsAndSuggestions!) {
-			if (!default_reqchecks.ContainsKey(reqcheck.Name)) {
-				ReqField(reqcheck.Name, true, reqcheck.Name);
-			}
-		}
-		
-		{
+		{ // Textbox to add custom
 			var input = UI.AddTextbox(requirements_panel!, "", (s) => {
 				if (s == null || s == "") {
 					return;
 				}
 				
 				RequirementCheck.RegisterRequirement(new CustomRequirement(s!, RequirementCheck.RequirementType.Requirement, DifficultyInfo()));
+				DifficultyInfo().CustomRequirements.Add(s!);
 				
 				RefreshRequirements();
 				Refresh();
@@ -324,8 +330,19 @@ public class MapSettingsWindow : UIWindow {
 			
 			UI.MoveTransform((RectTransform)input.transform, new Vector2(0, 20), new Vector2(0, 0));
 		}
+		refreshing_reqs = false;
 	}
 	
+	// Restore default reqchecks
+	private void RestoreReqChecks() {
+		Plugin.Trace("Restore default requirement checks!");
+		requirementsAndSuggestions!.Clear();
+		foreach (var rc in default_reqchecks) {
+			RequirementCheck.RegisterRequirement((RequirementCheck)System.Activator.CreateInstance(rc.Value));
+		}
+	}
+	
+	// Pretty names for known mods
 	private Dictionary<string, string> requirement_names = new Dictionary<string, string>() {
 		{ "ChromaReq", "Chroma" },
 		{ "LegacyChromaReq", "Legacy Chroma" },
@@ -334,15 +351,15 @@ public class MapSettingsWindow : UIWindow {
 		{ "CinemaReq", "Cinema" },
 		{ "SoundExtensionsReq", "Sound Extensions" },
 		{ "VivifyReq", "Vivify" },
+		{ "BeatToTheFutureReq", "Beat To The Future" },
 	};
 	
-	private void ReqField(string name, bool force, string reqcheck = "") {
-		string tt_name = name;
-		if (requirement_names.ContainsKey(reqcheck)) {
-			tt_name = requirement_names[reqcheck];
-		}
+	private void ReqField(string name, int status, bool force, string typename = "") {
+		string tt_name = requirement_names.ContainsKey(typename)
+			? requirement_names[typename]
+			: name;
 		var container = UI.AddField(requirements_panel!, tt_name, null, tooltip.GetTooltip(TooltipStrings.Tooltip.ModReq, tt_name));
-		requirements[name] = UI.AddDropdown(container, 0, (v) => {
+		requirements[name] = UI.AddDropdown(container, status, (v) => {
 			SetForced(name, true);
 		}, MapSettings.RequirementStatus);
 		if (default_reqchecks.ContainsKey(name)) {
@@ -351,31 +368,11 @@ public class MapSettingsWindow : UIWindow {
 				SetForced(name, v);
 			});
 		}
-	}
-	
-	public void OnDestroy() {
-		// Restore any requirement checks that were yoted
-		requirementsAndSuggestions!.Clear();
-		RequirementCheck.RegisterRequirement(new ChromaReq());
-		RequirementCheck.RegisterRequirement(new LegacyChromaReq());
-		RequirementCheck.RegisterRequirement(new MappingExtensionsReq());
-		RequirementCheck.RegisterRequirement(new NoodleExtensionsReq());
-		RequirementCheck.RegisterRequirement(new CinemaReq());
-		RequirementCheck.RegisterRequirement(new SoundExtensionsReq());
-		RequirementCheck.RegisterRequirement(new VivifyReq());
-#if CHROMPER_13
-		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromAction;
-		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
-		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;
-#else
-		BeatmapActionContainer.OnActionCreated -= UpdateFromAction;
-		BeatmapActionContainer.OnActionUndo -= UpdateFromAction;
-		BeatmapActionContainer.OnActionRedo -= UpdateFromAction;
-#endif
+		if (force) SetForced(name, true);
 	}
 	
 	private void SetForced(string name, bool force) {
-		// TODO: Update instead of removing, currently unable to change multiple maps in the same set
+		// TODO: Update instead of removing, currently unable to change multiple maps in the same set (is this still true?)
 		requirementsAndSuggestions!.Remove(GetReqCheck(name)!);
 		RequirementCheck.RegisterRequirement(force
 			? (new CustomRequirement(name, (RequirementCheck.RequirementType)requirements[name].Dropdown.value, DifficultyInfo()))
@@ -399,10 +396,25 @@ public class MapSettingsWindow : UIWindow {
 		}
 	}
 	
+	public void OnDestroy() {
+		RestoreReqChecks();
+#if CHROMPER_13
+		BeatmapActionContainer.ActionCreatedEvent -= UpdateFromAction;
+		BeatmapActionContainer.ActionUndoEvent -= UpdateFromAction;
+		BeatmapActionContainer.ActionRedoEvent -= UpdateFromAction;
+#else
+		BeatmapActionContainer.OnActionCreated -= UpdateFromAction;
+		BeatmapActionContainer.OnActionUndo -= UpdateFromAction;
+		BeatmapActionContainer.OnActionRedo -= UpdateFromAction;
+#endif
+	}
+	
 	public void Refresh() {
 		Plugin.Trace("MapSettingsWindow Refresh");
-		foreach (var r in requirements) {
-			r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(DifficultyInfo(), BeatSaberSongContainer.Instance.Map)));
+		if (!refreshing_reqs) {
+			foreach (var r in requirements) {
+				r.Value.Dropdown.SetValueWithoutNotify((int)(GetReqCheck(r.Key)!.IsRequiredOrSuggested(DifficultyInfo(), BeatSaberSongContainer.Instance.Map)));
+			}
 		}
 		information_editor?.Refresh();
 		warnings_editor?.Refresh();

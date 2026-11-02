@@ -33,7 +33,7 @@ public class Plugin {
 			Plugin.Trace($"{chromper_ver.Minor} vs {TARGET_VER}");
 			
 			if (chromper_ver.Minor != TARGET_VER) {
-				var bypass =  Settings.Get("BypassVersion");
+				var bypass =  Settings.BypassVersion.Get();
 				// Allow testing in uncharted territory
 				bool allowBypass = DEV && (chromper_ver.Minor > TARGET_VER);
 				
@@ -46,7 +46,7 @@ public class Plugin {
 					dialog.AddComponent<TextComponent>().WithInitialValue($"This build of PropEdit is made for ChroMapper v0.{TARGET_VER}.x! Please install the correct version. (For this version of ChroMapper, you want the ChroMapper-{chromper_ver.Minor}-PropEdit.xxx.zip)" + (allowBypass ? " Do you want to try to run it anyways?" : ""));
 					if (allowBypass) {
 						dialog.AddFooterButton(() => {
-							Settings.Set("BypassVersion", false);
+							Settings.BypassVersion.Set(false);
 							Debug.Log("Not loading PropEdit on incompatible version!");
 						}, "No");
 						dialog.AddFooterButton(() => {
@@ -54,7 +54,7 @@ public class Plugin {
 							DoInit();
 						}, "Yes");
 						dialog.AddFooterButton(() => {
-							Settings.Set("BypassVersion", true);
+							Settings.BypassVersion.Set(true);
 							Debug.Log("PropEdit version check bypassed!");
 							DoInit();
 						}, "Always");

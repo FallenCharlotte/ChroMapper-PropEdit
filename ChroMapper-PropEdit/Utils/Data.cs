@@ -130,7 +130,7 @@ public static class Data {
 			if (node == null) {
 				return null;
 			}
-			if (Settings.Get(Settings.ColorHex, true)) {
+			if (Settings.ColorHex.Get()) {
 				var color = node.ReadColor();
 				return $"#{ColorUtility.ToHtmlStringRGBA(color)}";
 			}

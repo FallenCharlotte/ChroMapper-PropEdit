@@ -23,23 +23,23 @@ public class PluginSettingsWindow : UIWindow {
 		}
 		
 		EditCheckbox("Show Chroma",
-			SettingAccessor(Settings.ShowChromaKey, true),
+			SettingAccessor<bool>(Settings.ShowChroma),
 			tooltip.GetTooltip(TooltipStrings.Tooltip.ShowChroma));
 		
 		EditCheckbox("Show Noodle Extensions",
-			SettingAccessor(Settings.ShowNoodleKey, true),
+			SettingAccessor<bool>(Settings.ShowNoodle),
 			tooltip.GetTooltip(TooltipStrings.Tooltip.ShowNoodleExtensions));
 		
 		EditCheckbox("Split light values",
-			SettingAccessor(Settings.SplitValue, true),
+			SettingAccessor<bool>(Settings.SplitValue),
 			tooltip.GetTooltip(TooltipStrings.Tooltip.SplitLightValues));
 		
 		EditCheckbox("Colors as Hex", 
-			SettingAccessor(Settings.SplitValue, true),
+			SettingAccessor<bool>(Settings.SplitValue),
 			tooltip.GetTooltip(TooltipStrings.Tooltip.ColorsAsHex));
 		
 		EditCheckbox("Show Tooltips",
-			SettingAccessor(Settings.ShowTooltips, true, (_) => {
+			SettingAccessor<bool>(Settings.ShowTooltips, (_) => {
 				UI.RefreshTooltips(Plugin.main?.panel);
 				UI.RefreshTooltips(Plugin.map_settings?.panel);
 				UI.RefreshTooltips(panel);
@@ -47,29 +47,29 @@ public class PluginSettingsWindow : UIWindow {
 			tooltip.GetTooltip(TooltipStrings.Tooltip.ShowTooltips));
 		
 		EditCheckbox("Force Custom Event Lanes",
-			SettingAccessor(Settings.ForceLanes, false, (v) => {
+			SettingAccessor<bool>(Settings.ForceLanes, (v) => {
 				if (v) ShowDefaultLanes();
 			}),
 			tooltip.GetTooltip(TooltipStrings.Tooltip.ForceLanes));
 		
 		force_reqs = EditDropdown("Keep Forced Requirements",
-			SettingAccessor(Settings.KeepForcedReqs, "Ask", (_) => { Plugin.map_settings?.RefreshRequirements(); }),
+			SettingAccessor<string>(Settings.KeepForcedReqs, (_) => { Plugin.map_settings?.RefreshRequirements(); }),
 			Enums.MapSettings.KeepCustomRequirements
 		);
 		
-		if (Settings.Get(Settings.ForceLanes, false)) {
+		if (Settings.ForceLanes.Get()) {
 			ShowDefaultLanes();
 		}
 		
 		UI.RefreshTooltips(panel);
 	}
 	
-	private Utils.Accessor<T?> SettingAccessor<T>(string key, T _default, UnityAction<T>? extra = null) {
+	private Utils.Accessor<T?> SettingAccessor<T>(Settings.Setting setting, UnityAction<T>? extra = null) {
 		var conv = Data.JSONValue<T?>();
 		return new Accessor<JSONNode?>(
-			() => Settings.Get(key, conv.Backwards(_default)),
+			() => setting.Get(),
 			(v) => {
-				Settings.Set(key, v!);
+				setting.Set(v!);
 				Plugin.main?.TriggerFullRefresh();
 				if (extra != null) extra(conv.Forwards(v)!);
 			}

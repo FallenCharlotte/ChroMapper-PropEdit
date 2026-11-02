@@ -17,7 +17,7 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 	
 	public GameObject? title;
 	
-	public string? settings_key;
+	public Settings.Setting? pos_setting;
 	
 	public static Window Create(string name, string title, GameObject parent, Vector2 size) {
 		var obj = new GameObject($"{name} Window");
@@ -27,7 +27,7 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 	public Window Init(string name, string title, GameObject parent, Vector2 size) {
 		var canvas = parent.GetComponent<Canvas>();
 		transform.SetParent(parent.transform, false);
-		settings_key = $"{name}_window";
+		pos_setting = new($"{name}_window");
 		// Window Drag
 		gameObject.AddComponent<DragWindowController>().Init(canvas, PosSave);
 		
@@ -104,7 +104,7 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 	
 	private void PosLoad() {
 		Settings.Reload();
-		var settings = Settings.Get(settings_key!)?.AsObject;
+		var settings = pos_setting?.Get()?.AsObject;
 		if (settings == null) {
 			return;
 		}
@@ -136,7 +136,7 @@ public class Window : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
 		settings["y"] = pos.y;
 		settings["w"] = GetComponent<RectTransform>().sizeDelta.x;
 		settings["h"] = GetComponent<RectTransform>().sizeDelta.y;
-		Settings.Set(settings_key!, settings);
+		pos_setting!.Set(settings);
 	}
 	
 	private void SizeSave() {

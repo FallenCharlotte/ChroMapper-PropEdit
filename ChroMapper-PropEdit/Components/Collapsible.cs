@@ -16,7 +16,7 @@ public class Collapsible : MonoBehaviour
 	
 	public UnityAction<bool>? OnAnimationComplete;
 	
-	private string? settings_key;
+	private Settings.Setting? setting;
 	private float? height_cache;
 	
 	public bool Expanded {
@@ -42,7 +42,7 @@ public class Collapsible : MonoBehaviour
 	
 	public Collapsible Init(string label, bool expanded, string tooltip = "", bool background = true) {
 		if (!gameObject.name.StartsWith("_")) {
-			settings_key = $"ExpanderStates.{gameObject.name}";
+			setting = new Settings.Setting($"ExpanderStates.{gameObject.name}", expanded);
 		}
 		UI.AttachTransform(gameObject, new Vector2(0, 20), pos: new Vector2(0, 0));
 		{
@@ -82,8 +82,8 @@ public class Collapsible : MonoBehaviour
 			_label_trans.anchoredPosition += new Vector2(5, 0);
 			_label_trans.anchorMax = new Vector2(0.75f, 1);
 		}
-		if (settings_key != null) {
-			expanded = Settings.Get(settings_key, expanded);
+		if (setting != null) {
+			expanded = setting.Get();
 		}
 		expandToggle = UI.AddCheckbox(header, expanded, SetExpandedInternal);
 		Sprite arrow = UI.GetSprite("ArrowIcon");
@@ -198,8 +198,8 @@ public class Collapsible : MonoBehaviour
 	private void SetExpandedNow(bool expanded, bool set_active) {
 		if (set_active) panel!.SetActive(expanded);
 		expandToggle!.transform.localEulerAngles = (expanded ? 1 : 0) * 180f * Vector3.forward;
-		if (settings_key != null) {
-			Settings.Set(settings_key, expanded);
+		if (setting != null) {
+			setting.Set(expanded);
 		}
 	}
 }

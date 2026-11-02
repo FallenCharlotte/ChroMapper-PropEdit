@@ -110,7 +110,7 @@ public partial class MainWindow : UIWindow {
 						EditParsed("Angle Offset", ObjectField<int>("AngleOffset"), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.AngleOffset));
 					}
 					Line("");
-					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
+					if (Settings.ShowChroma.Get()?.AsBool ?? false) {
 						Expando(CHROMA_NAME, "Chroma", true);
 						EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.Color));
 						if (v2) {
@@ -123,7 +123,7 @@ public partial class MainWindow : UIWindow {
 						panels.Pop();
 					}
 					
-					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
+					if (Settings.ShowNoodle.Get()?.AsBool ?? false) {
 						Expando(NOODLE_NAME, "Noodle Extensions", true);
 						EditParsed("NJS", CustomField<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.NJS));
 						EditParsed("Spawn Offset", CustomField<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), tooltip.GetTooltip(PropertyType.Note, TooltipStrings.Tooltip.SpawnOffset));
@@ -172,13 +172,13 @@ public partial class MainWindow : UIWindow {
 					
 					var s = (o as BaseSlider)!;
 					
-					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
+					if (Settings.ShowChroma.Get()?.AsBool ?? false) {
 						Expando(CHROMA_NAME, "Chroma", true);
 						EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.Color));
 						panels.Pop();
 					}
 					
-					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
+					if (Settings.ShowNoodle.Get()?.AsBool ?? false) {
 						Expando(NOODLE_NAME, "Noodle Extensions", true);
 						EditParsed("NJS", CustomField<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.NJS));
 						EditParsed("Spawn Offset", CustomField<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), tooltip.GetTooltip(PropertyType.Arc, TooltipStrings.Tooltip.SpawnOffset));
@@ -215,13 +215,13 @@ public partial class MainWindow : UIWindow {
 					
 					var s = (o as BaseSlider)!;
 					
-					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
+					if (Settings.ShowChroma.Get()?.AsBool ?? false) {
 						Expando(CHROMA_NAME, "Chroma", true);
 						EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.Color));
 						panels.Pop();
 					}
 					
-					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
+					if (Settings.ShowNoodle.Get()?.AsBool ?? false) {
 						Expando(NOODLE_NAME, "Noodle Extensions", true);
 						EditParsed("NJS", CustomField<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.NJS));
 						EditParsed("Spawn Offset", CustomField<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), tooltip.GetTooltip(PropertyType.Chain, TooltipStrings.Tooltip.SpawnOffset));
@@ -261,13 +261,13 @@ public partial class MainWindow : UIWindow {
 					}
 					Line("");
 					
-					if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
+					if (Settings.ShowChroma.Get()?.AsBool ?? false) {
 						Expando(CHROMA_NAME, "Chroma", true);
 						EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.Color));
 						panels.Pop();
 					}
 					
-					if (Settings.Get(Settings.ShowNoodleKey)?.AsBool ?? false) {
+					if (Settings.ShowNoodle.Get()?.AsBool ?? false) {
 						Expando(NOODLE_NAME, "Noodle Extensions", true);
 						EditParsed("NJS", CustomField<float?>(v2 ? "_noteJumpMovementSpeed" : "noteJumpMovementSpeed"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.NJS));
 						EditParsed("Spawn Offset", CustomField<float?>(v2 ? "_noteJumpStartBeatOffset" : "noteJumpStartBeatOffset"), tooltip.GetTooltip(PropertyType.Obstacle, TooltipStrings.Tooltip.SpawnOffset));
@@ -315,7 +315,7 @@ public partial class MainWindow : UIWindow {
 					
 					switch (new_etype) {
 					case Events.EventType.Light:
-						if (Settings.Get(Settings.SplitValue, true)!.AsBool) {
+						if (Settings.SplitValue.Get()!.AsBool) {
 							EditDropdown<int?>("Color", SplitEventValue(0b1100), Events.LightColors, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventColor));
 							EditDropdown<int?>("Action", SplitEventValue(0b0011), Events.LightActions, false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.EventAction));
 						}
@@ -325,7 +325,7 @@ public partial class MainWindow : UIWindow {
 						EditParsed("Brightness", ObjectField<float>("FloatValue"), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Brightness));
 						Line("");
 						
-						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
+						if (Settings.ShowChroma.Get()?.AsBool ?? false) {
 							Expando(CHROMA_NAME, "Chroma", true);
 							EditTextbox("LightID", CustomFieldRaw(f.CustomKeyLightID), true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LightID));
 							EditColor("Color", o.CustomKeyColor, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.Color));
@@ -347,7 +347,7 @@ public partial class MainWindow : UIWindow {
 						EditParsed("Speed", ObjectField<int>("Value"), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserSpeed));
 						Line("");
 						
-						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
+						if (Settings.ShowChroma.Get()?.AsBool ?? false) {
 							Expando(CHROMA_NAME, "Chroma", true);
 							EditCheckbox("Lock Rotation", CustomField<bool?> (f.CustomKeyLockRotation), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LockRotation));
 							EditDropdown<int?>("Direction", CustomField<int?>  (f.CustomKeyDirection), Events.LaserDirection, true, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.LaserDirection));
@@ -357,7 +357,7 @@ public partial class MainWindow : UIWindow {
 						break;
 					case Events.EventType.RingRotation:
 						Line("");
-						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
+						if (Settings.ShowChroma.Get()?.AsBool ?? false) {
 							Expando(CHROMA_NAME, "Chroma", true);
 							EditTextbox("Filter",     CustomField<string>(f.CustomKeyNameFilter), false, tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingFilter));
 							if (v2) {
@@ -376,7 +376,7 @@ public partial class MainWindow : UIWindow {
 						break;
 					case Events.EventType.RingZoom:
 						Line("");
-						if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
+						if (Settings.ShowChroma.Get()?.AsBool ?? false) {
 							Expando(CHROMA_NAME, "Chroma", true);
 							EditParsed("Step",  CustomField<float?>(f.CustomKeyStep), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingZoomStep));
 							EditParsed("Speed", CustomField<float?>(f.CustomKeySpeed), tooltip.GetTooltip(PropertyType.Event, TooltipStrings.Tooltip.RingSpeed));

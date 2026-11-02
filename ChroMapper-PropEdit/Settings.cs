@@ -6,28 +6,36 @@ using ChroMapper_PropEdit.Utils;
 namespace ChroMapper_PropEdit {
 
 public class Settings {
-	// TODO: Some way to integrate defaults here, enum class?
-	public static readonly string ShowChromaKey = "Chroma";
-	public static readonly string ShowNoodleKey = "Noodle";
-	public static readonly string SplitValue = "split_val";
-	public static readonly string ColorHex = "color_hex";
-	public static readonly string ShowTooltips = "tooltips";
-	public static readonly string ForceLanes = "force_lanes";
-	public static readonly string KeepForcedReqs = "keep_forced_reqs";
-
-		public static JSONNode? Get(string name, JSONNode? d = null) {
-		var o = Data.GetNode(Settings.Instance.json, name);
-		if (o == null && d != null) {
-			o = Settings.Set(name, d);
+	// Mostly an enum class, but allows external construction for custom keys
+	public class Setting {
+		public readonly string Key;
+		public readonly JSONNode? Default;
+		public Setting(string key, JSONNode? _default = null) {
+			Key = key;
+			Default = _default;
 		}
-		return o;
+		
+		public JSONNode? Get() {
+			var o = Data.GetNode(Settings.Instance.json, Key);
+			if (o == null && Default != null) {
+				o = Set(Default);
+			}
+			return o;
+		}
+		public JSONNode Set(JSONNode value) {
+			Data.SetNode(Settings.Instance.json, Key, value);
+			Settings.Instance.Save();
+			return value;
+		}
 	}
-	
-	public static JSONNode Set(string name, JSONNode value) {
-		Data.SetNode(Settings.Instance.json, name, value);
-		Settings.Instance.Save();
-		return value;
-	}
+	public static readonly Setting BypassVersion = new("BypassVersion", false);
+	public static readonly Setting ShowChroma = new("Chroma", true);
+	public static readonly Setting ShowNoodle = new("Noodle", true);
+	public static readonly Setting SplitValue = new("split_val", true);
+	public static readonly Setting ColorHex = new("color_hex", true);
+	public static readonly Setting ShowTooltips = new("tooltips", true);
+	public static readonly Setting ForceLanes = new("force_lanes", true);
+	public static readonly Setting KeepForcedReqs = new("keep_forced_reqs", "Ask");
 	
 	public static void Reload() {
 		Settings._instance = new Settings();

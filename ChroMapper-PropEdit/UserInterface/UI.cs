@@ -65,7 +65,7 @@ public static class UI {
 		UI.LeftColumn(label);
 		
 		//main code that adds the tooltip to the label
-		if (tooltip != "" && Settings.Get(Settings.ShowTooltips, true)!.AsBool == true) {
+		if (tooltip != "" && Settings.ShowTooltips.Get()!.AsBool == true) {
 			var LINE_WIDTH = 40;
 			var tooltip_wrapped = new System.Text.StringBuilder(tooltip);
 			var i = 0;
@@ -259,7 +259,7 @@ public static class UI {
 		if (root == null)
 			return;
 		
-		var show_tooltips = Settings.Get(Settings.ShowTooltips, true)!.AsBool;
+		var show_tooltips = Settings.ShowTooltips.Get()!.AsBool;
 		
 		foreach (var t in root.GetComponentsInChildren<Tooltip>(true)) {
 			t.enabled = show_tooltips;

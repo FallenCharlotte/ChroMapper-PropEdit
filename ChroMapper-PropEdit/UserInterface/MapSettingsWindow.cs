@@ -143,7 +143,7 @@ public class MapSettingsWindow : UIWindow {
 			panels.Pop();
 		}
 		
-		if (Settings.Get(Settings.ShowChromaKey)?.AsBool ?? false) {
+		if (Settings.ShowChroma.Get()?.AsBool ?? false) {
 			pointdefinitions_panel = Collapsible.Create(panel!, "Point Definitions", "Point Definitions", false).panel;
 			new_pointdefinition_textbox = UI.AddTextbox(pointdefinitions_panel!, "", (v) => {
 				if (!string.IsNullOrEmpty(v)) {
@@ -307,7 +307,7 @@ public class MapSettingsWindow : UIWindow {
 				: default_status;
 			Plugin.Trace($"{rc.Key}: CM: {default_status} Map: {current_status}");
 			if (current_status != default_status) {
-				var force_setting = (string)Settings.Get(Settings.KeepForcedReqs, "Ask");
+				var force_setting = (string)Settings.KeepForcedReqs.Get();
 				if (force == null && force_setting == "Ask") {
 					different.Add((rc.Key, default_status, current_status, rc.Value.Name));
 				}

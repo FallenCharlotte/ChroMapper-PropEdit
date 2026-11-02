@@ -1,3 +1,7 @@
+v0.14.2
+	Fix custom requirements
+	Requirement forcing setting and popup
+
 v0.14.1
 	Fix undo/redo
 

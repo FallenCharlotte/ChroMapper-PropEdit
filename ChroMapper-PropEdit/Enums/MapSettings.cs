@@ -9,6 +9,12 @@ public static class MapSettings {
 		{(int)RequirementCheck.RequirementType.None, "None"},
 	};
 	
+	public static readonly Map<string?> KeepCustomRequirements = new Map<string?> {
+		{ "Ask", "Ask Every Time" },
+		{ "Never", "Keep Defaults" },
+		{ "Force", "Keep Overrides" },
+	};
+	
 	public static readonly Map<bool?> OptionBool = new Map<bool?> {
 		{ true, "True" },
 		{ false, "False" },

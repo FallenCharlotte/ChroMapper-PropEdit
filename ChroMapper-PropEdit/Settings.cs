@@ -6,12 +6,14 @@ using ChroMapper_PropEdit.Utils;
 namespace ChroMapper_PropEdit {
 
 public class Settings {
+	// TODO: Some way to integrate defaults here, enum class?
 	public static readonly string ShowChromaKey = "Chroma";
 	public static readonly string ShowNoodleKey = "Noodle";
 	public static readonly string SplitValue = "split_val";
 	public static readonly string ColorHex = "color_hex";
 	public static readonly string ShowTooltips = "tooltips";
 	public static readonly string ForceLanes = "force_lanes";
+	public static readonly string KeepForcedReqs = "keep_forced_reqs";
 
 		public static JSONNode? Get(string name, JSONNode? d = null) {
 		var o = Data.GetNode(Settings.Instance.json, name);

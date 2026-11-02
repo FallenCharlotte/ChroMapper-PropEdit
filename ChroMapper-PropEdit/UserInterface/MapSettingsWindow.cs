@@ -272,7 +272,7 @@ public class MapSettingsWindow : UIWindow {
 	private string prefix = "";
 	
 	private bool refreshing_reqs = false;
-	private void RefreshRequirements() {
+	public void RefreshRequirements(bool? force = null) {
 		refreshing_reqs = true;
 		foreach (Transform child in requirements_panel!.transform) {
 			GameObject.Destroy(child.gameObject);
@@ -297,14 +297,53 @@ public class MapSettingsWindow : UIWindow {
 			}
 		}
 		
+		var different = new List<(string, RequirementCheck.RequirementType, RequirementCheck.RequirementType, string)>();
+		
 		// Add all default mods
 		foreach (var rc in default_reqchecks) {
 			var default_status = GetReqCheck(rc.Key)!.IsRequiredOrSuggested(DifficultyInfo(), BeatSaberSongContainer.Instance.Map);
 			var current_status = all_rs.ContainsKey(rc.Key)
 				? all_rs[rc.Key]
 				: default_status;
-			Plugin.Trace($"{rc.Key}: Map: {current_status} CM: {default_status}");
-			ReqField(rc.Key, (int)current_status, current_status != default_status, rc.Value.Name);
+			Plugin.Trace($"{rc.Key}: CM: {default_status} Map: {current_status}");
+			if (current_status != default_status) {
+				var force_setting = (string)Settings.Get(Settings.KeepForcedReqs, "Ask");
+				if (force == null && force_setting == "Ask") {
+					different.Add((rc.Key, default_status, current_status, rc.Value.Name));
+				}
+				if (force == false || force_setting == "Never") {
+					ReqField(rc.Key, (int)default_status, false, rc.Value.Name);
+				}
+				if (force == true || force_setting == "Force") {
+					ReqField(rc.Key, (int)current_status, current_status != default_status, rc.Value.Name);
+				}
+			}
+			else {
+				ReqField(rc.Key, (int)default_status, false, rc.Value.Name);
+			}
+		}
+		
+		if (different.Count > 0) {
+			var dialog = PersistentUI.Instance.CreateNewDialogBox().WithNoTitle();
+			dialog.AddComponent<TextComponent>().WithInitialValue("This map has requirements different from ChroMapper's defaults:");
+			foreach (var diff in different) {
+				dialog.AddComponent<TextComponent>().WithInitialValue($"{diff.Item1} - Chromapper: {diff.Item2}, Map: {diff.Item3}");
+			}
+			dialog.AddComponent<TextComponent>().WithInitialValue("Do you want to keep these changes as forced overrides?");
+			dialog.AddFooterButton(() => {
+				Plugin.plugin_settings?.force_reqs?.Dropdown.value = 1;
+			}, "Never");
+			dialog.AddFooterButton(() => {
+				RefreshRequirements(false);
+			}, "No");
+			dialog.AddFooterButton(() => {
+				RefreshRequirements(true);
+			}, "Yes");
+			dialog.AddFooterButton(() => {
+				Plugin.plugin_settings?.force_reqs?.Dropdown.value = 2;
+			}, "Always");
+			
+			dialog.Open();
 		}
 		
 		// Add all custom mods
